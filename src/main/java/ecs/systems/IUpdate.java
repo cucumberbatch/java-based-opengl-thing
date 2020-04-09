@@ -8,7 +8,7 @@ package ecs.systems;
 public interface IUpdate extends ISystem {
     /**
      *
-     * @param deltaTime
+     * @param deltaTime is a time interval between present and previous frames
      */
     default void update(double deltaTime) {};
 }

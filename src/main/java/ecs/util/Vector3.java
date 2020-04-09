@@ -12,6 +12,22 @@ public final class Vector3 {
         this.z = z;
     }
 
+    public static Vector3 sum(Vector3 that, Vector3 other) {
+        return new Vector3(that.x + other.x, that.y + other.y, that.z + other.z);
+    }
+
+    public static Vector3 sub(Vector3 that, Vector3 other) {
+        return new Vector3(that.x - other.x, that.y - other.y, that.z - other.z);
+    }
+
+    public static Vector3 mul(Vector3 vec, float val) {
+        return new Vector3(vec.x * val, vec.y * val, vec.z * val);
+    }
+
+    public static Vector3 div(Vector3 vec, float val) {
+        return new Vector3(vec.x / val, vec.y / val, vec.z / val);
+    }
+
 
 
     public static float dot(Vector3 that, Vector3 other) {
