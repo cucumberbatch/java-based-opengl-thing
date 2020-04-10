@@ -1,9 +1,10 @@
 package ecs.systems;
 
-/**
- * The parent system of all the game objects and components
- *
- * @author cucumberbatch
- */
-public interface ISystem {
+import ecs.systems.processes.IRender;
+import ecs.systems.processes.IStart;
+import ecs.systems.processes.IUpdate;
+
+public interface ISystem
+        extends IStart, IUpdate, IRender {
+
 }

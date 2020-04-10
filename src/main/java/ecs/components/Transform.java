@@ -1,7 +1,13 @@
 package ecs.components;
 
-import ecs.util.Vector3;
+import ecs.math.Vector3;
 
+/**
+ * The main component of each game object that tells
+ * you about its position, rotation and scale
+ *
+ * @author cucumberbatch
+ */
 public class Transform extends Component {
     public Vector3 position;
     public Vector3 rotation;
@@ -15,8 +21,8 @@ public class Transform extends Component {
 
     @Override
     public String toString() {
-        return  "position: "      + position.toString() +
-                "\nrotation: "    + rotation.toString() +
-                "\nscale: "       + scale.toString() + "\n";
+        return  "position:\t"   + position +
+                "\nrotation:\t" + rotation +
+                "\nscale:\t\t"  + scale + "\n";
     }
 }

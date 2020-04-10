@@ -1,4 +1,4 @@
-package ecs.util;
+package ecs.math;
 
 public final class Vector3 {
     public float x, y, z;

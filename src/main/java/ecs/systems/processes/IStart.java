@@ -1,4 +1,4 @@
-package ecs.systems;
+package ecs.systems.processes;
 
 /**
  * A system that allows the executions of individual instructions
@@ -6,9 +6,10 @@ package ecs.systems;
  *
  * @author cucumberbatch
  */
-public interface IStart extends ISystem {
+public interface IStart extends IProcess {
     /**
      *
      */
-    void start();
+    default void start() {
+    }
 }

@@ -1,15 +1,14 @@
 package ecs;
 
-import ecs.components.Transform;
 import ecs.entities.Entity;
-import ecs.util.Physics;
-import ecs.util.Vector3;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Scene {
+    List<Entity> entityList = new ArrayList<>();
+
     public Scene() {
-        Engine engine = new Engine(this);
-        Entity entity = new Entity();
-//        entity.AddComponent(Transform.class);
+
     }
 
 

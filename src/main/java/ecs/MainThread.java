@@ -1,24 +1,33 @@
 package ecs;
 
-import ecs.components.Component;
+import ecs.components.Rigidbody;
 import ecs.components.Transform;
 import ecs.entities.Entity;
-import ecs.util.Vector3;
+import ecs.math.Vector3;
 
 public class MainThread {
     public static void main(String[] args) {
-        Entity entity = new Entity();
+        Scene firstScene = new Scene();
+        Engine engine = new Engine(firstScene);
 
-        entity.AddComponent(Transform::new);
-        System.out.print(entity.GetComponent(Transform::new));
-        entity.GetComponent(Transform::new).position = Vector3.one();
-        System.out.print(entity.GetComponent(Transform::new));
+        Entity gameObject = new Entity(engine, firstScene);
+
+        engine.helper.linkComponentAndSystem(gameObject.transform);
+
+        System.out.print(gameObject.transform.system.getClass().getSimpleName() + "\n");
+
+        gameObject.AddComponent(Rigidbody::new);
+
+        engine.helper.linkComponentAndSystem(gameObject.GetComponent(Rigidbody::new));
+
+        System.out.print(gameObject.GetComponent(Rigidbody::new).system.getClass().getSimpleName());
+
 
 //
-//        System.out.print(entity.GetComponent(Transform.class).position.x);
+//        gameObject.AddComponent(Rigidbody::new);
+//        System.out.print(gameObject.GetComponent(Rigidbody::new));
 //
-//        entity.GetComponent(Transform.class).position = new Vector3(1, 0, 0);
+//        System.out.print(gameObject.engine.helper.getSystemByComponentName("Transform"));
 
-//        System.out.print(entity.GetComponent(Transform.class).position.x);
     }
 }
