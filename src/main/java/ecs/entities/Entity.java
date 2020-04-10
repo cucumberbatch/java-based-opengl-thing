@@ -7,6 +7,7 @@ import ecs.util.ITurntable;
 import ecs.util.Layer;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class Entity implements IComponentManager, ITurntable {
     public Engine engine;
@@ -27,13 +28,13 @@ public class Entity implements IComponentManager, ITurntable {
     }
 
     public Entity root() {
-        Entity that = this;
+        Entity root = this;
 
-        while (that.parent != null) {
-            that = that.parent.entity;
+        while (root.parent != null) {
+            root = root.parent.entity;
         }
 
-        return that;
+        return root;
     }
 
     public int compareTag(String tag) {
@@ -41,20 +42,24 @@ public class Entity implements IComponentManager, ITurntable {
     }
 
 
-    @Override
-    public <E extends Component> void AddComponent(Class<E> clazz) throws IllegalArgumentException {
-        E component = clazz.cast(new Component());
 
+    @Override
+    public <E extends Component> void AddComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
+        E component = supplier.get();
+        componentMap.put(component.getClass().getSimpleName(), component);
     }
 
     @Override
-    public <E extends Component> void RemoveComponent(Class<E> clazz) throws IllegalArgumentException {
-
+    public <E extends Component> E GetComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
+        Component component = componentMap.get(supplier.get().getClass().getSimpleName());
+        return (E) component;
     }
 
     @Override
-    public <E extends Component> E GetComponent(Class<E> clazz) throws IllegalArgumentException, ClassCastException {
-        return clazz.cast(componentMap.get(clazz.getName()));
+    public <E extends Component> E RemoveComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
+//        E component = clazz.cast(componentMap.remove(clazz.getSimpleName()));
+//        return engine.removeComponentFromSystem(component);
+        return null;
     }
 
     @Override

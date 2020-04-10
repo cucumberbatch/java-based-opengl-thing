@@ -1,10 +1,7 @@
 package ecs.util;
 
 public final class Vector3 {
-
-    public float x;
-    public float y;
-    public float z;
+    public float x, y, z;
 
     public Vector3(float x, float y, float z) {
         this.x = x;
@@ -44,4 +41,8 @@ public final class Vector3 {
     public static Vector3 right()       { return new Vector3( 1,  0,  0); }
     public static Vector3 left()        { return new Vector3(-1,  0,  0); }
 
+    @Override
+    public String toString() {
+        return "[ " + x + ", " + y + ", " + z + " ]";
+    }
 }

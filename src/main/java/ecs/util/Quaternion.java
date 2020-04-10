@@ -1,10 +1,7 @@
 package ecs.util;
 
 public class Quaternion {
-    private float x;
-    private float y;
-    private float z;
-    private float w;
+    public float x, y, z, w;
 
     public Quaternion(float x, float y, float z, float w) {
         this.x = x;

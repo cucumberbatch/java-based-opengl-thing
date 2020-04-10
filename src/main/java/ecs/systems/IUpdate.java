@@ -10,5 +10,5 @@ public interface IUpdate extends ISystem {
      *
      * @param deltaTime is a time interval between present and previous frames
      */
-    default void update(double deltaTime) {};
+    void update(double deltaTime);
 }

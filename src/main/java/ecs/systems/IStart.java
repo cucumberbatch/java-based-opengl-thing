@@ -10,5 +10,5 @@ public interface IStart extends ISystem {
     /**
      *
      */
-    default void start() {};
+    void start();
 }
