@@ -5,7 +5,7 @@ package ecs.util;
  *
  * @author cucumberbatch
  */
-public interface ITurntable {
+public interface Turntable {
 
     /**
      * Allows to check the activity of an object

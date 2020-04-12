@@ -9,6 +9,6 @@ public interface IUpdate extends IProcess {
     /**
      * @param deltaTime is a time interval between present and previous frames
      */
-    default void update(double deltaTime) {
+    default void update(float deltaTime) {
     }
 }

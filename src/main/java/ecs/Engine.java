@@ -1,18 +1,17 @@
 package ecs;
 
 import ecs.components.Component;
+import ecs.components.ComponentType;
 import ecs.entities.Entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Engine implements Runnable {
     private final Thread gameLoopThread;
     public Scene scene;
     public List<Entity> entityList;
-    public List<System> systemList = new ArrayList<>();
 
-    public SystemHelper helper = new SystemHelper();
+    public SystemHandler    s_handler = new SystemHandler();
 
     public Engine(Scene scene) {
         gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
@@ -30,9 +29,8 @@ public class Engine implements Runnable {
 
     // ---------------------  Game engine processes  -----------------------------------------------------------
 
-    public void frameRender(double deltaTime) {
-        update(deltaTime);
-        render();
+    public void tick(float deltaTime) {
+        s_handler.update(deltaTime);
     }
 
     public void start() {
@@ -54,14 +52,22 @@ public class Engine implements Runnable {
 
     }
 
-    // ---------------------  Component access interface  -------------------------------------------------------
+    // ---------------------  Component access implementation  --------------------------------------------------
 
-    public <E extends Component> void addComponentToSystem(E component) {
-        String name = component.getClass().getSimpleName();
-//        systemList.add();
+    public void addComponentToSystem(ComponentType type, Component component) {
+        s_handler.linkComponentAndSystem(type, component);
     }
 
-    public <E extends Component> E removeComponentFromSystem(E component) {
-        return null;
+    public Component instantiateNewComponent(ComponentType type) {
+        return type.getComponent().getInstance();
+    }
+
+//    public Component getComponentFromSystem(ComponentType type) {
+//        return s_handler.getSystemByComponentType(type);
+//    }
+
+    public Component removeComponentFromSystem(ComponentType type, Component component) {
+        s_handler.removeComponent(type, component);
+        return component;
     }
 }

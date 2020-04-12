@@ -43,6 +43,6 @@ public final class Vector3 {
 
     @Override
     public String toString() {
-        return "[ " + x + ", " + y + ", " + z + " ]";
+        return "[\t" + x + ",\t" + y + ",\t" + z + "\t]";
     }
 }

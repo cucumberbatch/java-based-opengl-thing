@@ -1,33 +1,30 @@
 package ecs;
 
-import ecs.components.Rigidbody;
+import ecs.components.ComponentType;
+import ecs.components.RigidBody;
 import ecs.components.Transform;
 import ecs.entities.Entity;
-import ecs.math.Vector3;
+import ecs.util.Physics;
+import org.joml.Vector3f;
 
 public class MainThread {
     public static void main(String[] args) {
         Scene firstScene = new Scene();
         Engine engine = new Engine(firstScene);
 
-        Entity gameObject = new Entity(engine, firstScene);
+        Entity object1 = new Entity(engine, firstScene);
+        Entity object2 = new Entity(engine, firstScene);
+        Entity object3 = new Entity(engine, firstScene);
 
-        engine.helper.linkComponentAndSystem(gameObject.transform);
+        object2.attachTo(object1);
+        object3.attachTo(object2);
 
-        System.out.print(gameObject.transform.system.getClass().getSimpleName() + "\n");
+        ((Transform) object1.GetComponent(ComponentType.TRANSFORM)).position = new Vector3f(1, 0, 0);
+        ((Transform) object2.GetComponent(ComponentType.TRANSFORM)).position = new Vector3f(1, 0, 0);
+        ((Transform) object3.GetComponent(ComponentType.TRANSFORM)).position = new Vector3f(1, 0, 0);
 
-        gameObject.AddComponent(Rigidbody::new);
+        engine.tick(1f);
 
-        engine.helper.linkComponentAndSystem(gameObject.GetComponent(Rigidbody::new));
-
-        System.out.print(gameObject.GetComponent(Rigidbody::new).system.getClass().getSimpleName());
-
-
-//
-//        gameObject.AddComponent(Rigidbody::new);
-//        System.out.print(gameObject.GetComponent(Rigidbody::new));
-//
-//        System.out.print(gameObject.engine.helper.getSystemByComponentName("Transform"));
 
     }
 }

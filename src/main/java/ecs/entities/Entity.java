@@ -3,15 +3,15 @@ package ecs.entities;
 import ecs.Engine;
 import ecs.Scene;
 import ecs.components.Component;
+import ecs.components.ComponentType;
 import ecs.components.Transform;
-import ecs.util.ITurntable;
+import ecs.util.Turntable;
 import ecs.util.Layer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Entity is an object that contains a bunch of components
@@ -19,28 +19,25 @@ import java.util.function.Supplier;
  *
  * @author cucumberbatch
  */
-public class Entity implements IComponentManager, ITurntable {
+public class Entity implements IComponentManager, Turntable {
     public Engine engine;
     public Layer layer;
     public String tag;
+
+    // Collection of daughters entities
+    public List<Transform> daughters = new ArrayList<>();
+
+    // Map of pairs of component types and components
+    public Map<ComponentType, Component> componentMap = new HashMap<>();
+
+    // Activity state of the entity
+    public boolean activity;
 
     // Transform component of that entity
     public Transform transform;
 
     // Transform component of the parent entity
     public Transform parent;
-
-    // Collection of daughters entities
-    public List<Transform> daughters;
-
-    // Collection of components that attached to an entity
-    public List<Component> componentList = new ArrayList<>();
-
-    //
-    public Map<String, Component> componentMap = new HashMap<>();
-
-    // Activity state of the entity
-    public boolean activity;
 
 
     public Entity(Engine engine, Scene scene) {
@@ -57,8 +54,8 @@ public class Entity implements IComponentManager, ITurntable {
         this.layer = layer;
         this.tag = tag;
 
-        AddComponent(Transform::new);
-        transform = GetComponent(Transform::new);
+        AddComponent(ComponentType.TRANSFORM);
+        transform = (Transform) GetComponent(ComponentType.TRANSFORM);
 
         /*
          Such a weird stuff right here...
@@ -71,14 +68,27 @@ public class Entity implements IComponentManager, ITurntable {
     /* Get the root entity in this branch */
     public Entity root() {
         Entity root = this;
-
         while (root.parent != null) {
             root = root.parent.entity;
         }
-
         return root;
     }
 
+    /* Attach this entity to another entity */
+    public void attachTo(Entity entity) {
+        if (parent != null && parent.entity.daughters.size() > 0) {
+            parent.entity.daughters.remove(this.transform);
+        }
+        parent = entity.transform;
+        entity.daughters.add(transform);
+    }
+
+    /* Compare tag of this and other entity by entity */
+    public int compareTag(Entity entity) {
+        return compareTag(entity.tag);
+    }
+
+    /* Compare tag of this and other entity by string */
     public int compareTag(String tag) {
         return this.tag.compareTo(tag);
     }
@@ -86,35 +96,30 @@ public class Entity implements IComponentManager, ITurntable {
     // ---------------------  Component access interface  ------------------------------------------------------
 
     @Override
-    public <E extends Component> void AddComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
-        E component = supplier.get();
-        componentMap.put(component.getClass().getSimpleName(), component);
-        engine.addComponentToSystem(component);
+    public <E extends Component> void AddComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+        if (!componentMap.containsKey(type)) {
+            Component component = initializedComponent(type);
+            componentMap.put(type, component);
+            engine.addComponentToSystem(type, component);
+        }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <E extends Component> E GetComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
-        Class<?> clazz = supplier.get().getClass();
-        Component component = componentMap.get(clazz.getSimpleName());
-        // FIXME: duplicated expressions!!!
-        if (component != null && !clazz.isInstance(component)) {
-            throw new ClassCastException();
-        }
-        return (E) component;
+    public <E extends Component> Component GetComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+        return componentMap.get(type);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <E extends Component> E RemoveComponent(Supplier<E> supplier) throws IllegalArgumentException, ClassCastException {
-        Class<?> clazz = supplier.get().getClass();
-        Component component = componentMap.remove(clazz.getSimpleName());
-        engine.removeComponentFromSystem(component);
-        // FIXME: duplicated expressions!!!
-        if (component != null && !clazz.isInstance(component)) {
-            throw new ClassCastException();
-        }
-        return (E) component;
+    public Component RemoveComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+        return engine.removeComponentFromSystem(type, componentMap.remove(type));
+    }
+
+    public Component initializedComponent(ComponentType type) {
+        Component component = engine.instantiateNewComponent(type);
+        component.name = component.getClass().getSimpleName();
+        component.transform = transform;
+        component.entity = this;
+        return component;
     }
 
     // ---------------------  Activity control interface  ------------------------------------------------------

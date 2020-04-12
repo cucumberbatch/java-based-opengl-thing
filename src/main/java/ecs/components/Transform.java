@@ -1,6 +1,7 @@
 package ecs.components;
 
 import ecs.math.Vector3;
+import org.joml.Vector3f;
 
 /**
  * The main component of each game object that tells
@@ -9,14 +10,19 @@ import ecs.math.Vector3;
  * @author cucumberbatch
  */
 public class Transform extends Component {
-    public Vector3 position;
-    public Vector3 rotation;
-    public Vector3 scale;
+    public Vector3f position;
+    public Vector3f rotation;
+    public Vector3f scale;
 
     public Transform() {
-        position = Vector3.zero();
-        rotation = Vector3.zero();
-        scale = Vector3.zero();
+        position = new Vector3f();
+        rotation = new Vector3f();
+        scale = new Vector3f();
+    }
+
+    @Override
+    public Transform getInstance() {
+        return new Transform();
     }
 
     @Override
