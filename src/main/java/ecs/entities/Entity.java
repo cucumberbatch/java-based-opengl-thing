@@ -5,13 +5,12 @@ import ecs.Scene;
 import ecs.components.Component;
 import ecs.components.ComponentType;
 import ecs.components.Transform;
+import ecs.util.Instantiatable;
+import ecs.util.Replicable;
 import ecs.util.Turntable;
 import ecs.util.Layer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Entity is an object that contains a bunch of components
@@ -19,8 +18,8 @@ import java.util.Map;
  *
  * @author cucumberbatch
  */
-public class Entity implements IComponentManager, Turntable {
-    public Engine engine;
+public class Entity implements IComponentManager, Turntable, Instantiatable<Entity>, Replicable<Entity> {
+    private Engine engine;
     public Layer layer;
     public String tag;
 
@@ -50,34 +49,34 @@ public class Entity implements IComponentManager, Turntable {
             Layer layer,
             String tag) {
         this.engine = engine;
-        this.engine.scene = scene;
+        this.engine.setScene(scene);
         this.layer = layer;
         this.tag = tag;
 
         AddComponent(ComponentType.TRANSFORM);
-        transform = (Transform) GetComponent(ComponentType.TRANSFORM);
+        transform = GetComponent(ComponentType.TRANSFORM);
 
         /*
          Such a weird stuff right here...
          actually, its a necessary reference manipulation which will help you to get
          the access to a transform component from any component or even entity itself
         */
-        transform.transform = transform;
+        transform.transform(transform);
     }
 
     /* Get the root entity in this branch */
     public Entity root() {
         Entity root = this;
         while (root.parent != null) {
-            root = root.parent.entity;
+            root = root.parent.entity();
         }
         return root;
     }
 
     /* Attach this entity to another entity */
     public void attachTo(Entity entity) {
-        if (parent != null && parent.entity.daughters.size() > 0) {
-            parent.entity.daughters.remove(this.transform);
+        if (parent != null && parent.entity().daughters.size() > 0) {
+            parent.entity().daughters.remove(this.transform);
         }
         parent = entity.transform;
         entity.daughters.add(transform);
@@ -96,7 +95,7 @@ public class Entity implements IComponentManager, Turntable {
     // ---------------------  Component access interface  ------------------------------------------------------
 
     @Override
-    public <E extends Component> void AddComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public void AddComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
         if (!componentMap.containsKey(type)) {
             Component component = initializedComponent(type);
             componentMap.put(type, component);
@@ -105,20 +104,20 @@ public class Entity implements IComponentManager, Turntable {
     }
 
     @Override
-    public <E extends Component> Component GetComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
-        return componentMap.get(type);
+    public <E extends Component> E GetComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+        return (E) componentMap.get(type);
     }
 
     @Override
-    public Component RemoveComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
-        return engine.removeComponentFromSystem(type, componentMap.remove(type));
+    public <E extends Component> E RemoveComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+        return (E) engine.removeComponentFromSystem(type, componentMap.remove(type));
     }
 
-    public Component initializedComponent(ComponentType type) {
-        Component component = engine.instantiateNewComponent(type);
-        component.name = component.getClass().getSimpleName();
-        component.transform = transform;
-        component.entity = this;
+    public <E extends Component> E initializedComponent(ComponentType type) {
+        E component = engine.instantiateNewComponent(type);
+        component.name(component.getClass().getSimpleName());
+        component.transform(transform);
+        component.entity(this);
         return component;
     }
 
@@ -137,5 +136,19 @@ public class Entity implements IComponentManager, Turntable {
     @Override
     public void switchActivity() {
         activity = !activity;
+    }
+
+    @Override
+    public Entity getInstance() {
+        Entity clone = new Entity(engine, engine.getScene(), layer, tag);
+        Set<Component> components = new HashSet<>();
+        components.addAll(componentMap.values());
+        clone.activity = activity;
+        return null;
+    }
+
+    @Override
+    public Entity getReplica() {
+        return null;
     }
 }

@@ -4,6 +4,7 @@ package ecs.util;
  * Interface for instantiating objects
  *
  * @param <T>
+ * @author cucumberbatch
  */
 public interface Instantiatable<T> {
     /**
@@ -11,5 +12,5 @@ public interface Instantiatable<T> {
      *
      * @return an instance of object that implements this interface
      */
-    T getInstance();
+    <E extends T> E getInstance();
 }

@@ -1,6 +1,5 @@
 package ecs.components;
 
-import ecs.math.Vector3;
 import org.joml.Vector3f;
 
 /**
@@ -9,7 +8,7 @@ import org.joml.Vector3f;
  *
  * @author cucumberbatch
  */
-public class Transform extends Component {
+public class Transform extends AbstractComponent {
     public Vector3f position;
     public Vector3f rotation;
     public Vector3f scale;
@@ -23,6 +22,15 @@ public class Transform extends Component {
     @Override
     public Transform getInstance() {
         return new Transform();
+    }
+
+    @Override
+    public Transform getReplica() {
+        Transform transform = new Transform();
+        transform.position = new Vector3f(position);
+        transform.rotation = new Vector3f(rotation);
+        transform.scale = new Vector3f(scale);
+        return transform;
     }
 
     @Override

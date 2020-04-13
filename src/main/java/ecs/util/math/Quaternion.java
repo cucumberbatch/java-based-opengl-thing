@@ -1,4 +1,4 @@
-package ecs.math;
+package ecs.util.math;
 
 public class Quaternion {
     public float x, y, z, w;

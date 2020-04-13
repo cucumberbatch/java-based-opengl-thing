@@ -2,20 +2,66 @@ package ecs.systems;
 
 import ecs.components.RigidBody;
 import ecs.components.Transform;
+import ecs.util.Physics;
+import org.joml.Vector3f;
 
-public class RigidBodySystem extends System {
+public class RigidBodySystem extends AbstractSystem {
 
     @Override
     public void update(float deltaTime) {
-        RigidBody that = (RigidBody) current_component;
-        Transform transform = that.transform;
+        /* Skip calculations if component is not active */
+        if (!currentComponent().isActive()) return;
 
-        transform.position.add(that.velocity.mul(deltaTime));
+        RigidBody rigidBody = currentComponent();
+        Transform transform = rigidBody.transform();
 
-//        transform.position.add(that.velocity.mul(deltaTime));
-//        that.velocity.add(that.acceleration.mul(deltaTime * deltaTime));
-//
-//        transform.rotation.add(that.angularVelocity.mul(deltaTime));
-//        that.angularVelocity.add(that.angularAcceleration.mul(deltaTime * deltaTime));
+        /* Catch the free vector from pool for calculations */
+        Vector3f temp = vector3Pool.get();
+
+        /* Update all kinds of movement for transform and rigid body components */
+        updatePosition(transform, rigidBody, deltaTime, temp);
+        updateRotation(transform, rigidBody, deltaTime, temp);
+        updateVelocity(rigidBody, deltaTime, temp);
+        updateAngularVelocity(rigidBody, deltaTime, temp);
+
+        /* Apply gravitational force to an object */
+        if (rigidBody.isGravitational) {
+            updateGravitationalAcceleration(transform, deltaTime, temp);
+        }
+
+        /* Take it back */
+        vector3Pool.put(temp);
     }
+
+    private void updateGravitationalAcceleration(Transform transform, float deltaTime, Vector3f temp) {
+        temp.set(Physics.gravityVector);
+        transform.position.add(temp.mul(deltaTime));
+    }
+
+    private void updateAngularVelocity(RigidBody that, float deltaTime, Vector3f temp) {
+        temp.set(that.angularAcceleration);
+        that.angularVelocity.add(temp.mul(deltaTime * deltaTime));
+    }
+
+    private void updateVelocity(RigidBody that, float deltaTime, Vector3f temp) {
+        temp.set(that.acceleration);
+        that.velocity.add(temp.mul(deltaTime * deltaTime));
+    }
+
+    private void updateRotation(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
+        temp.set(that.angularVelocity);
+        transform.rotation.add(temp.mul(deltaTime));
+    }
+
+    private void updatePosition(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
+        temp.set(that.velocity);
+        transform.position.add(temp.mul(deltaTime));
+    }
+
+    public void addImpulseToMassCenter(Vector3f direction, float mass) {
+        Vector3f temp = vector3Pool.get().set(direction);
+        ((RigidBody) currentComponent()).velocity.add(temp.mul(mass));
+        vector3Pool.put(temp);
+    }
+
 }

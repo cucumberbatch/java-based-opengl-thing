@@ -3,48 +3,28 @@ package ecs.components;
 import ecs.entities.Entity;
 import ecs.systems.System;
 import ecs.util.Instantiatable;
+import ecs.util.Replicable;
 import ecs.util.Turntable;
 
-public class Component implements Turntable, Instantiatable<Component> {
-    public String name;
-    public Entity entity;
+public interface Component
+        extends Turntable, Instantiatable<Component>, Replicable<Component> {
 
-    /*
-     If you need to execute a special method of the component
-     you can get a reference to the system it belows
-    */
-    public System system;
+    /* Get and set methods for the name */
+    String name();
+    void name(String name);
 
-    /* Reference to the transform component of its entity */
-    public Transform transform;
+    /* Get and set methods for an entity */
+    Entity entity();
+    void entity(Entity entity);
 
-    public boolean activity;
+    /* Get and set methods for the system */
+    System system();
+    void system(System system);
+
+    /* Get and set methods for the transform component */
+    Transform transform();
+    void transform(Transform transform);
 
 
-    @Override
-    public boolean isActive() {
-        return activity;
-    }
-
-    @Override
-    public void setActivity(boolean activity) {
-        this.activity = activity;
-    }
-
-    @Override
-    public void switchActivity() {
-        activity = !activity;
-    }
-
-    /**
-     * Because of its a base component, it will return null
-     * instead of component instance
-     *
-     * @return null in any case
-     */
-    @Override
-    public Component getInstance() {
-        return null;
-    }
 }
  
