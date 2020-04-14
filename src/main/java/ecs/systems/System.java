@@ -7,30 +7,35 @@ import ecs.systems.processes.ISystem;
 import java.util.List;
 import java.util.Set;
 
-public interface System extends ISystem, IComponentManager {
+public interface System<E extends Component> extends ISystem, IComponentManager {
+
+    /* Type of system */
+    enum Type {
+        TRANSFORM,
+        RIGIDBODY
+    }
+
 
     /* -------------- Getters -------------- */
-    List<Component> componentList();
+    List<E> componentList();
 
-    Set<Component> componentSet();
+    Set<E> componentSet();
 
-    Component getComponent(Component component);
-
-    <E extends Component> E currentComponent();
+    E currentComponent();
 
 
     /* -------------- Setters -------------- */
-    void componentList(List<Component> componentList);
+    void componentList(List<E> componentList);
 
-    void componentSet(Set<Component> componentSet);
+    void componentSet(Set<E> componentSet);
 
-    void addComponent(Component component);
-
-    void currentComponent(Component component);
+    void currentComponent(E component);
 
 
     /* -------------- Other methods -------------- */
-    void removeComponent(Component component);
+    void addComponent(E component);
 
+    E getComponent(E component);
 
+    void removeComponent(E component);
 }

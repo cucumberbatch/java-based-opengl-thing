@@ -3,8 +3,8 @@ package ecs.entities;
 import ecs.Engine;
 import ecs.Scene;
 import ecs.components.Component;
-import ecs.components.ComponentType;
 import ecs.components.Transform;
+import ecs.systems.System;
 import ecs.util.Instantiatable;
 import ecs.util.Replicable;
 import ecs.util.Turntable;
@@ -27,7 +27,7 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     public List<Transform> daughters = new ArrayList<>();
 
     // Map of pairs of component types and components
-    public Map<ComponentType, Component> componentMap = new HashMap<>();
+    public Map<System.Type, Component> componentMap = new HashMap<>();
 
     // Activity state of the entity
     public boolean activity;
@@ -53,8 +53,8 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         this.layer = layer;
         this.tag = tag;
 
-        AddComponent(ComponentType.TRANSFORM);
-        transform = GetComponent(ComponentType.TRANSFORM);
+        AddComponent(System.Type.TRANSFORM);
+        transform = GetComponent(System.Type.TRANSFORM);
 
         /*
          Such a weird stuff right here...
@@ -95,7 +95,7 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     // ---------------------  Component access interface  ------------------------------------------------------
 
     @Override
-    public void AddComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public void AddComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         if (!componentMap.containsKey(type)) {
             Component component = initializedComponent(type);
             componentMap.put(type, component);
@@ -104,16 +104,16 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     }
 
     @Override
-    public <E extends Component> E GetComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public <E extends Component> E GetComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) componentMap.get(type);
     }
 
     @Override
-    public <E extends Component> E RemoveComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public <E extends Component> E RemoveComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) engine.removeComponentFromSystem(type, componentMap.remove(type));
     }
 
-    public <E extends Component> E initializedComponent(ComponentType type) {
+    public <E extends Component> E initializedComponent(System.Type type) {
         E component = engine.instantiateNewComponent(type);
         component.name(component.getClass().getSimpleName());
         component.transform(transform);

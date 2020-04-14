@@ -1,7 +1,6 @@
 package ecs.systems;
 
 import ecs.components.Component;
-import ecs.components.ComponentType;
 import ecs.util.managment.memory.AbstractPool;
 import ecs.util.managment.memory.Pool;
 import org.joml.Vector3f;
@@ -12,11 +11,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractSystem implements System {
-    private List<Component> component_list = new LinkedList<>();
-    private Set<Component> component_set = new HashSet<>();
+public abstract class AbstractSystem<E extends Component> implements System<E> {
+    private List<E> component_list = new LinkedList<>();
+    private Set<E> component_set = new HashSet<>();
 
-    public Component current_component;
+    public E current_component;
 
     protected Pool<Vector3f> vector3Pool = new AbstractPool<Vector3f>() {
         @Override
@@ -29,75 +28,78 @@ public abstract class AbstractSystem implements System {
     /* -------------- Getters -------------- */
 
     @Override
-    public List<Component> componentList() {
+    public List<E> componentList() {
         return component_list;
     }
 
     @Override
-    public Set<Component> componentSet() {
+    public Set<E> componentSet() {
         return component_set;
     }
 
     @Override
-    public <E extends Component> E currentComponent() {
-        return (E) current_component;
-    }
-
-    @Override
-    public Component getComponent(Component that) {
-        if (component_set.contains(that)) {
-            return component_list.stream().filter((other) -> that.entity().equals(other.entity())).collect(Collectors.toList()).get(0);
-        }
-        return null;
+    public E currentComponent() {
+        return current_component;
     }
 
 
     /* -------------- Setters -------------- */
 
     @Override
-    public void componentList(List<Component> componentList) {
+    public void componentList(List<E> componentList) {
         this.component_list = componentList;
     }
 
     @Override
-    public void componentSet(Set<Component> componentSet) {
+    public void componentSet(Set<E> componentSet) {
         this.component_set = componentSet;
     }
 
     @Override
-    public void currentComponent(Component component) {
+    public void currentComponent(E component) {
         this.current_component = component;
-    }
-
-    @Override
-    public void addComponent(Component component) {
-        if (component_set.add(component)) {
-            component_list.add(component);
-        }
     }
 
 
     /* -------------- Other methods -------------- */
 
     @Override
-    public void removeComponent(Component component) {
+    public void addComponent(E component) {
+        if (component_set.add(component)) {
+            component_list.add(component);
+        }
+    }
+
+    @Override
+    public E getComponent(E that) {
+        if (component_set.contains(that)) {
+            return component_list.stream().filter((c) -> that.entity().equals(c.entity())).collect(Collectors.toList()).get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public void removeComponent(E component) {
         if (component_set.remove(component)) {
             component_list.remove(component);
         }
     }
 
+
+    /* -------------- Component API -------------- */
+
     @Override
-    public void AddComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public void AddComponent(Type type) throws IllegalArgumentException, ClassCastException {
         current_component.entity().AddComponent(type);
     }
 
     @Override
-    public <E extends Component> E GetComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
-        return (E) current_component.entity().GetComponent(type);
+    public <T extends Component> T GetComponent(Type type) throws IllegalArgumentException, ClassCastException {
+        return current_component.entity().GetComponent(type);
     }
 
     @Override
-    public <E extends Component> E RemoveComponent(ComponentType type) throws IllegalArgumentException, ClassCastException {
+    public <T extends Component> T RemoveComponent(Type type) throws IllegalArgumentException, ClassCastException {
         return current_component.entity().RemoveComponent(type);
     }
 }

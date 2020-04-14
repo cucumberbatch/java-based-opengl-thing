@@ -21,7 +21,7 @@ public abstract class AbstractComponent implements Component {
     private Transform transform;
 
     /* Activity state of component */
-    private boolean activity;
+    private boolean activity = true;
 
 
     /*

@@ -5,14 +5,14 @@ import ecs.components.Transform;
 import ecs.util.Physics;
 import org.joml.Vector3f;
 
-public class RigidBodySystem extends AbstractSystem {
+public class RigidBodySystem extends AbstractSystem<RigidBody> {
 
     @Override
     public void update(float deltaTime) {
         /* Skip calculations if component is not active */
-        if (!currentComponent().isActive()) return;
+        if (!current_component.isActive()) return;
 
-        RigidBody rigidBody = currentComponent();
+        RigidBody rigidBody = current_component;
         Transform transform = rigidBody.transform();
 
         /* Catch the free vector from pool for calculations */
@@ -26,16 +26,16 @@ public class RigidBodySystem extends AbstractSystem {
 
         /* Apply gravitational force to an object */
         if (rigidBody.isGravitational) {
-            updateGravitationalAcceleration(transform, deltaTime, temp);
+            updateGravitationalAcceleration(rigidBody, deltaTime, temp);
         }
 
         /* Take it back */
         vector3Pool.put(temp);
     }
 
-    private void updateGravitationalAcceleration(Transform transform, float deltaTime, Vector3f temp) {
+    private void updateGravitationalAcceleration(RigidBody rigidBody, float deltaTime, Vector3f temp) {
         temp.set(Physics.gravityVector);
-        transform.position.add(temp.mul(deltaTime));
+        rigidBody.velocity.add(temp.mul(deltaTime));
     }
 
     private void updateAngularVelocity(RigidBody that, float deltaTime, Vector3f temp) {
@@ -60,7 +60,7 @@ public class RigidBodySystem extends AbstractSystem {
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
         Vector3f temp = vector3Pool.get().set(direction);
-        ((RigidBody) currentComponent()).velocity.add(temp.mul(mass));
+        current_component.velocity.add(temp.mul(mass));
         vector3Pool.put(temp);
     }
 

@@ -4,7 +4,6 @@ import ecs.Engine;
 import ecs.Scene;
 import ecs.components.AbstractComponent;
 import ecs.components.Component;
-import ecs.components.ComponentType;
 import ecs.systems.AbstractSystem;
 import ecs.systems.System;
 import ecs.util.managment.Factory;

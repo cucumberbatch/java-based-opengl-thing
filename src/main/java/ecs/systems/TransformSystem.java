@@ -3,9 +3,7 @@ package ecs.systems;
 import ecs.components.Transform;
 import org.joml.Vector3f;
 
-import java.io.PrintStream;
-
-public class TransformSystem extends AbstractSystem {
+public class TransformSystem extends AbstractSystem<Transform> {
 
     @Override
     public void update(float deltaTime) {

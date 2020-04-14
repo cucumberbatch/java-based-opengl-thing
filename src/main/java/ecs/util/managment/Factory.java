@@ -1,7 +1,7 @@
 package ecs.util.managment;
 
-import ecs.components.ComponentType;
+import ecs.systems.System;
 
 public interface Factory<T> {
-    T create(ComponentType type);
+    T create(System.Type type);
 }
