@@ -1,9 +1,9 @@
 package ecs.systems;
 
 import ecs.components.Component;
-import ecs.util.managment.memory.AbstractPool;
-import ecs.util.managment.memory.Pool;
-import org.joml.Vector3f;
+import ecs.managment.memory.ConcretePool;
+import ecs.managment.memory.Pool;
+import ecs.math.Vector3f;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,12 +17,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     public E current_component;
 
-    protected Pool<Vector3f> vector3Pool = new AbstractPool<Vector3f>() {
-        @Override
-        public Vector3f create() {
-            return new Vector3f();
-        }
-    };
+    protected Pool<Vector3f> vector3Pool = new ConcretePool<>(1000, Vector3f::new);
 
 
     /* -------------- Getters -------------- */
@@ -89,17 +84,17 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     /* -------------- Component API -------------- */
 
     @Override
-    public void AddComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        current_component.entity().AddComponent(type);
+    public void addComponent(Type type) throws IllegalArgumentException, ClassCastException {
+        current_component.entity().addComponent(type);
     }
 
     @Override
-    public <T extends Component> T GetComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        return current_component.entity().GetComponent(type);
+    public <T extends Component> T getComponent(Type type) throws IllegalArgumentException, ClassCastException {
+        return current_component.entity().getComponent(type);
     }
 
     @Override
-    public <T extends Component> T RemoveComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        return current_component.entity().RemoveComponent(type);
+    public <T extends Component> T removeComponent(Type type) throws IllegalArgumentException, ClassCastException {
+        return current_component.entity().removeComponent(type);
     }
 }

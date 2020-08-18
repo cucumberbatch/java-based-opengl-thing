@@ -17,7 +17,8 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    void AddComponent(System.Type type) throws IllegalArgumentException, ClassCastException;
+    void addComponent(System.Type type)
+            throws IllegalArgumentException, ClassCastException;
 
     /**
      * This method allows you to get the concrete component to an entity that it calls
@@ -27,7 +28,8 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    <E extends Component> E GetComponent(System.Type type) throws IllegalArgumentException, ClassCastException;
+    <E extends Component> E getComponent(System.Type type)
+            throws IllegalArgumentException, ClassCastException;
 
     /**
      * Method that allows you to remove the component that attached to it entity
@@ -37,6 +39,7 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    <E extends Component> E RemoveComponent(System.Type type) throws IllegalArgumentException, ClassCastException;
+    <E extends Component> E removeComponent(System.Type type)
+            throws IllegalArgumentException, ClassCastException;
 
 }

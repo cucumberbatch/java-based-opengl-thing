@@ -11,8 +11,9 @@ public interface System<E extends Component> extends ISystem, IComponentManager 
 
     /* Type of system */
     enum Type {
+        RENDERER,
         TRANSFORM,
-        RIGIDBODY
+        RIGIDBODY;
     }
 
 

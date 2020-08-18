@@ -5,19 +5,16 @@ import ecs.Scene;
 import ecs.components.AbstractComponent;
 import ecs.components.Component;
 import ecs.systems.AbstractSystem;
-import ecs.systems.System;
-import ecs.util.managment.Factory;
+import ecs.managment.factory.ComponentSystemFactory;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class EngineTest {
 
     @Test
     void testEngineWorkflow() {
-        Scene scene = new Scene();
-        Engine engine = new Engine(scene);
-        Entity object = new Entity(engine, scene);
+        Scene scene     = new Scene();
+        Engine engine   = new Engine(scene);
+        Entity object   = new Entity(engine, scene);
 
         class MyComponent extends AbstractComponent {
             float value;
@@ -30,9 +27,7 @@ class EngineTest {
             }
         }
 
-        Factory<Component> componentFactory = type -> new MyComponent();
-
-        Factory<System> systemFactory = type -> new MySystem();
+        ComponentSystemFactory<Component> componentFactory = type -> new MyComponent();
 
 
 

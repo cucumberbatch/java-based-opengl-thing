@@ -1,4 +1,4 @@
-package ecs.util.managment.memory;
+package ecs.managment.memory;
 
 public interface Pool<T> {
 

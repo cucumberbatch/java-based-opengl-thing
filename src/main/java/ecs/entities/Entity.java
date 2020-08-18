@@ -6,9 +6,9 @@ import ecs.components.Component;
 import ecs.components.Transform;
 import ecs.systems.System;
 import ecs.util.Instantiatable;
+import ecs.util.Layer;
 import ecs.util.Replicable;
 import ecs.util.Turntable;
-import ecs.util.Layer;
 
 import java.util.*;
 
@@ -22,8 +22,9 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     private Engine engine;
     public Layer layer;
     public String tag;
+    public UUID id;
 
-    // Collection of daughters entities
+    // Collection of daughter entities
     public List<Transform> daughters = new ArrayList<>();
 
     // Map of pairs of component types and components
@@ -52,9 +53,10 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         this.engine.setScene(scene);
         this.layer = layer;
         this.tag = tag;
+        this.id = UUID.randomUUID();
 
-        AddComponent(System.Type.TRANSFORM);
-        transform = GetComponent(System.Type.TRANSFORM);
+        addComponent(System.Type.TRANSFORM);
+        transform = getComponent(System.Type.TRANSFORM);
 
         /*
          Such a weird stuff right here...
@@ -78,8 +80,19 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         if (parent != null && parent.entity().daughters.size() > 0) {
             parent.entity().daughters.remove(this.transform);
         }
-        parent = entity.transform;
+        parent = transform.parent = entity.transform;
         entity.daughters.add(transform);
+    }
+
+    public void detachDaughters() {
+        for (Transform daughter : daughters) {
+            daughter.parent = this.parent;
+        }
+
+        daughters.clear();
+    }
+
+    public void detachComponents() {
     }
 
     /* Compare tag of this and other entity by entity */
@@ -95,25 +108,26 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     // ---------------------  Component access interface  ------------------------------------------------------
 
     @Override
-    public void AddComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public void addComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         if (!componentMap.containsKey(type)) {
-            Component component = initializedComponent(type);
+            Component component = initializeComponent(type);
             componentMap.put(type, component);
             engine.addComponentToSystem(type, component);
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public <E extends Component> E GetComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public <E extends Component> E getComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) componentMap.get(type);
     }
 
     @Override
-    public <E extends Component> E RemoveComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public <E extends Component> E removeComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) engine.removeComponentFromSystem(type, componentMap.remove(type));
     }
 
-    public <E extends Component> E initializedComponent(System.Type type) {
+    public <E extends Component> E initializeComponent(System.Type type) {
         E component = engine.instantiateNewComponent(type);
         component.name(component.getClass().getSimpleName());
         component.transform(transform);
@@ -141,8 +155,7 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     @Override
     public Entity getInstance() {
         Entity clone = new Entity(engine, engine.getScene(), layer, tag);
-        Set<Component> components = new HashSet<>();
-        components.addAll(componentMap.values());
+        Set<Component> components = new HashSet<>(componentMap.values());
         clone.activity = activity;
         return null;
     }
@@ -150,5 +163,14 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     @Override
     public Entity getReplica() {
         return null;
+    }
+
+    public void reset() {
+        detachDaughters();
+        componentMap.clear();
+    }
+
+    public Engine engine() {
+        return engine;
     }
 }

@@ -3,6 +3,8 @@ package ecs.components;
 import ecs.entities.Entity;
 import ecs.systems.System;
 
+import java.util.UUID;
+
 public abstract class AbstractComponent implements Component {
 
     /* Name of component */
@@ -15,18 +17,35 @@ public abstract class AbstractComponent implements Component {
      If you need to execute a special method of the component
      you can get a reference to the system it belongs
      */
-    private System system;
+    private System<? extends Component> system;
 
     /* Reference to the transform component of its entity */
     private Transform transform;
 
     /* Activity state of component */
     private boolean activity = true;
+    private UUID id;
 
+
+    @Override
+    public void reset() {
+        entity = null;
+        transform = null;
+    }
 
     /*
      Getters and setters implementation by an abstract component class
      */
+    @Override
+    public UUID id() {
+        return id;
+    }
+
+    @Override
+    public void id(UUID id) {
+        this.id = id;
+    }
+
     @Override
     public String name() {
         return name;
@@ -48,12 +67,12 @@ public abstract class AbstractComponent implements Component {
     }
 
     @Override
-    public System system() {
+    public System<? extends Component> system() {
         return system;
     }
 
     @Override
-    public void system(System system) {
+    public void system(System<? extends Component> system) {
         this.system = system;
     }
 

@@ -1,6 +1,6 @@
 package ecs.components;
 
-import org.joml.Vector3f;
+import ecs.math.Vector3f;
 
 /**
  * The main component of each game object that tells
@@ -9,14 +9,27 @@ import org.joml.Vector3f;
  * @author cucumberbatch
  */
 public class Transform extends AbstractComponent {
+    public Transform parent;
+
     public Vector3f position;
     public Vector3f rotation;
     public Vector3f scale;
+
 
     public Transform() {
         position = new Vector3f();
         rotation = new Vector3f();
         scale = new Vector3f();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        Vector3f.reset(
+                position,
+                rotation,
+                scale
+        );
     }
 
     @Override

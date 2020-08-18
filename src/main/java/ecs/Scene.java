@@ -7,6 +7,7 @@ import java.util.List;
 public class Scene {
     List<Entity> entityList = new ArrayList<>();
 
+
     public Scene() {
 
     }

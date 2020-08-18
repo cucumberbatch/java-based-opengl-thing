@@ -2,44 +2,67 @@ package ecs;
 
 import ecs.components.Component;
 import ecs.entities.Entity;
+import ecs.gl.Window;
+import ecs.managment.factory.ComponentFactory;
+import ecs.managment.factory.ComponentSystemFactory;
+import ecs.managment.factory.Factory;
+import ecs.managment.factory.SystemFactory;
+import ecs.managment.memory.ConcretePool;
+import ecs.managment.memory.Pool;
 import ecs.systems.System;
 import ecs.systems.SystemHandler;
-import ecs.util.managment.ComponentFactory;
-import ecs.util.managment.Factory;
-import ecs.util.managment.SystemFactory;
-import ecs.util.managment.memory.AbstractPool;
-import ecs.util.managment.memory.Pool;
+import ecs.systems.processes.ISystem;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Engine implements Runnable {
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+
+public class Engine implements Runnable, ISystem {
     private final Thread gameLoopThread;
+    private final Window window;
+    private IGameLogic gameLogic;
     private Engine engine = this;
     private Scene scene;
-    private List<Entity> entityList;
+    private List<Entity> entityList = new ArrayList<>();
 
-    private Pool<Entity> entityPool = new AbstractPool<Entity>() {
+    private float frameRate = 50.0f;
+    private float secondsPerFrame = 1.0f / frameRate;
+    private boolean keepOnRunning;
+
+    private SystemHandler s_handler = new SystemHandler();
+
+    private ComponentSystemFactory<System> s_factory = new SystemFactory();
+    private ComponentSystemFactory<Component> c_factory = new ComponentFactory();
+
+    /* Pool for entities, that creates  */
+    private Pool<Entity> e_pool = new ConcretePool<>(new Factory<Entity>() {
         @Override
         public Entity create() {
             return new Entity(engine, scene);
         }
-    };
+    });
 
-    private SystemHandler s_handler = new SystemHandler();
 
-    private Factory<System> s_factory = new SystemFactory();
-    private Factory<Component> c_factory = new ComponentFactory();
-
+    public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
+        gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
+        window = new Window(windowTitle, width, height, vSync);
+        this.gameLogic = gameLogic;
+    }
 
     public Engine(Scene scene) {
-        gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
-        setScene(scene);
-        entityList = scene.entityList;
-
+        this.scene = scene;
+        this.gameLoopThread = new Thread();
+        this.window = null;
     }
 
     public void addEntity(Entity entity) {
         entityList.add(entity);
+    }
+
+    public void deactivateEntity(Entity entity) {
+        entity.reset();
+        e_pool.put(entity);
     }
 
     public void setScene(Scene scene) {
@@ -52,27 +75,91 @@ public class Engine implements Runnable {
 
     // ---------------------  Game engine processes  -----------------------------------------------------------
 
-    public void tick(float deltaTime) {
+    public void init() throws Exception {
+        s_handler.init();
+    }
+
+    public void input() {
+        gameLogic.input(window);
+    }
+
+    public void update(float deltaTime) {
         s_handler.update(deltaTime);
     }
 
-    public void start() {
-
+    public void render(Window window) {
+        s_handler.render(window);
     }
 
-    public void update(double deltaTime) {
-
-    }
-
-    public void render() {
+    public void destroy() {
 
     }
 
     // ---------------------  Running method for main game engine thread  ---------------------------------------
 
+    // TODO: needs to understand what I want here...
     @Override
     public void run() {
+        assert window != null;
+        window.init();
 
+        try {
+            init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        gameLoop();
+
+        destroy();
+
+        window.destroy();
+    }
+
+    private void gameLoop() {
+        double previous = getTime();
+        double steps = 0.0;
+        while (!glfwWindowShouldClose(window.getWindow())) {
+            double loopStartTime = getTime();
+            double elapsedTime = loopStartTime - previous;
+            previous = loopStartTime;
+            steps += elapsedTime;
+
+            handleInput();
+
+            while (steps >= secondsPerFrame) {
+                update((float) elapsedTime);
+                steps -= secondsPerFrame;
+            }
+
+            render(window);
+            sync(loopStartTime);
+
+        }
+    }
+
+    private void updateGameState() {
+
+    }
+
+    private void handleInput() {
+
+    }
+
+    private void sync(double loopStartTime) {
+        double loopSlot = 1.0d / 50.0d;
+        double endTime = loopStartTime + loopSlot;
+        while (getTime() < endTime) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private double getTime() {
+        return (double) java.lang.System.currentTimeMillis() / 1_000L;
     }
 
     // ---------------------  Component access implementation  --------------------------------------------------
@@ -95,5 +182,9 @@ public class Engine implements Runnable {
     public <E extends Component> E removeComponentFromSystem(System.Type type, E component) {
         s_handler.removeComponent(type, component);
         return component;
+    }
+
+    public Window window() {
+        return window;
     }
 }

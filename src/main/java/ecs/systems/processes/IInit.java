@@ -6,10 +6,10 @@ package ecs.systems.processes;
  *
  * @author cucumberbatch
  */
-public interface IStart extends IProcess {
+public interface IInit extends IProcess {
     /**
      *
      */
-    default void start() {
+    default void init() throws Exception {
     }
 }

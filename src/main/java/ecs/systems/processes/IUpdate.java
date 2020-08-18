@@ -1,7 +1,5 @@
 package ecs.systems.processes;
 
-import ecs.components.Component;
-
 /**
  * A system that updates all the component content
  *

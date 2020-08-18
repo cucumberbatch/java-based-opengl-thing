@@ -2,14 +2,13 @@ package ecs.systems;
 
 import ecs.components.RigidBody;
 import ecs.components.Transform;
-import ecs.util.Physics;
-import org.joml.Vector3f;
+import ecs.physics.Physics;
+import ecs.math.Vector3f;
 
 public class RigidBodySystem extends AbstractSystem<RigidBody> {
 
     @Override
     public void update(float deltaTime) {
-        /* Skip calculations if component is not active */
         if (!current_component.isActive()) return;
 
         RigidBody rigidBody = current_component;
