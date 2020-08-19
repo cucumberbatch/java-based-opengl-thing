@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL.createCapabilities;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 
 @SuppressWarnings("rawtypes")
@@ -46,9 +46,6 @@ public class SystemHandler implements ISystem {
 
     @Override
     public void init() throws Exception {
-        createCapabilities();
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-
         for (System system : s_list) {
             for (Object component : system.componentList()) {
                 system.currentComponent((Component) component);
@@ -59,9 +56,6 @@ public class SystemHandler implements ISystem {
 
     @Override
     public void update(float deltaTime) {
-
-        // Poll for window events. The key callback above will only be
-        // invoked during this call.
         glfwPollEvents();
 
         for (System system : s_list) {
@@ -74,7 +68,7 @@ public class SystemHandler implements ISystem {
 
     @Override
     public void render(Window window) {
-         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (System system : s_list) {
             for (Object component : system.componentList()) {
@@ -83,8 +77,6 @@ public class SystemHandler implements ISystem {
             }
         }
 
-        glfwSwapBuffers(window.getWindow()); // swap the color buffers
-
-
+        glfwSwapBuffers(window.getWindow());
     }
 }

@@ -1,6 +1,5 @@
-package ecs.gl;
+package ecs.math;
 
-import ecs.math.Vector3f;
 import ecs.utils.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -26,22 +25,23 @@ public class Matrix4f {
         return result;
     }
 
-    public static Matrix4f orthographic(float left, float right, float top, float bottom, float near, float far) {
+    public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far) {
         Matrix4f result = identity();
         result.elements[0 + 0 * 4] = 2.0f / (right - left);
         result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
-        result.elements[2 + 2 * 4] = 2.0f / (far - near);
-        result.elements[3 + 0 * 4] = -(right + left) / (right - left);
-        result.elements[3 + 1 * 4] = -(top + bottom) / (top - bottom);
-        result.elements[3 + 2 * 4] = -(far + near) / (far - near);
+        result.elements[2 + 2 * 4] = 2.0f / (near - far);
+
+        result.elements[0 + 3 * 4] = (left + right) / (left - right);
+        result.elements[1 + 3 * 4] = (bottom + top) / (bottom - top);
+        result.elements[2 + 3 * 4] = (far + near) / (far - near);
         return result;
     }
 
     public static Matrix4f translate(Vector3f vector3) {
         Matrix4f result = identity();
-        result.elements[3 + 0 * 4] = vector3.x;
-        result.elements[3 + 1 * 4] = vector3.y;
-        result.elements[3 + 2 * 4] = vector3.z;
+        result.elements[0 + 3 * 4] = vector3.x;
+        result.elements[1 + 3 * 4] = vector3.y;
+        result.elements[2 + 3 * 4] = vector3.z;
         return result;
     }
 

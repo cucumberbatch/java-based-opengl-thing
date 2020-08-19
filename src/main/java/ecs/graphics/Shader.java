@@ -1,6 +1,6 @@
 package ecs.graphics;
 
-import ecs.gl.Matrix4f;
+import ecs.math.Matrix4f;
 import ecs.math.Vector3f;
 import ecs.utils.ShaderUtils;
 
@@ -18,13 +18,14 @@ public class Shader {
 
     private final int ID;
     private Map<String, Integer> locationCache = new HashMap<>();
+    private boolean enabled;
 
     public Shader(String vertex, String fragment) {
         ID = ShaderUtils.load(vertex, fragment);
     }
 
     public static void loadAll() {
-        BACKGROUND = new Shader("Enter the path of vertex shader!", "Enter the path of fragment shader!");
+        BACKGROUND = new Shader("/shaders/bg.vert", "/shaders/bg.frag");
     }
 
     public int getUniform(String name) {
@@ -41,31 +42,38 @@ public class Shader {
     }
 
     public void setUniform1i(String name, int value) {
+        if (!enabled) enable();
         glUniform1i(getUniform(name), value);
     }
 
     public void setUniform1f(String name, float value) {
+        if (!enabled) enable();
         glUniform1f(getUniform(name), value);
     }
 
     public void setUniform2f(String name, float x, float y) {
+        if (!enabled) enable();
         glUniform2f(getUniform(name), x, y);
     }
 
     public void setUniform3f(String name, Vector3f vector3) {
+        if (!enabled) enable();
         glUniform3f(getUniform(name), vector3.x, vector3.y, vector3.z);
     }
 
     public void setUniformMat4f(String name, Matrix4f matrix4f) {
+        if (!enabled) enable();
         glUniformMatrix4fv(getUniform(name), false, matrix4f.toFloatBuffer());
     }
 
     public void enable() {
         glUseProgram(ID);
+        enabled = true;
     }
 
     public void disable() {
         glUseProgram(0);
+        enabled = false;
     }
 
 }
