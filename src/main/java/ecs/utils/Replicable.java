@@ -1,4 +1,4 @@
-package ecs.util;
+package ecs.utils;
 
 /**
  * Interface for replicating objects

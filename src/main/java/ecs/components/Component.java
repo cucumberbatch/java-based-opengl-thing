@@ -2,9 +2,9 @@ package ecs.components;
 
 import ecs.entities.Entity;
 import ecs.systems.System;
-import ecs.util.Instantiatable;
-import ecs.util.Replicable;
-import ecs.util.Turntable;
+import ecs.utils.Instantiatable;
+import ecs.utils.Replicable;
+import ecs.utils.Turntable;
 
 import java.util.UUID;
 

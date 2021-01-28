@@ -5,6 +5,7 @@ import ecs.gl.Window;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
+import ecs.graphics.Renderer2D;
 
 public class RendererSystem extends AbstractSystem<Renderer> {
 
@@ -21,10 +22,6 @@ public class RendererSystem extends AbstractSystem<Renderer> {
 
     @Override
     public void render(Window window) {
-        currentComponent().texture.bind();
-        Shader.BACKGROUND.enable();
-        currentComponent().background.render();
-        Shader.BACKGROUND.disable();
-        currentComponent().texture.unbind();
+        Renderer2D.draw(currentComponent().background, currentComponent().texture, Shader.BACKGROUND);
     }
 }

@@ -5,10 +5,10 @@ import ecs.Scene;
 import ecs.components.Component;
 import ecs.components.Transform;
 import ecs.systems.System;
-import ecs.util.Instantiatable;
-import ecs.util.Layer;
-import ecs.util.Replicable;
-import ecs.util.Turntable;
+import ecs.utils.Instantiatable;
+import ecs.utils.Layer;
+import ecs.utils.Replicable;
+import ecs.utils.Turntable;
 
 import java.util.*;
 

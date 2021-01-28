@@ -1,7 +1,5 @@
 package ecs.utils;
 
-import ecs.graphics.Constants;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

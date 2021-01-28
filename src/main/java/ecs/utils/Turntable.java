@@ -1,4 +1,4 @@
-package ecs.util;
+package ecs.utils;
 
 /**
  * Interface that allows an implemented object to switch its activity state

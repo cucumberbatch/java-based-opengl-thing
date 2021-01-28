@@ -1,4 +1,4 @@
-package ecs.util;
+package ecs.utils;
 
 public enum Layer {
     GUI(10),

@@ -1,6 +1,7 @@
 package ecs.graphics;
 
 import ecs.utils.BufferUtils;
+import ecs.utils.Constants;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
