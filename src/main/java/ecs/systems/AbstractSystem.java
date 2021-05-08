@@ -1,8 +1,8 @@
 package ecs.systems;
 
 import ecs.components.Component;
-import ecs.managment.memory.ConcretePool;
 import ecs.managment.memory.Pool;
+import ecs.managment.memory.IPool;
 import ecs.math.Vector3f;
 
 import java.util.HashSet;
@@ -12,12 +12,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
-    private List<E> component_list = new LinkedList<>();
-    private Set<E> component_set = new HashSet<>();
+    public static final int INIT_MASK       = 0b0000_0001;
+    public static final int UPDATE_MASK     = 0b0000_0010;
+    public static final int RENDER_MASK     = 0b0000_0100;
+    public static final int COLLISION_MASK  = 0b0000_1000;
 
     public E current_component;
 
-    protected Pool<Vector3f> vector3Pool = new ConcretePool<>(1000, Vector3f::new);
+    private int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
+
+    private List<E> component_list = new LinkedList<>();
+    private Set<E>  component_set  = new HashSet<>();
+
+    protected IPool<Vector3f> vector3IPool = new Pool<>(1000, Vector3f::new);
 
 
     /* -------------- Getters -------------- */
@@ -37,6 +44,10 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
         return current_component;
     }
 
+    @Override
+    public int getWorkflowMask() {
+        return workflowMask;
+    }
 
     /* -------------- Setters -------------- */
 

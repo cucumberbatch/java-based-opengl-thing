@@ -5,10 +5,10 @@ import ecs.entities.Entity;
 import ecs.gl.Window;
 import ecs.managment.factory.ComponentFactory;
 import ecs.managment.factory.ComponentSystemFactory;
-import ecs.managment.factory.Factory;
+import ecs.managment.factory.IFactory;
 import ecs.managment.factory.SystemFactory;
-import ecs.managment.memory.ConcretePool;
 import ecs.managment.memory.Pool;
+import ecs.managment.memory.IPool;
 import ecs.systems.System;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
@@ -21,22 +21,22 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 public class Engine implements Runnable, ISystem {
     private final Thread gameLoopThread;
     private final Window window;
+    private final Engine engine = this;
     private IGameLogic gameLogic;
-    private Engine engine = this;
     private Scene scene;
-    private List<Entity> entityList = new ArrayList<>();
+    private final List<Entity> entityList = new ArrayList<>();
 
-    private float frameRate = 50.0f;
-    private float secondsPerFrame = 1.0f / frameRate;
+    private final float frameRate = 50.0f;
+    private final float secondsPerFrame = 1.0f / frameRate;
     private boolean keepOnRunning;
 
-    private SystemHandler s_handler = new SystemHandler();
+    private final SystemHandler s_handler = new SystemHandler();
 
-    private ComponentSystemFactory<System> s_factory = new SystemFactory();
-    private ComponentSystemFactory<Component> c_factory = new ComponentFactory();
+    private final ComponentSystemFactory<System> s_factory = new SystemFactory();
+    private final ComponentSystemFactory<Component> c_factory = new ComponentFactory();
 
     /* Pool for entities, that creates  */
-    private Pool<Entity> e_pool = new ConcretePool<>(new Factory<Entity>() {
+    private final IPool<Entity> e_I_pool = new Pool<>(new IFactory<Entity>() {
         @Override
         public Entity create() {
             return new Entity(engine, scene);
@@ -62,7 +62,7 @@ public class Engine implements Runnable, ISystem {
 
     public void deactivateEntity(Entity entity) {
         entity.reset();
-        e_pool.put(entity);
+        e_I_pool.put(entity);
     }
 
     public void setScene(Scene scene) {

@@ -92,7 +92,7 @@ public class Window {
 
         Matrix4f projectionMatrix = Matrix4f.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f);
         Shader.BACKGROUND.setUniformMat4f("pr_matrix", projectionMatrix);
-        Shader.BACKGROUND.setUniform1i("tex", 1);
+        Shader.BACKGROUND.setUniform1i("u_tex", 1);
 
     }
 

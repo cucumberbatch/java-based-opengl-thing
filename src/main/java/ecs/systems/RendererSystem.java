@@ -10,6 +10,11 @@ import ecs.graphics.Renderer2D;
 public class RendererSystem extends AbstractSystem<Renderer> {
 
     @Override
+    public int getWorkflowMask() {
+        return INIT_MASK | RENDER_MASK;
+    }
+
+    @Override
     public void init() throws Exception {
         Renderer renderer = currentComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);

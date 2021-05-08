@@ -1,5 +1,5 @@
 package ecs.managment.factory;
 
-public interface Factory<T> {
-    T create();
+public abstract class Factory<T> implements IFactory<T> {
+
 }

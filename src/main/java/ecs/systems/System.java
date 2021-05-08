@@ -24,6 +24,7 @@ public interface System<E extends Component> extends ISystem, IComponentManager 
 
     E currentComponent();
 
+    int getWorkflowMask();
 
     /* -------------- Setters -------------- */
     void componentList(List<E> componentList);
