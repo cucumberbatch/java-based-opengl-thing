@@ -9,7 +9,8 @@ public class FileUtils {
     public static String loadAsString(String path) {
         StringBuilder result = new StringBuilder();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(Constants.RESOURCES_PATH + path));
+            BufferedReader reader = new BufferedReader(new FileReader(Constants.ASSETS_DIRECTORY_PATH + path));
+
             String buffer = "";
             while ((buffer = reader.readLine()) != null) {
                 result.append(buffer + '\n');

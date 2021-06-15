@@ -1,28 +1,30 @@
 package ecs.systems;
 
-import ecs.components.Component;
+import ecs.components.ECSComponent;
+import ecs.entities.Entity;
 import ecs.entities.IComponentManager;
 import ecs.systems.processes.ISystem;
 
 import java.util.List;
 import java.util.Set;
 
-public interface System<E extends Component> extends ISystem, IComponentManager {
+public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentManager {
 
     /* Type of system */
     enum Type {
         RENDERER,
         TRANSFORM,
-        RIGIDBODY;
+        RIGIDBODY,
+        CAMERA;
     }
 
 
     /* -------------- Getters -------------- */
-    List<E> componentList();
+    List<E> getComponentList();
 
     Set<E> componentSet();
 
-    E currentComponent();
+    E getCurrentComponent();
 
     int getWorkflowMask();
 
@@ -31,7 +33,7 @@ public interface System<E extends Component> extends ISystem, IComponentManager 
 
     void componentSet(Set<E> componentSet);
 
-    void currentComponent(E component);
+    void setCurrentComponent(E component);
 
 
     /* -------------- Other methods -------------- */
@@ -40,4 +42,6 @@ public interface System<E extends Component> extends ISystem, IComponentManager 
     E getComponent(E component);
 
     void removeComponent(E component);
+
+    Entity getEntityByName(String name);
 }

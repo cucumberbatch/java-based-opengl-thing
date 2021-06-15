@@ -1,6 +1,19 @@
 package ecs.utils;
 
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
+import static org.lwjgl.opengl.GL20.GL_FALSE;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glCompileShader;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glCreateShader;
+import static org.lwjgl.opengl.GL20.glDeleteShader;
+import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
+import static org.lwjgl.opengl.GL20.glGetShaderi;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
+import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glValidateProgram;
 
 public class ShaderUtils {
 
@@ -14,10 +27,10 @@ public class ShaderUtils {
     }
 
     private static int create(String vertex, String fragment) {
-        int program = glCreateProgram();
-        int vertexID = glCreateShader(GL_VERTEX_SHADER);
+        int program    = glCreateProgram();
+        int vertexID   = glCreateShader(GL_VERTEX_SHADER);
         int fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(vertexID, vertex);
+        glShaderSource(vertexID,   vertex);
         glShaderSource(fragmentID, fragment);
 
         glCompileShader(vertexID);

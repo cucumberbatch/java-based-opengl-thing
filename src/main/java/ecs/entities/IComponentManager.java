@@ -1,7 +1,7 @@
 package ecs.entities;
 
-import ecs.components.Component;
-import ecs.systems.System;
+import ecs.components.ECSComponent;
+import ecs.systems.ECSSystem;
 
 /**
  * Interface for an entity components behaviour
@@ -17,7 +17,7 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    void addComponent(System.Type type)
+    void addComponent(ECSSystem.Type type)
             throws IllegalArgumentException, ClassCastException;
 
     /**
@@ -28,7 +28,7 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    <E extends Component> E getComponent(System.Type type)
+    <E extends ECSComponent> E getComponent(ECSSystem.Type type)
             throws IllegalArgumentException, ClassCastException;
 
     /**
@@ -39,7 +39,7 @@ public interface IComponentManager {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    <E extends Component> E removeComponent(System.Type type)
+    <E extends ECSComponent> E removeComponent(ECSSystem.Type type)
             throws IllegalArgumentException, ClassCastException;
 
 }

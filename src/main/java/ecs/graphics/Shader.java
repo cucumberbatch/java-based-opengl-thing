@@ -1,13 +1,21 @@
 package ecs.graphics;
 
 import ecs.math.Matrix4f;
+import ecs.math.Vector2f;
 import ecs.math.Vector3f;
 import ecs.utils.ShaderUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform2f;
+import static org.lwjgl.opengl.GL20.glUniform2i;
+import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 
 public class Shader {
 
@@ -16,23 +24,23 @@ public class Shader {
 
     public static Shader BACKGROUND;
 
-    private final int ID;
+    private final int id;
     private Map<String, Integer> locationCache = new HashMap<>();
     private boolean enabled;
 
     public Shader(String vertex, String fragment) {
-        ID = ShaderUtils.load(vertex, fragment);
+        id = ShaderUtils.load(vertex, fragment);
     }
 
     public static void loadAll() {
-        BACKGROUND = new Shader("/shaders/bg.vert", "/shaders/bg.frag");
+        BACKGROUND = new Shader("shaders/bg.vert", "shaders/bg.frag");
     }
 
     public int getUniform(String name) {
         if (locationCache.containsKey(name)) {
             return locationCache.get(name);
         }
-        int result = glGetUniformLocation(ID, name);
+        int result = glGetUniformLocation(id, name);
         if (result == -1) {
             System.err.println("Couldn't find uniform variable '" + name + "'!");
         } else {
@@ -51,9 +59,14 @@ public class Shader {
         glUniform1f(getUniform(name), value);
     }
 
-    public void setUniform2f(String name, float x, float y) {
+    public void setUniform2i(String name, int x, int y) {
         if (!enabled) enable();
-        glUniform2f(getUniform(name), x, y);
+        glUniform2i(getUniform(name), x, y);
+    }
+
+    public void setUniform2f(String name, Vector2f vector2) {
+        if (!enabled) enable();
+        glUniform2f(getUniform(name), vector2.x, vector2.y);
     }
 
     public void setUniform3f(String name, Vector3f vector3) {
@@ -67,13 +80,17 @@ public class Shader {
     }
 
     public void enable() {
-        glUseProgram(ID);
+        glUseProgram(id);
         enabled = true;
     }
 
     public void disable() {
         glUseProgram(0);
         enabled = false;
+    }
+
+    public int getId() {
+        return id;
     }
 
 }

@@ -1,5 +1,7 @@
 package ecs.math;
 
+import ecs.utils.TerminalUtils;
+
 import java.util.Objects;
 
 public final class Vector3f {
@@ -80,6 +82,13 @@ public final class Vector3f {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
+    public Vector3f negate() {
+        this.x = -this.x;
+        this.y = -this.y;
+        this.z = -this.z;
+        return this;
+    }
+
     public float length() {
         return (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
@@ -118,6 +127,10 @@ public final class Vector3f {
         return that.x * other.x + that.y * other.y + that.z * other.z;
     }
 
+    public static Vector3f negate(Vector3f that) {
+        return new Vector3f(-that.x, -that.y, -that.z);
+    }
+
     public static float length(Vector3f that) {
         return (float) Math.sqrt(that.x * that.x + that.y * that.y + that.z * that.z);
     }
@@ -128,6 +141,22 @@ public final class Vector3f {
             that.x *= factor,
             that.y *= factor,
             that.z *= factor
+        );
+    }
+
+    public static Vector3f cross(Vector3f that, Vector3f other) {
+        return new Vector3f(
+                that.y * other.z - that.z * other.y,
+                that.z * other.x - that.x * other.z,
+                that.x * other.y - that.y * other.x
+        );
+    }
+
+    public static Vector3f lerp(Vector3f begin, Vector3f end, float ratio) {
+        return new Vector3f(
+                Mathf.lerp(begin.x, end.x, ratio),
+                Mathf.lerp(begin.y, end.y, ratio),
+                Mathf.lerp(begin.z, end.z, ratio)
         );
     }
 
@@ -142,7 +171,7 @@ public final class Vector3f {
 
     @Override
     public String toString() {
-        return "[\t" + x + ",\t" + y + ",\t" + z + "\t]";
+        return TerminalUtils.formatOutputVector(this);
     }
 
     @Override

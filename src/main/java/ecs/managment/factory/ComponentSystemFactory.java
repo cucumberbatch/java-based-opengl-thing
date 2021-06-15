@@ -1,7 +1,7 @@
 package ecs.managment.factory;
 
-import ecs.systems.System;
+import ecs.systems.ECSSystem;
 
 public interface ComponentSystemFactory<T> {
-    T create(System.Type type);
+    T create(ECSSystem.Type type);
 }

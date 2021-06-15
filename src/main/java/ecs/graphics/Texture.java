@@ -30,7 +30,7 @@ public class Texture {
     private int load(String path) {
         int[] pixels = null;
         try {
-            BufferedImage image = ImageIO.read(new FileInputStream(Constants.RESOURCES_PATH + path));
+            BufferedImage image = ImageIO.read(new FileInputStream(Constants.ASSETS_DIRECTORY_PATH + path));
             width = image.getWidth();
             height = image.getHeight();
             pixels = new int[width * height];

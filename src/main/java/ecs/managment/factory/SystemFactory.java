@@ -1,15 +1,16 @@
 package ecs.managment.factory;
 
+import ecs.math.CameraSystem;
+import ecs.systems.ECSSystem;
 import ecs.systems.RendererSystem;
 import ecs.systems.RigidBodySystem;
-import ecs.systems.System;
 import ecs.systems.TransformSystem;
 
 @SuppressWarnings("rawtypes")
-public class SystemFactory implements ComponentSystemFactory<System> {
+public class SystemFactory implements ComponentSystemFactory<ECSSystem> {
 
     @Override
-    public System create(System.Type type) {
+    public ECSSystem create(ECSSystem.Type type) {
         switch (type) {
             case RENDERER:
                 return new RendererSystem();
@@ -20,8 +21,11 @@ public class SystemFactory implements ComponentSystemFactory<System> {
             case RIGIDBODY:
                 return new RigidBodySystem();
 
+            case CAMERA:
+                return new CameraSystem();
+
             default:
-                return null;
+                throw new IllegalArgumentException("No such component type name or system initialization!");
         }
     }
 }

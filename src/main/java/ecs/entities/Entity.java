@@ -2,13 +2,10 @@ package ecs.entities;
 
 import ecs.Engine;
 import ecs.Scene;
-import ecs.components.Component;
+import ecs.components.ECSComponent;
 import ecs.components.Transform;
-import ecs.systems.System;
-import ecs.utils.Instantiatable;
-import ecs.utils.Layer;
-import ecs.utils.Replicable;
-import ecs.utils.Turntable;
+import ecs.systems.ECSSystem;
+import ecs.utils.*;
 
 import java.util.*;
 
@@ -19,16 +16,18 @@ import java.util.*;
  * @author cucumberbatch
  */
 public class Entity implements IComponentManager, Turntable, Instantiatable<Entity>, Replicable<Entity> {
+    public Layer    layer;
+    public String   tag;
+    public UUID     id;
+    public String   name;
+
     private Engine engine;
-    public Layer layer;
-    public String tag;
-    public UUID id;
 
     // Collection of daughter entities
     public List<Transform> daughters = new ArrayList<>();
 
     // Map of pairs of component types and components
-    public Map<System.Type, Component> componentMap = new HashMap<>();
+    public Map<ECSSystem.Type, ECSComponent> componentMap = new HashMap<>();
 
     // Activity state of the entity
     public boolean activity;
@@ -40,45 +39,45 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     public Transform parent;
 
 
-    public Entity(Engine engine, Scene scene) {
-        this(engine, scene, Layer.DEFAULT, "Default");
+    public Entity(String name, Engine engine, Scene scene) {
+        this(name, engine, scene, Layer.DEFAULT, "Default");
     }
 
     public Entity(
+            String name,
             Engine engine,
             Scene scene,
             Layer layer,
             String tag) {
+        this.name = name;
         this.engine = engine;
         this.engine.setScene(scene);
         this.layer = layer;
         this.tag = tag;
         this.id = UUID.randomUUID();
 
-        addComponent(System.Type.TRANSFORM);
-        transform = getComponent(System.Type.TRANSFORM);
+        addComponent(ECSSystem.Type.TRANSFORM);
+        transform = getComponent(ECSSystem.Type.TRANSFORM);
 
-        /*
-         Such a weird stuff right here...
-         actually, its a necessary reference manipulation which will help you to get
-         the access to a transform component from any component or even entity itself
-        */
-        transform.transform(transform);
+        /* Such a weird stuff right here...
+        actually, its a necessary reference manipulation which will help you to get
+        the access to a transform component from any component or even entity itself */
+        transform.setTransform(transform);
     }
 
     /* Get the root entity in this branch */
     public Entity root() {
         Entity root = this;
         while (root.parent != null) {
-            root = root.parent.entity();
+            root = root.parent.getEntity();
         }
         return root;
     }
 
     /* Attach this entity to another entity */
     public void attachTo(Entity entity) {
-        if (parent != null && parent.entity().daughters.size() > 0) {
-            parent.entity().daughters.remove(this.transform);
+        if (parent != null && parent.getEntity().daughters.size() > 0) {
+            parent.getEntity().daughters.remove(this.transform);
         }
         parent = transform.parent = entity.transform;
         entity.daughters.add(transform);
@@ -108,9 +107,9 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     // ---------------------  Component access interface  ------------------------------------------------------
 
     @Override
-    public void addComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public void addComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
         if (!componentMap.containsKey(type)) {
-            Component component = initializeComponent(type);
+            ECSComponent component = initializeComponent(type);
             componentMap.put(type, component);
             engine.addComponentToSystem(type, component);
         }
@@ -118,20 +117,20 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
 
     @SuppressWarnings("rawtypes")
     @Override
-    public <E extends Component> E getComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public <E extends ECSComponent> E getComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) componentMap.get(type);
     }
 
     @Override
-    public <E extends Component> E removeComponent(System.Type type) throws IllegalArgumentException, ClassCastException {
+    public <E extends ECSComponent> E removeComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) engine.removeComponentFromSystem(type, componentMap.remove(type));
     }
 
-    public <E extends Component> E initializeComponent(System.Type type) {
+    public <E extends ECSComponent> E initializeComponent(ECSSystem.Type type) {
         E component = engine.instantiateNewComponent(type);
-        component.name(component.getClass().getSimpleName());
-        component.transform(transform);
-        component.entity(this);
+        component.setName(component.getClass().getSimpleName());
+        component.setTransform(transform);
+        component.setEntity(this);
         return component;
     }
 
@@ -152,17 +151,19 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         activity = !activity;
     }
 
+    // TODO: 07.06.2021 implementation isn't done yet
     @Override
     public Entity getInstance() {
-        Entity clone = new Entity(engine, engine.getScene(), layer, tag);
-        Set<Component> components = new HashSet<>(componentMap.values());
+        Entity clone = engine.generateNewEntity();
+        Set<ECSComponent> components = new HashSet<>(componentMap.values());
         clone.activity = activity;
         return null;
     }
 
+    // TODO: 07.06.2021 implementation isn't done yet
     @Override
     public Entity getReplica() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void reset() {
@@ -170,7 +171,47 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         componentMap.clear();
     }
 
-    public Engine engine() {
+    public Engine getEngine() {
         return engine;
+    }
+
+    public String showHierarchy(int level) {
+        String componentNames    = "";
+        String levelIndent       = "";
+        String accumulator       = "";
+        String toStringComponent = "";
+
+        for (int i = 0; i < level; i++) {
+            levelIndent = levelIndent + TerminalUtils.indent4;
+        }
+
+        for (Iterator<ECSComponent> iterator = componentMap.values().iterator(); iterator.hasNext(); ) {
+            ECSComponent component  = iterator.next();
+            componentNames          = componentNames + component.getClass().getName();
+            toStringComponent       = component.toString();
+
+            if (toStringComponent != null && !toStringComponent.equals("")) {
+                componentNames = componentNames + component.toString().replace("\n", "\n" + levelIndent + "    <state> ");
+            }
+
+            if (iterator.hasNext()) {
+                componentNames = componentNames + "\n" + levelIndent + " > ";
+            }
+        }
+
+        accumulator =
+                accumulator +
+                        levelIndent + TerminalUtils.formatOutputEntity(this, 0) + "\n" +
+                        levelIndent + " > " + componentNames + "\n";
+
+        for (Transform e : daughters) {
+            accumulator = accumulator + e.entity.showHierarchy(level + 1);
+        }
+
+        return accumulator;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -8,7 +8,7 @@ import ecs.math.Vector3f;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent {
+public class Transform extends AbstractECSComponent {
     public Transform parent;
 
     public Vector3f position;
@@ -48,8 +48,13 @@ public class Transform extends AbstractComponent {
 
     @Override
     public String toString() {
-        return  "position:\t"   + position +
-                "\nrotation:\t" + rotation +
-                "\nscale:\t\t"  + scale + "\n";
+        return  "\nposition: " + position +
+                "\nrotation: " + rotation +
+                "\nscale:    " + scale;
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getName();
     }
 }

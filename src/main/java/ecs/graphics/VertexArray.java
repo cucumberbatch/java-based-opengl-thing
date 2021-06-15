@@ -2,7 +2,20 @@ package ecs.graphics;
 
 import ecs.utils.BufferUtils;
 
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL30.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL30.GL_ELEMENT_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL30.GL_FLOAT;
+import static org.lwjgl.opengl.GL30.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL30.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL30.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL30.glBindBuffer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glBufferData;
+import static org.lwjgl.opengl.GL30.glDrawElements;
+import static org.lwjgl.opengl.GL30.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL30.glGenBuffers;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.glVertexAttribPointer;
 
 public class VertexArray {
 

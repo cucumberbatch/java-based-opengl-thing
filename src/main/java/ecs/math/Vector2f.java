@@ -5,6 +5,9 @@ import java.util.Objects;
 public class Vector2f {
     public float x, y;
 
+    public Vector2f() {
+    }
+
     public Vector2f(float x, float y) {
         this.x = x;
         this.y = y;
@@ -76,6 +79,13 @@ public class Vector2f {
         this.x *= factor;
         this.y *= factor;
         return this;
+    }
+
+    public static Vector2f lerp(Vector2f begin, Vector2f end, float ratio) {
+        return new Vector2f(
+                Mathf.lerp(begin.x, end.x, ratio),
+                Mathf.lerp(begin.y, end.y, ratio)
+        );
     }
 
     public static void reset(Vector2f... vectors) {

@@ -1,18 +1,22 @@
 package ecs;
 
-import ecs.components.Component;
+import ecs.components.ECSComponent;
 import ecs.entities.Entity;
 import ecs.gl.Window;
 import ecs.managment.factory.ComponentFactory;
 import ecs.managment.factory.ComponentSystemFactory;
 import ecs.managment.factory.IFactory;
 import ecs.managment.factory.SystemFactory;
-import ecs.managment.memory.Pool;
 import ecs.managment.memory.IPool;
-import ecs.systems.System;
+import ecs.managment.memory.Pool;
+import ecs.systems.ECSSystem;
+import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,43 +30,74 @@ public class Engine implements Runnable, ISystem {
     private Scene scene;
     private final List<Entity> entityList = new ArrayList<>();
 
-    private final float frameRate = 50.0f;
+    private JLabel hierarchyInfo = new JLabel("JFrame By Example");
+
+    private final float frameRate = 60.0f;
     private final float secondsPerFrame = 1.0f / frameRate;
     private boolean keepOnRunning;
 
-    private final SystemHandler s_handler = new SystemHandler();
+    private final SystemHandler systemHandler = new SystemHandler();
 
-    private final ComponentSystemFactory<System> s_factory = new SystemFactory();
-    private final ComponentSystemFactory<Component> c_factory = new ComponentFactory();
+    private final ComponentSystemFactory<ECSSystem>    systemFactory    = new SystemFactory();
+    private final ComponentSystemFactory<ECSComponent> componentFactory = new ComponentFactory();
+    private final IFactory<Entity>                     entityFactory    = new IFactory<Entity>() {
+        private int counter;
 
-    /* Pool for entities, that creates  */
-    private final IPool<Entity> e_I_pool = new Pool<>(new IFactory<Entity>() {
         @Override
         public Entity create() {
-            return new Entity(engine, scene);
+            return new Entity("entity_".concat(String.valueOf(counter++)), engine, scene);
         }
-    });
+    };
+
+    /* Pool for entities, that creates  */
+    private final IPool<Entity> entityPool = new Pool<>(entityFactory);
+
 
 
     public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
         gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
         window = new Window(windowTitle, width, height, vSync);
         this.gameLogic = gameLogic;
+
+        createJFrame();
+
     }
 
     public Engine(Scene scene) {
         this.scene = scene;
         this.gameLoopThread = new Thread();
         this.window = null;
+
+        createJFrame();
+    }
+
+    private void createJFrame() {
+        JFrame frame = new JFrame("JFrame Example");
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        JButton button = new JButton();
+        button.setText("Button");
+
+        panel.add(hierarchyInfo);
+
+        panel.add(button);
+        frame.add(panel);
+        frame.setSize(200, 300);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
     public void addEntity(Entity entity) {
         entityList.add(entity);
     }
 
+    public Entity generateNewEntity() {
+        return entityFactory.create();
+    }
     public void deactivateEntity(Entity entity) {
         entity.reset();
-        e_I_pool.put(entity);
+        entityPool.put(entity);
     }
 
     public void setScene(Scene scene) {
@@ -76,7 +111,7 @@ public class Engine implements Runnable, ISystem {
     // ---------------------  Game engine processes  -----------------------------------------------------------
 
     public void init() throws Exception {
-        s_handler.init();
+        systemHandler.init();
     }
 
     public void input() {
@@ -84,11 +119,11 @@ public class Engine implements Runnable, ISystem {
     }
 
     public void update(float deltaTime) {
-        s_handler.update(deltaTime);
+        systemHandler.update(deltaTime);
     }
 
     public void render(Window window) {
-        s_handler.render(window);
+        systemHandler.render(window);
     }
 
     public void destroy() {
@@ -127,14 +162,21 @@ public class Engine implements Runnable, ISystem {
 
             handleInput();
 
-            while (steps >= secondsPerFrame) {
-                update((float) elapsedTime);
-                steps -= secondsPerFrame;
-            }
+            update((float) elapsedTime);
+
+//            while (steps >= secondsPerFrame) {
+//                steps -= secondsPerFrame;
+//            }
 
             render(window);
-            sync(loopStartTime);
+//            sync(loopStartTime);
+//            System.out.println((int) (1 / elapsedTime));
 
+            try {
+                showHierarchy();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -143,11 +185,11 @@ public class Engine implements Runnable, ISystem {
     }
 
     private void handleInput() {
-
+        Input.updateInput();
     }
 
     private void sync(double loopStartTime) {
-        double loopSlot = 1.0d / 50.0d;
+        double loopSlot = 1.0d / 60.0d;
         double endTime = loopStartTime + loopSlot;
         while (getTime() < endTime) {
             try {
@@ -164,27 +206,40 @@ public class Engine implements Runnable, ISystem {
 
     // ---------------------  Component access implementation  --------------------------------------------------
 
-    public void addComponentToSystem(System.Type type, Component component) {
-        if (!s_handler.hasSystem(type)) {
-            s_handler.addSystem(type, s_factory.create(type));
+    public void addComponentToSystem(ECSSystem.Type type, ECSComponent component) {
+        if (!systemHandler.hasSystem(type)) {
+            systemHandler.addSystem(type, systemFactory.create(type));
         }
-        s_handler.linkComponentAndSystem(type, component);
+        systemHandler.linkComponentAndSystem(type, component);
     }
 
-    public <E extends Component> E instantiateNewComponent(System.Type type) {
-        return (E) c_factory.create(type);
+    @SuppressWarnings("unchecked")
+    public <E extends ECSComponent> E instantiateNewComponent(ECSSystem.Type type) {
+        return (E) componentFactory.create(type);
     }
 
 //    public Component getComponentFromSystem(ComponentType type) {
 //        return s_handler.getSystemByComponentType(type);
 //    }
 
-    public <E extends Component> E removeComponentFromSystem(System.Type type, E component) {
-        s_handler.removeComponent(type, component);
+    public <E extends ECSComponent> E removeComponentFromSystem(ECSSystem.Type type, E component) {
+        systemHandler.removeComponent(type, component);
         return component;
     }
 
     public Window window() {
         return window;
+    }
+
+    public void showHierarchy() throws UnsupportedEncodingException {
+        String accumulator = "";
+
+        for (Entity e : entityList) {
+            if (e.parent == null) {
+                accumulator = accumulator + e.showHierarchy(0);
+            }
+        }
+
+        hierarchyInfo.setText("\n- - - hierarchy - - -\n".concat(accumulator));
     }
 }

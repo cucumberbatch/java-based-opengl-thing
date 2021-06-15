@@ -5,14 +5,14 @@ import ecs.components.Transform;
 import ecs.physics.Physics;
 import ecs.math.Vector3f;
 
-public class RigidBodySystem extends AbstractSystem<RigidBody> {
+public class RigidBodySystem extends AbstractECSSystem<RigidBody> {
 
     @Override
     public void update(float deltaTime) {
-        if (!current_component.isActive()) return;
+        if (!currentComponent.isActive()) return;
 
-        RigidBody rigidBody = current_component;
-        Transform transform = rigidBody.transform();
+        RigidBody rigidBody = currentComponent;
+        Transform transform = rigidBody.getTransform();
 
         /* Catch the free vector from pool for calculations */
         Vector3f temp = vector3IPool.get();
@@ -59,7 +59,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody> {
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
         Vector3f temp = vector3IPool.get().set(direction);
-        current_component.velocity.add(temp.mul(mass));
+        currentComponent.velocity.add(temp.mul(mass));
         vector3IPool.put(temp);
     }
 
