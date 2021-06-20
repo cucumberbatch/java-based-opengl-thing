@@ -107,7 +107,7 @@ public class Window {
             // Center the window
             glfwSetWindowPos(
                     window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
+                    (vidmode.width() - pWidth.get(0)) / 2 + 200,
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         }

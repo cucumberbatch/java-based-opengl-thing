@@ -13,9 +13,8 @@ import ecs.systems.ECSSystem;
 import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
+import ecs.utils.TerminalUtils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,6 @@ public class Engine implements Runnable, ISystem {
     private IGameLogic gameLogic;
     private Scene scene;
     private final List<Entity> entityList = new ArrayList<>();
-
-    private JLabel hierarchyInfo = new JLabel("JFrame By Example");
 
     private final float frameRate = 60.0f;
     private final float secondsPerFrame = 1.0f / frameRate;
@@ -53,6 +50,8 @@ public class Engine implements Runnable, ISystem {
     private final IPool<Entity> entityPool = new Pool<>(entityFactory);
 
 
+    SceneView view;
+
 
     public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
         gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
@@ -72,20 +71,7 @@ public class Engine implements Runnable, ISystem {
     }
 
     private void createJFrame() {
-        JFrame frame = new JFrame("JFrame Example");
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
-        JButton button = new JButton();
-        button.setText("Button");
-
-        panel.add(hierarchyInfo);
-
-        panel.add(button);
-        frame.add(panel);
-        frame.setSize(200, 300);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        view = new SceneView("Scene view");
     }
 
     public void addEntity(Entity entity) {
@@ -240,6 +226,6 @@ public class Engine implements Runnable, ISystem {
             }
         }
 
-        hierarchyInfo.setText("\n- - - hierarchy - - -\n".concat(accumulator));
+        view.updateTextField(TerminalUtils.deleteAnsiCodes(accumulator));
     }
 }

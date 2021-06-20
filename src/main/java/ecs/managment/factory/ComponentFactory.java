@@ -1,9 +1,6 @@
 package ecs.managment.factory;
 
-import ecs.components.ECSComponent;
-import ecs.components.Renderer;
-import ecs.components.RigidBody;
-import ecs.components.Transform;
+import ecs.components.*;
 import ecs.math.Camera;
 import ecs.systems.ECSSystem;
 
@@ -23,6 +20,9 @@ public class ComponentFactory implements ComponentSystemFactory<ECSComponent> {
 
             case CAMERA:
                 return new Camera();
+
+            case PLANE:
+                return new PlaneRenderer();
 
             default:
                 throw new IllegalArgumentException("No such component type name or component initialization!");

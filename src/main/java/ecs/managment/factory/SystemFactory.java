@@ -1,10 +1,7 @@
 package ecs.managment.factory;
 
 import ecs.math.CameraSystem;
-import ecs.systems.ECSSystem;
-import ecs.systems.RendererSystem;
-import ecs.systems.RigidBodySystem;
-import ecs.systems.TransformSystem;
+import ecs.systems.*;
 
 @SuppressWarnings("rawtypes")
 public class SystemFactory implements ComponentSystemFactory<ECSSystem> {
@@ -23,6 +20,9 @@ public class SystemFactory implements ComponentSystemFactory<ECSSystem> {
 
             case CAMERA:
                 return new CameraSystem();
+
+            case PLANE:
+                return new PlaneRendererSystem();
 
             default:
                 throw new IllegalArgumentException("No such component type name or system initialization!");
