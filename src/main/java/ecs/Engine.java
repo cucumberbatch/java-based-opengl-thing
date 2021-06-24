@@ -13,7 +13,6 @@ import ecs.systems.ECSSystem;
 import ecs.graphics.Graphics;
 import ecs.systems.Input;
 import ecs.systems.SystemHandler;
-import ecs.systems.processes.ISystem;
 import ecs.utils.TerminalUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -23,7 +22,7 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
-public class Engine implements Runnable, ISystem {
+public class Engine implements Runnable {
     private final Thread gameLoopThread;
     private final Window window;
     private final Engine engine = this;
@@ -81,6 +80,7 @@ public class Engine implements Runnable, ISystem {
     public Entity generateNewEntity() {
         return entityFactory.create();
     }
+
     public void deactivateEntity(Entity entity) {
         entity.reset();
         entityPool.put(entity);
@@ -96,7 +96,8 @@ public class Engine implements Runnable, ISystem {
 
     // ---------------------  Game engine processes  -----------------------------------------------------------
 
-    public void init() throws Exception {
+    public void init() {
+        // initialize components in loop
         systemHandler.init();
     }
 
@@ -119,9 +120,9 @@ public class Engine implements Runnable, ISystem {
         Graphics.swapBuffers(window);
     }
 
-    // TODO: implement destroy method in systemHandler and add an onDestroy method
     public void destroy() {
-
+        // destroy components and remove every system from destruction handler
+        systemHandler.destroy();
     }
 
     // ---------------------  Running method for main game engine thread  ---------------------------------------
@@ -132,15 +133,8 @@ public class Engine implements Runnable, ISystem {
         assert window != null;
         window.init();
 
-        try {
-            init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         gameLoop();
-
-        destroy();
 
         window.destroy();
     }
@@ -154,8 +148,10 @@ public class Engine implements Runnable, ISystem {
             previous = loopStartTime;
             steps += elapsedTime;
 
-            handleInput();
+            init();
+            destroy();
 
+            handleInput();
 
             update((float) elapsedTime);
 

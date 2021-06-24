@@ -1,6 +1,6 @@
 package ecs.systems.processes;
 
 public interface ISystem
-        extends IInit, IUpdate, IRender {
+        extends IInit, IUpdate, IRender, IDestroy {
 
 }

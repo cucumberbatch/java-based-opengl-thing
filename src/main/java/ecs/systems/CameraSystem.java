@@ -18,14 +18,14 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
     }
 
     @Override
-    public void init() throws Exception {
+    public void onInit() {
         currentComponent.eye.set(0f, 0f, -1f);
         currentComponent.up.set(Vector3f.up());
         currentComponent.at.set(Vector3f.zero());
     }
 
     @Override
-    public void update(float deltaTime) {
+    public void onUpdate(float deltaTime) {
         Vector2f pos = Input.getCursorPosition();
 
         float xFactor = 1f;

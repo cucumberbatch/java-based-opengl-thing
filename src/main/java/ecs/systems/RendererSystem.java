@@ -17,18 +17,18 @@ public class RendererSystem extends AbstractECSSystem<Renderer> {
     }
 
     @Override
-    public void init() throws Exception {
+    public void onInit() {
         Renderer renderer = getCurrentComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
         renderer.texture = new Texture("textures/screen-frame-1024.png");
     }
 
     @Override
-    public void update(float deltaTime) {
+    public void onUpdate(float deltaTime) {
     }
 
     @Override
-    public void render(Window window) {
+    public void onRender(Window window) {
         Shader.BACKGROUND.setUniform1i("u_tex", Shader.BACKGROUND.getId());
 
         Shader.BACKGROUND.setUniformMat4f("u_model",

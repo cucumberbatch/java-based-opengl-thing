@@ -8,7 +8,7 @@ import ecs.math.Vector3f;
 public class RigidBodySystem extends AbstractECSSystem<RigidBody> {
 
     @Override
-    public void update(float deltaTime) {
+    public void onUpdate(float deltaTime) {
         if (!currentComponent.isActive()) return;
 
         RigidBody rigidBody = currentComponent;

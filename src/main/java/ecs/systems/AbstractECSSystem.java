@@ -13,14 +13,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSystem<E> {
-    public static final int INIT_MASK       = 0b0000_0001;
-    public static final int UPDATE_MASK     = 0b0000_0010;
-    public static final int RENDER_MASK     = 0b0000_0100;
-    public static final int COLLISION_MASK  = 0b0000_1000;
+    public static final int INIT_MASK       = 0x0001;
+    public static final int UPDATE_MASK     = 0x0010;
+    public static final int RENDER_MASK     = 0x0100;
+    public static final int COLLISION_MASK  = 0x1000;
+
+    public static final int DESTRUCTION_MASK = 0xffff;
 
     public E currentComponent;
 
-    private int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
+    protected int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
 
     private List<E> componentList = new LinkedList<>();
     private Set<E>  componentSet  = new HashSet<>();
