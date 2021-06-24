@@ -9,7 +9,7 @@ public class MainThread {
         int width = 640;
         int height = 480;
 
-        Engine engine = new Engine("test_engine", width, height, true, new GameLogic());
+        Engine engine = new Engine("test_engine", width, height, true);
 
         Scene scene = new Scene();
 

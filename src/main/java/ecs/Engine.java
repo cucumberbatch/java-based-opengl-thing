@@ -25,7 +25,6 @@ public class Engine implements Runnable, ISystem {
     private final Thread gameLoopThread;
     private final Window window;
     private final Engine engine = this;
-    private IGameLogic gameLogic;
     private Scene scene;
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -53,10 +52,9 @@ public class Engine implements Runnable, ISystem {
     SceneView view;
 
 
-    public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
+    public Engine(String windowTitle, int width, int height, boolean vSync) {
         gameLoopThread = new Thread(this, "GAME_ENGINE_LOOP");
         window = new Window(windowTitle, width, height, vSync);
-        this.gameLogic = gameLogic;
 
         createJFrame();
 
@@ -98,10 +96,6 @@ public class Engine implements Runnable, ISystem {
 
     public void init() throws Exception {
         systemHandler.init();
-    }
-
-    public void input() {
-        gameLogic.input(window);
     }
 
     public void update(float deltaTime) {
@@ -164,10 +158,6 @@ public class Engine implements Runnable, ISystem {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void updateGameState() {
-
     }
 
     private void handleInput() {
