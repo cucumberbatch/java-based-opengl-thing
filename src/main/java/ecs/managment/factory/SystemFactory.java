@@ -1,6 +1,6 @@
 package ecs.managment.factory;
 
-import ecs.math.CameraSystem;
+import ecs.systems.CameraSystem;
 import ecs.systems.*;
 
 @SuppressWarnings("rawtypes")

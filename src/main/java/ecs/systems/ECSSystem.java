@@ -2,7 +2,6 @@ package ecs.systems;
 
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
-import ecs.entities.IComponentManager;
 import ecs.systems.processes.ISystem;
 
 import java.util.List;

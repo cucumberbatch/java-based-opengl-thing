@@ -1,7 +1,7 @@
 package ecs.systems;
 
 import ecs.components.ECSComponent;
-import ecs.gl.Window;
+import ecs.graphics.gl.Window;
 import ecs.systems.processes.ISystem;
 
 import java.util.HashMap;
@@ -13,11 +13,6 @@ import static ecs.systems.AbstractECSSystem.COLLISION_MASK;
 import static ecs.systems.AbstractECSSystem.INIT_MASK;
 import static ecs.systems.AbstractECSSystem.RENDER_MASK;
 import static ecs.systems.AbstractECSSystem.UPDATE_MASK;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
 
 @SuppressWarnings("rawtypes")
 public class SystemHandler implements ISystem {
@@ -86,8 +81,6 @@ public class SystemHandler implements ISystem {
     generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void update(float deltaTime) {
-        glfwPollEvents();
-
         for (ECSSystem system : listOfSystemsForUpdate) {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((ECSComponent) component);
@@ -103,16 +96,12 @@ public class SystemHandler implements ISystem {
     generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void render(Window window) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         for (ECSSystem system : listOfSystemsForRender) {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((ECSComponent) component);
                 system.render(window);
             }
         }
-
-        glfwSwapBuffers(window.getWindow());
     }
 
     /* We are sure that each component object from system.getComponentList()

@@ -1,4 +1,4 @@
-package ecs.gl;
+package ecs.graphics.gl;
 
 import ecs.graphics.Shader;
 import ecs.systems.Input;

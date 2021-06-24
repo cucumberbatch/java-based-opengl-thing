@@ -1,7 +1,7 @@
 package ecs.managment.factory;
 
 import ecs.components.*;
-import ecs.math.Camera;
+import ecs.components.Camera;
 import ecs.systems.ECSSystem;
 
 public class ComponentFactory implements ComponentSystemFactory<ECSComponent> {

@@ -1,10 +1,12 @@
-package ecs.math;
+package ecs.systems;
 
 import ecs.Engine;
+import ecs.components.Camera;
 import ecs.entities.Entity;
 import ecs.graphics.Shader;
-import ecs.systems.AbstractECSSystem;
-import ecs.systems.Input;
+import ecs.math.Matrix4f;
+import ecs.math.Vector2f;
+import ecs.math.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
 

@@ -2,7 +2,7 @@ package ecs;
 
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
-import ecs.gl.Window;
+import ecs.graphics.gl.Window;
 import ecs.managment.factory.ComponentFactory;
 import ecs.managment.factory.ComponentSystemFactory;
 import ecs.managment.factory.IFactory;
@@ -10,6 +10,7 @@ import ecs.managment.factory.SystemFactory;
 import ecs.managment.memory.IPool;
 import ecs.managment.memory.Pool;
 import ecs.systems.ECSSystem;
+import ecs.graphics.Graphics;
 import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
@@ -19,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class Engine implements Runnable, ISystem {
@@ -99,13 +101,25 @@ public class Engine implements Runnable, ISystem {
     }
 
     public void update(float deltaTime) {
+        // update changes of window
+        glfwPollEvents();
+
+        // update systems
         systemHandler.update(deltaTime);
     }
 
     public void render(Window window) {
+        // clear buffer in window screen
+        Graphics.clearScreen();
+
+        // render game graphics
         systemHandler.render(window);
+
+        // switch screen to rendered buffer
+        Graphics.swapBuffers(window);
     }
 
+    // TODO: implement destroy method in systemHandler and add an onDestroy method
     public void destroy() {
 
     }
@@ -141,6 +155,7 @@ public class Engine implements Runnable, ISystem {
             steps += elapsedTime;
 
             handleInput();
+
 
             update((float) elapsedTime);
 

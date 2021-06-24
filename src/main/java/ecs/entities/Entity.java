@@ -5,6 +5,7 @@ import ecs.Scene;
 import ecs.components.ECSComponent;
 import ecs.components.Transform;
 import ecs.systems.ECSSystem;
+import ecs.systems.IComponentManager;
 import ecs.utils.*;
 
 import java.util.*;

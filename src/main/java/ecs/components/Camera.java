@@ -1,6 +1,7 @@
-package ecs.math;
+package ecs.components;
 
-import ecs.components.AbstractECSComponent;
+import ecs.math.Matrix4f;
+import ecs.math.Vector3f;
 
 public class Camera extends AbstractECSComponent {
     public Vector3f at      = new Vector3f();

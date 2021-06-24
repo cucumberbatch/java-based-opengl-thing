@@ -1,7 +1,6 @@
-package ecs.entities;
+package ecs.systems;
 
 import ecs.components.ECSComponent;
-import ecs.systems.ECSSystem;
 
 /**
  * Interface for an entity components behaviour

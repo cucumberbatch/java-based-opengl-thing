@@ -1,7 +1,7 @@
 package ecs.systems;
 
 import ecs.components.Renderer;
-import ecs.gl.Window;
+import ecs.graphics.gl.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;
