@@ -3,10 +3,7 @@ package ecs;
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
 import ecs.graphics.gl.Window;
-import ecs.managment.factory.ComponentFactory;
-import ecs.managment.factory.ComponentSystemFactory;
 import ecs.managment.factory.IFactory;
-import ecs.managment.factory.SystemFactory;
 import ecs.managment.memory.IPool;
 import ecs.managment.memory.Pool;
 import ecs.systems.ECSSystem;
@@ -33,8 +30,6 @@ public class Engine implements Runnable {
 
     private final SystemHandler systemHandler = new SystemHandler();
 
-    private final ComponentSystemFactory<ECSSystem>    systemFactory    = new SystemFactory();
-    private final ComponentSystemFactory<ECSComponent> componentFactory = new ComponentFactory();
     private final IFactory<Entity>                     entityFactory    = new IFactory<>() {
         private long counter;
 
@@ -193,15 +188,13 @@ public class Engine implements Runnable {
     // ---------------------  Component access implementation  --------------------------------------------------
 
     public void addComponentToSystem(ECSSystem.Type type, ECSComponent component) {
-        if (!systemHandler.hasSystem(type)) {
-            systemHandler.addSystem(type, systemFactory.create(type));
-        }
+        systemHandler.addSystem(type);
         systemHandler.linkComponentAndSystem(type, component);
     }
 
     @SuppressWarnings("unchecked")
     public <E extends ECSComponent> E instantiateNewComponent(ECSSystem.Type type) {
-        return (E) componentFactory.create(type);
+        return (E) type.createComponent();
     }
 
 //    public Component getComponentFromSystem(ComponentType type) {

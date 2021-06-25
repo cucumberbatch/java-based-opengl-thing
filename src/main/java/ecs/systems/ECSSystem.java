@@ -1,6 +1,6 @@
 package ecs.systems;
 
-import ecs.components.ECSComponent;
+import ecs.components.*;
 import ecs.entities.Entity;
 import ecs.systems.processes.ISystem;
 
@@ -11,11 +11,64 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
 
     /* Type of system */
     enum Type {
-        RENDERER,
-        TRANSFORM,
-        RIGIDBODY,
-        CAMERA,
-        PLANE;
+        RENDERER {
+            @Override
+            public ECSSystem createSystem() {
+                return new RendererSystem();
+            }
+
+            @Override
+            public ECSComponent createComponent() {
+                return new Renderer();
+            }
+        },
+        TRANSFORM {
+            @Override
+            public ECSSystem createSystem() {
+                return new TransformSystem();
+            }
+
+            @Override
+            public ECSComponent createComponent() {
+                return new Transform();
+            }
+        },
+        RIGIDBODY {
+            @Override
+            public ECSSystem createSystem() {
+                return new RigidBodySystem();
+            }
+
+            @Override
+            public ECSComponent createComponent() {
+                return new RigidBody();
+            }
+        },
+        CAMERA {
+            @Override
+            public ECSSystem createSystem() {
+                return new CameraSystem();
+            }
+
+            @Override
+            public ECSComponent createComponent() {
+                return new Camera();
+            }
+        },
+        PLANE {
+            @Override
+            public ECSSystem createSystem() {
+                return new PlaneRendererSystem();
+            }
+
+            @Override
+            public ECSComponent createComponent() {
+                return new PlaneRenderer();
+            }
+        };
+
+        public abstract ECSSystem createSystem();
+        public abstract ECSComponent createComponent();
     }
 
 

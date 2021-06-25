@@ -29,8 +29,16 @@ public class SystemHandler {
         return systemMap.containsKey(type);
     }
 
-    public void addSystem(ECSSystem.Type type, ECSSystem system) {
-        if (systemMap.put(type, system) == null) attachToSystemLists(system);
+    public void addSystem(ECSSystem.Type type) {
+        if (systemMap.containsKey(type)) {
+            return;
+        }
+
+        ECSSystem system = type.createSystem();
+
+        if (systemMap.put(type, system) == null) {
+            attachToSystemLists(system);
+        }
     }
 
     // Attach system to
