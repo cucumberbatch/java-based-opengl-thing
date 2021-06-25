@@ -24,7 +24,7 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
 
     Set<E> componentSet();
 
-    E getCurrentComponent();
+    E getComponent();
 
     int getWorkflowMask();
 
@@ -33,8 +33,9 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
 
     void componentSet(Set<E> componentSet);
 
-    void setCurrentComponent(E component);
+    void setComponent(E component);
 
+    void setWorkflowMask(int mask);
 
     /* -------------- Other methods -------------- */
     void addComponent(E component);

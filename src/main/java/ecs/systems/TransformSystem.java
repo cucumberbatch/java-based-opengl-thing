@@ -6,7 +6,7 @@ import ecs.math.Vector3f;
 public class TransformSystem extends AbstractECSSystem<Transform> {
 
     public Vector3f getWorldPosition() {
-        Transform iterable_transform = currentComponent.getTransform();
+        Transform iterable_transform = component.getTransform();
         Vector3f world_position = new Vector3f();
         while (iterable_transform.parent != null) {
             world_position.add(iterable_transform.position);
@@ -16,7 +16,7 @@ public class TransformSystem extends AbstractECSSystem<Transform> {
     }
 
     public Vector3f getWorldRotation() {
-        Transform iterable_transform = currentComponent.getTransform();
+        Transform iterable_transform = component.getTransform();
         Vector3f world_rotation = new Vector3f();
         while (iterable_transform.parent != null) {
             world_rotation.add(iterable_transform.rotation);
@@ -26,7 +26,7 @@ public class TransformSystem extends AbstractECSSystem<Transform> {
     }
 
     public Vector3f getWorldScale() {
-        Transform iterable_transform = currentComponent.getTransform();
+        Transform iterable_transform = component.getTransform();
         Vector3f world_scale = new Vector3f();
         while (iterable_transform.parent != null) {
             world_scale.add(iterable_transform.scale);
@@ -36,7 +36,7 @@ public class TransformSystem extends AbstractECSSystem<Transform> {
     }
 
     public Transform getWorldTransform() {
-        Transform iterable_transform = currentComponent.getTransform();
+        Transform iterable_transform = component.getTransform();
         Transform world_transform = new Transform();
         while (iterable_transform.parent != null) {
             world_transform.position.add(iterable_transform.position);

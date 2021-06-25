@@ -7,11 +7,15 @@ import ecs.math.Vector3f;
 
 public class RigidBodySystem extends AbstractECSSystem<RigidBody> {
 
+    public RigidBodySystem() {
+        setWorkflowMask(UPDATE_MASK);
+    }
+
     @Override
     public void onUpdate(float deltaTime) {
-        if (!currentComponent.isActive()) return;
+        if (!component.isActive()) return;
 
-        RigidBody rigidBody = currentComponent;
+        RigidBody rigidBody = component;
         Transform transform = rigidBody.getTransform();
 
         /* Catch the free vector from pool for calculations */
@@ -59,7 +63,7 @@ public class RigidBodySystem extends AbstractECSSystem<RigidBody> {
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
         Vector3f temp = vector3IPool.get().set(direction);
-        currentComponent.velocity.add(temp.mul(mass));
+        component.velocity.add(temp.mul(mass));
         vector3IPool.put(temp);
     }
 

@@ -26,7 +26,7 @@ public class SceneView extends JFrame {
     }
 
     private void updateFrameSize() {
-        int height = textArea.getFont().getAttributes().size() * textArea.getLineCount() * 2;
+        int height = (textArea.getFont().getAttributes().size() + 3) * textArea.getLineCount() * 2;
         this.setSize(420, height);
     }
 

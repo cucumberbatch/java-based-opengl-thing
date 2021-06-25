@@ -13,14 +13,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSystem<E> {
-    public static final int INIT_MASK       = 0x0001;
-    public static final int UPDATE_MASK     = 0x0010;
-    public static final int RENDER_MASK     = 0x0100;
-    public static final int COLLISION_MASK  = 0x1000;
+    public static final int INIT_MASK        = 0x1;
+    public static final int UPDATE_MASK      = 0x2;
+    public static final int RENDER_MASK      = 0x4;
+    public static final int COLLISION_MASK   = 0x8;
 
-    public static final int DESTRUCTION_MASK = 0xffff;
+    public static final int DESTRUCTION_MASK = 0x8000_0000;
 
-    public E currentComponent;
+    public E component;
 
     protected int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
 
@@ -43,8 +43,8 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
     }
 
     @Override
-    public E getCurrentComponent() {
-        return currentComponent;
+    public E getComponent() {
+        return component;
     }
 
     @Override
@@ -65,8 +65,13 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
     }
 
     @Override
-    public void setCurrentComponent(E component) {
-        this.currentComponent = component;
+    public void setComponent(E component) {
+        this.component = component;
+    }
+
+    @Override
+    public void setWorkflowMask(int mask) {
+        this.workflowMask = mask;
     }
 
 
@@ -104,16 +109,16 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
 
     @Override
     public void addComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        currentComponent.getEntity().addComponent(type);
+        component.getEntity().addComponent(type);
     }
 
     @Override
     public <T extends ECSComponent> T getComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        return currentComponent.getEntity().getComponent(type);
+        return component.getEntity().getComponent(type);
     }
 
     @Override
     public <T extends ECSComponent> T removeComponent(Type type) throws IllegalArgumentException, ClassCastException {
-        return currentComponent.getEntity().removeComponent(type);
+        return component.getEntity().removeComponent(type);
     }
 }

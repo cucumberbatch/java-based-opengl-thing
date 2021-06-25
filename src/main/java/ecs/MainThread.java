@@ -9,7 +9,7 @@ public class MainThread {
         int width = 640;
         int height = 480;
 
-        Engine engine = new Engine("test_engine", width, height, true);
+        Engine engine = new Engine("test_engine", width, height, false);
 
         Scene scene = new Scene();
 

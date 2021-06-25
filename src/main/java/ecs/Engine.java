@@ -15,12 +15,10 @@ import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.utils.TerminalUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Engine implements Runnable {
     private final Thread gameLoopThread;
@@ -29,7 +27,7 @@ public class Engine implements Runnable {
     private Scene scene;
     private final List<Entity> entityList = new ArrayList<>();
 
-    private final float frameRate = 60.0f;
+    private float frameRate = 60.0f;
     private final float secondsPerFrame = 1.0f / frameRate;
     private boolean keepOnRunning;
 
@@ -37,8 +35,8 @@ public class Engine implements Runnable {
 
     private final ComponentSystemFactory<ECSSystem>    systemFactory    = new SystemFactory();
     private final ComponentSystemFactory<ECSComponent> componentFactory = new ComponentFactory();
-    private final IFactory<Entity>                     entityFactory    = new IFactory<Entity>() {
-        private int counter;
+    private final IFactory<Entity>                     entityFactory    = new IFactory<>() {
+        private long counter;
 
         @Override
         public Entity create() {
@@ -148,26 +146,27 @@ public class Engine implements Runnable {
             previous = loopStartTime;
             steps += elapsedTime;
 
+            // component initialization process
             init();
+
+            // component deletion process
             destroy();
 
+            // input registration
             handleInput();
 
+            // component logic update process
             update((float) elapsedTime);
 
-//            while (steps >= secondsPerFrame) {
-//                steps -= secondsPerFrame;
-//            }
+            sync(loopStartTime);
 
+            // component rendering process
             render(window);
-//            sync(loopStartTime);
-//            System.out.println((int) (1 / elapsedTime));
 
-            try {
-                showHierarchy();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            // show entities scene hierarchy
+            showHierarchy();
+
+            System.out.println("elapsed time: " + elapsedTime + "\tFPS: " + (int) (1 / elapsedTime));
         }
     }
 
@@ -176,7 +175,7 @@ public class Engine implements Runnable {
     }
 
     private void sync(double loopStartTime) {
-        double loopSlot = 1.0d / 60.0d;
+        double loopSlot = 1.0d / frameRate;
         double endTime = loopStartTime + loopSlot;
         while (getTime() < endTime) {
             try {
@@ -188,7 +187,7 @@ public class Engine implements Runnable {
     }
 
     private double getTime() {
-        return (double) java.lang.System.currentTimeMillis() / 1_000L;
+        return System.currentTimeMillis() * 0.001;
     }
 
     // ---------------------  Component access implementation  --------------------------------------------------
@@ -218,7 +217,7 @@ public class Engine implements Runnable {
         return window;
     }
 
-    public void showHierarchy() throws UnsupportedEncodingException {
+    public void showHierarchy() {
         String accumulator = "";
 
         for (Entity e : entityList) {
@@ -227,6 +226,7 @@ public class Engine implements Runnable {
             }
         }
 
-        view.updateTextField(TerminalUtils.deleteAnsiCodes(accumulator));
+//        view.updateTextField(TerminalUtils.deleteAnsiCodes(accumulator));
+        view.updateTextField(systemHandler.getSystemsStatus());
     }
 }

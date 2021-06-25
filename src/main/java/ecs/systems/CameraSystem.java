@@ -12,16 +12,15 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class CameraSystem extends AbstractECSSystem<Camera> {
 
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK;
+    public CameraSystem() {
+        setWorkflowMask(INIT_MASK | UPDATE_MASK);
     }
 
     @Override
     public void onInit() {
-        currentComponent.eye.set(0f, 0f, -1f);
-        currentComponent.up.set(Vector3f.up());
-        currentComponent.at.set(Vector3f.zero());
+        component.eye.set(0f, 0f, -1f);
+        component.up.set(Vector3f.up());
+        component.at.set(Vector3f.zero());
     }
 
     @Override
@@ -35,24 +34,24 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
 //        currentComponent.at.set(Vector3f.add(currentComponent.eye, Vector3f.forward()));
 
         if (Input.isPressed(GLFW_KEY_G)) {
-            Engine engine = currentComponent.entity.getEngine();
+            Engine engine = component.entity.getEngine();
             Entity e = new Entity("generated entity", engine, engine.getScene());
-            e.addComponent(Type.RIGIDBODY);
+            e.addComponent(Type.PLANE);
             engine.addEntity(e);
         }
 
 
         if (Input.isHeldDown(GLFW_KEY_W)) {
-            currentComponent.eye.add(0f, 0f, zFactor * deltaTime);
+            component.eye.add(0f, 0f, zFactor * deltaTime);
         }
         if (Input.isHeldDown(GLFW_KEY_S)) {
-            currentComponent.eye.add(0f, 0f, -zFactor * deltaTime);
+            component.eye.add(0f, 0f, -zFactor * deltaTime);
         }
         if (Input.isHeldDown(GLFW_KEY_A)) {
-            currentComponent.eye.add(xFactor * deltaTime, 0f, 0f);
+            component.eye.add(xFactor * deltaTime, 0f, 0f);
         }
         if (Input.isHeldDown(GLFW_KEY_D)) {
-            currentComponent.eye.add(-xFactor * deltaTime, 0f, 0f);
+            component.eye.add(-xFactor * deltaTime, 0f, 0f);
         }
 
         // precalculating trigonometry for circular camera rotation
@@ -65,12 +64,12 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
 
         // test rotation around the pane or box
         float radius = 3f;
-        currentComponent.lookAtMatrix = Matrix4f.lookAt(
+        component.lookAtMatrix = Matrix4f.lookAt(
                 new Vector3f(
                         (float) (Math.sin(System.currentTimeMillis() * 0.005) * radius),
                         0f,
                         (float) (Math.cos(System.currentTimeMillis() * 0.005) * radius)),
-                currentComponent.eye,
+                component.eye,
                 Vector3f.up());
 
         // setting camera target view point around the camera position (XZ plane)
@@ -86,12 +85,12 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
         // calculating view matrix for camera rotation and position
 //        currentComponent.lookAtMatrix = Matrix4f.lookAt(currentComponent.eye, currentComponent.at, currentComponent.up);
 
-        currentComponent.viewMatrix = Matrix4f.multiply(
-                currentComponent.lookAtMatrix,
-                Matrix4f.translation(currentComponent.transform.position));
+        component.viewMatrix = Matrix4f.multiply(
+                component.lookAtMatrix,
+                Matrix4f.translation(component.transform.position));
 
         // finally pass view matrix to shader
-        Shader.BACKGROUND.setUniformMat4f("u_view", currentComponent.viewMatrix);
+        Shader.BACKGROUND.setUniformMat4f("u_view", component.viewMatrix);
 
     }
 }

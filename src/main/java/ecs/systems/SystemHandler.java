@@ -3,10 +3,7 @@ package ecs.systems;
 import ecs.components.ECSComponent;
 import ecs.graphics.gl.Window;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ecs.systems.AbstractECSSystem.*;
 
@@ -17,12 +14,16 @@ public class SystemHandler {
 
     private final List<ECSSystem> systemList                  = new LinkedList<>();
 
-    private final List<ECSSystem> listOfSystemsForInit        = new LinkedList<>();
-    private final List<ECSSystem> listOfSystemsForUpdate      = new LinkedList<>();
-    private final List<ECSSystem> listOfSystemsForRender      = new LinkedList<>();
-    private final List<ECSSystem> listOfSystemsForCollision   = new LinkedList<>();
-    private final List<ECSSystem> listOfSystemsForDestruction = new LinkedList<>();
+    private final List<ECSSystem> listOfSystemsForInit        = new ArrayList<>();
+    private final List<ECSSystem> listOfSystemsForUpdate      = new ArrayList<>();
+    private final List<ECSSystem> listOfSystemsForRender      = new ArrayList<>();
+    private final List<ECSSystem> listOfSystemsForCollision   = new ArrayList<>();
+    private final List<ECSSystem> listOfSystemsForDestruction = new ArrayList<>();
 
+    // needs for iterating over the systems
+    private int index;
+
+    private StringBuffer systemStatusAccumulator = new StringBuffer();
 
     public boolean hasSystem(ECSSystem.Type type) {
         return systemMap.containsKey(type);
@@ -44,11 +45,11 @@ public class SystemHandler {
     }
 
     private void attachToInitList(ECSSystem system) {
-        listOfSystemsForCollision.add(system);
+        listOfSystemsForInit.add(system);
     }
 
     private void detachFromInitList(ECSSystem system) {
-        listOfSystemsForCollision.remove(system);
+        listOfSystemsForInit.remove(system);
     }
 
     private void attachToDestructionList(ECSSystem system) {
@@ -77,72 +78,70 @@ public class SystemHandler {
     /* We are sure that each component object from system.getComponentList()
     is an ECSComponent type, because the only way of adding a component into
     component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
+    generates objects of ECSComponent type, also we don't use iterators because
+    we don't want to create them each frame, so it uses a simple indexed for loop
+    there and in other methods below */
     @SuppressWarnings("unchecked")
     public void init() {
-        for (ECSSystem system : listOfSystemsForInit) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((ECSComponent) component);
-                system.onInit();
+        List<ECSSystem> systems = listOfSystemsForInit;
+
+        for (index = systems.size() - 1; index >= 0; index--) {
+            for (Object component : systems.get(index).getComponentList()) {
+                systems.get(index).setComponent((ECSComponent) component);
+                systems.get(index).onInit();
             }
-            detachFromInitList(system);
+            systemStatusAccumulator.append("INIT: ").append(systems.get(index)).append("\n");
+            detachFromInitList(systems.get(index));
         }
     }
 
-    /* We are sure that each component object from system.getComponentList()
-    is an ECSComponent type, because the only way of adding a component into
-    component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void update(float deltaTime) {
-        for (ECSSystem system : listOfSystemsForUpdate) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((ECSComponent) component);
-                system.onUpdate(deltaTime);
+        List<ECSSystem> systems = listOfSystemsForUpdate;
+
+        for (index = systems.size() - 1; index >= 0; index--) {
+            for (Object component : systems.get(index).getComponentList()) {
+                systems.get(index).setComponent((ECSComponent) component);
+                systems.get(index).onUpdate(deltaTime);
             }
+            systemStatusAccumulator.append("UPDATE: ").append(systems.get(index)).append("\n");
         }
     }
 
-    /* We are sure that each component object from system.getComponentList()
-    is an ECSComponent type, because the only way of adding a component into
-    component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void render(Window window) {
-        for (ECSSystem system : listOfSystemsForRender) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((ECSComponent) component);
-                system.onRender(window);
+        List<ECSSystem> systems = listOfSystemsForRender;
+
+        for (index = systems.size() - 1; index >= 0; index--) {
+            for (Object component : systems.get(index).getComponentList()) {
+                systems.get(index).setComponent((ECSComponent) component);
+                systems.get(index).onRender(window);
             }
+            systemStatusAccumulator.append("RENDER: ").append(systems.get(index)).append("\n");
         }
     }
 
-    /* We are sure that each component object from system.getComponentList()
-    is an ECSComponent type, because the only way of adding a component into
-    component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void destroy() {
-        for (ECSSystem system : listOfSystemsForRender) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((ECSComponent) component);
-                system.onDestroy();
+        List<ECSSystem> systems = listOfSystemsForDestruction;
+
+        for (index = systems.size() - 1; index >= 0; index--) {
+            for (Object component : systems.get(index).getComponentList()) {
+                systems.get(index).setComponent((ECSComponent) component);
+                systems.get(index).onDestroy();
             }
-            detachFromDestructionList(system);
+            systemStatusAccumulator.append("DESTRUCT: ").append(systems.get(index)).append("\n");
+            detachFromDestructionList(systems.get(index));
         }
     }
 
-    /* We are sure that each component object from system.getComponentList()
-    is an ECSComponent type, because the only way of adding a component into
-    component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void collide() {
-        for (ECSSystem system : listOfSystemsForCollision) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((ECSComponent) component);
-//                system.collide(collision);
-            }
-        }
+    }
+
+    public String getSystemsStatus() {
+        String data = systemStatusAccumulator.toString();
+        systemStatusAccumulator = new StringBuffer();
+        return data;
     }
 }

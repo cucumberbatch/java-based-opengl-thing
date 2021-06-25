@@ -11,14 +11,13 @@ import ecs.math.Vector3f;
 
 public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK | RENDER_MASK;
+    public PlaneRendererSystem() {
+        setWorkflowMask(INIT_MASK | UPDATE_MASK | RENDER_MASK);
     }
 
     @Override
     public void onInit() {
-        PlaneRenderer renderer = getCurrentComponent();
+        PlaneRenderer renderer = getComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
         renderer.texture = new Texture("textures/screen-frame-1024.png");
 
@@ -36,16 +35,16 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
         Shader.BACKGROUND.setUniformMat4f("u_model",
                 Matrix4f.multiply(
                         Matrix4f.multiply(
-                                Matrix4f.rotation(Vector3f.up(),    currentComponent.transform.rotation.y),
-                                Matrix4f.rotation(Vector3f.right(), currentComponent.transform.rotation.x)),
-                        Matrix4f.translation(currentComponent.transform.position)));
+                                Matrix4f.rotation(Vector3f.up(),    component.transform.rotation.y),
+                                Matrix4f.rotation(Vector3f.right(), component.transform.rotation.x)),
+                        Matrix4f.translation(component.transform.position)));
 
 //        Shader.BACKGROUND.setUniformMat4f("u_view", Matrix4f.identity());
 
         Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.orthographic(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
 //        Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.perspective(50f, 0.1f, 100.0f, 0f));
 
-        Renderer2D.draw(getCurrentComponent().background, getCurrentComponent().texture, Shader.BACKGROUND);
+        Renderer2D.draw(getComponent().background, getComponent().texture, Shader.BACKGROUND);
 
     }
 

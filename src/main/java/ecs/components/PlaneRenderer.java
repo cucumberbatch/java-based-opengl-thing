@@ -29,6 +29,6 @@ public class PlaneRenderer extends AbstractECSComponent {
 
     @Override
     public String toString() {
-        return null;
+        return getName();
     }
 }
