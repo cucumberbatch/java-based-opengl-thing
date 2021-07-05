@@ -2,9 +2,6 @@ package ecs.systems;
 
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
-import ecs.managment.memory.Pool;
-import ecs.managment.memory.IPool;
-import ecs.math.Vector3f;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,8 +23,6 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
 
     private List<E> componentList = new LinkedList<>();
     private Set<E>  componentSet  = new HashSet<>();
-
-    protected IPool<Vector3f> vector3IPool = new Pool<>(1000, Vector3f::new);
 
 
     /* -------------- Getters -------------- */
