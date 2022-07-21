@@ -15,6 +15,7 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
         RENDERER,
         TRANSFORM,
         RIGIDBODY,
+        RIGIDBODY2D,
         CAMERA,
         PLANE;
     }

@@ -18,6 +18,9 @@ public class SystemFactory implements ComponentSystemFactory<ECSSystem> {
             case RIGIDBODY:
                 return new RigidBodySystem();
 
+            case RIGIDBODY2D:
+                return new RigidBody2dSystem();
+
             case CAMERA:
                 return new CameraSystem();
 

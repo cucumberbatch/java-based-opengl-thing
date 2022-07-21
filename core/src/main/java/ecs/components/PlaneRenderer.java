@@ -21,13 +21,6 @@ public class PlaneRenderer extends AbstractECSComponent {
              0.5f, -0.5f, 0.0f
     };
 
-    // public float[] vertices = new float[]{
-    //         -1.0f, -1.0f, 0.0f,
-    //         -1.0f,  1.0f, 0.0f,
-    //         -0.2f,  1.0f, 0.0f,
-    //         -0.2f, -1.0f, 0.0f
-    // };
-
     public byte[] indices = new byte[]{
             0, 1, 2, 2, 3, 0,
     };
@@ -43,44 +36,6 @@ public class PlaneRenderer extends AbstractECSComponent {
     public Texture     texture;
     public Rectangle cursor;
     public Rectangle button;
-
-
-    @Override
-    public String toString() {
-        return null;
-    }
-
-
-
-
-
-
-
-    public float[] buttonVertices = new float[]{
-            -0.5f, -0.5f, 0.0f,
-            -0.5f,  0.5f, 0.0f,
-             0.5f,  0.5f, 0.0f,
-             0.5f, -0.5f, 0.0f
-    };
-
-    // public float[] vertices = new float[]{
-    //         -1.0f, -1.0f, 0.0f,
-    //         -1.0f,  1.0f, 0.0f,
-    //         -0.2f,  1.0f, 0.0f,
-    //         -0.2f, -1.0f, 0.0f
-    // };
-
-    public byte[] buttonIndices = new byte[]{
-            0, 1, 2, 2, 3, 0,
-    };
-
-    public float[] buttonUv = new float[]{
-            0,  1,
-            0,  0,
-            1,  0,
-            1,  1
-    };
-
     public VertexArray buttonBackground;
     public Texture     buttonTexture;
 

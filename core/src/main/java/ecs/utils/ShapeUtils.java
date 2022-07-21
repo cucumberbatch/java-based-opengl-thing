@@ -1,9 +1,6 @@
 package ecs.utils;
 
-import ecs.shapes.ConvertibleShape;
+import ecs.shapes.Shape2d;
 
 public class ShapeUtils {
-    public static float[] convertToVertices(ConvertibleShape shape) {
-        return shape.convertToVertices();
-    }
 }

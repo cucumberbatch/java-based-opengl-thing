@@ -7,16 +7,18 @@ import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
-import ecs.utils.ShapeUtils;
+import ecs.utils.Logger;
 import matrices.Matrix4f;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static ecs.utils.TerminalUtils.*;
 
 public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
@@ -55,8 +57,6 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
 
     private Rectangle imaginaryCursor      = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
-
-    private Logger logger                  = Logger.getLogger(this.getClass().getSimpleName());
 
     @Override
     public int getWorkflowMask() {
@@ -111,7 +111,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         cursorState = HOVER_CURSOR_STATE;
-                        System.out.printf("\nSTATE:\t%s", "HOVER_CURSOR_STATE");
+                        Logger.debug("HOVER_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     button.topLeft,     transitionTimeAccumulator / transitionTimeLimit);
@@ -122,12 +122,12 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
                 case HOVER_TO_IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    System.out.printf("\nSTATE:\t%s", "IDLE_TO_HOVER_CURSOR_STATE");
+                    Logger.debug("IDLE_TO_HOVER_CURSOR_STATE");
                     break;
 
                 case IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    System.out.printf("\nSTATE:\t%s", "IDLE_TO_HOVER_CURSOR_STATE");
+                    Logger.debug("IDLE_TO_HOVER_CURSOR_STATE");
                     break;
 
                 case HOVER_CURSOR_STATE:
@@ -150,7 +150,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         cursorState = IDLE_CURSOR_STATE;
-                        System.out.printf("\nSTATE:\t%s", "IDLE_CURSOR_STATE");
+                        Logger.debug("IDLE_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
 //                        setCursorPosition(cursor, position);
@@ -162,12 +162,12 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
                 case HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    System.out.printf("\nSTATE:\t%s", "HOVER_TO_IDLE_CURSOR_STATE");
+                    Logger.debug("HOVER_TO_IDLE_CURSOR_STATE");
                     break;
 
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    System.out.printf("\nSTATE:\t%s", "HOVER_TO_IDLE_CURSOR_STATE");
+                    Logger.debug("HOVER_TO_IDLE_CURSOR_STATE");
                     break;
 
                 case IDLE_CURSOR_STATE:
@@ -191,9 +191,19 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
         setCursorPosition(imaginaryCursor, Input.getCursorPosition());
 
-        component.vertices = cursor.convertToVertices();
+        component.vertices = cursor.toVertices();
 
     }
+
+/*    private void logStateInfo(String state) {
+        System.out.printf(
+                "\n" + ANSI_CYAN + "[%s]" + ANSI_RESET + " [%-6.6s] STATE:\t" + ANSI_BOLD + "%s" + ANSI_RESET,
+                new SimpleDateFormat("HH:mm:ss.SSS").format(Date.from(Instant.now())),
+                Thread.currentThread().getName(),
+                state
+        );
+    }
+*/
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
         return center.mul(2f).sub(previousPhysicalPosition).sub(displacement.mul(springFactor * deltaTime * deltaTime / mass));
@@ -213,12 +223,12 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
         // System.out.println(Shader.GUI.getUniform("pos_shift"));
 
         VertexArray cursorVertices = new VertexArray(
-                component.cursor.convertToVertices(),
+                component.cursor.toVertices(),
                 component.indices,
                 component.uv);
 
         VertexArray buttonVertices = new VertexArray(
-                component.button.convertToVertices(),
+                component.button.toVertices(),
                 component.indices,
                 component.uv);
 

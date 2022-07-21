@@ -3,6 +3,7 @@ package ecs.systems;
 import ecs.components.ECSComponent;
 import ecs.gl.Window;
 import ecs.systems.processes.ISystem;
+import ecs.utils.Logger;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -72,6 +73,7 @@ public class SystemHandler implements ISystem {
     @SuppressWarnings("unchecked")
     public void init() throws Exception {
         for (ECSSystem system : listOfSystemsForInit) {
+            Logger.trace(String.format("Handling init system [%s]", system.getClass().getName()));
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
                 system.init();
@@ -89,6 +91,7 @@ public class SystemHandler implements ISystem {
         glfwPollEvents();
 
         for (ECSSystem system : listOfSystemsForUpdate) {
+            Logger.trace(String.format("Handling update system [%s]", system.getClass().getName()));
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
                 system.update(deltaTime);
@@ -106,6 +109,7 @@ public class SystemHandler implements ISystem {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (ECSSystem system : listOfSystemsForRender) {
+            Logger.trace(String.format("Handling render system [%s]", system.getClass().getName()));
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
                 system.render(window);

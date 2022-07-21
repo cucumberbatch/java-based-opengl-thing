@@ -111,7 +111,4 @@ public abstract class AbstractECSComponent implements ECSComponent {
     public <E extends ECSComponent> E getReplica() {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public abstract String toString();
 }
