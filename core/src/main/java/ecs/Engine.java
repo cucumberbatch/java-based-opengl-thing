@@ -13,6 +13,7 @@ import ecs.systems.ECSSystem;
 import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
+import ecs.utils.Logger;
 import ecs.utils.TerminalUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -143,6 +144,8 @@ public class Engine implements Runnable, ISystem {
             double elapsedTime = loopStartTime - previous;
             previous = loopStartTime;
             steps += elapsedTime;
+
+            Logger.trace(String.format("Started game loop iteration with <bold>dT: %fs</> and <bold>%d fps</>", elapsedTime, (int) (1 / elapsedTime)));
 
             handleInput();
 

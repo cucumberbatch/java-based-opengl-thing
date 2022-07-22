@@ -111,7 +111,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         cursorState = HOVER_CURSOR_STATE;
-                        Logger.debug("HOVER_CURSOR_STATE");
+                        Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     button.topLeft,     transitionTimeAccumulator / transitionTimeLimit);
@@ -122,12 +122,12 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
                 case HOVER_TO_IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    Logger.debug("IDLE_TO_HOVER_CURSOR_STATE");
+                    Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
                     break;
 
                 case IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    Logger.debug("IDLE_TO_HOVER_CURSOR_STATE");
+                    Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
                     break;
 
                 case HOVER_CURSOR_STATE:
@@ -150,7 +150,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         cursorState = IDLE_CURSOR_STATE;
-                        Logger.debug("IDLE_CURSOR_STATE");
+                        Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
 //                        setCursorPosition(cursor, position);
@@ -162,12 +162,12 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
                 case HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    Logger.debug("HOVER_TO_IDLE_CURSOR_STATE");
+                    Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
                     break;
 
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    Logger.debug("HOVER_TO_IDLE_CURSOR_STATE");
+                    Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
                     break;
 
                 case IDLE_CURSOR_STATE:

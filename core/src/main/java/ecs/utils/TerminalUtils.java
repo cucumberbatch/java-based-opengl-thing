@@ -10,6 +10,69 @@ import java.util.stream.IntStream;
 
 public class TerminalUtils {
 
+    public enum Ansi {
+        ANSI_RESET("\u001b[0m", "</>"),
+
+        ANSI_BLACK("\u001b[30m", "<black>"),
+        ANSI_RED("\u001b[31m", "<red>"),
+        ANSI_GREEN("\u001b[32m", "<green>"),
+        ANSI_YELLOW("\u001b[33m", "<yellow>"),
+        ANSI_BLUE("\u001b[34m", "<blue>"),
+        ANSI_MAGENTA("\u001b[35m", "<magenta>"),
+        ANSI_CYAN("\u001b[36m", "<cyan>"),
+        ANSI_WHITE("\u001b[37m", "<white>"),
+
+        ANSI_BRIGHT_BLACK("\u001b[30;1m", "<Black>"),
+        ANSI_BRIGHT_RED("\u001b[31;1m", "<Red>"),
+        ANSI_BRIGHT_GREEN("\u001b[32;1m", "<Green>"),
+        ANSI_BRIGHT_YELLOW("\u001b[33;1m", "<Yellow>"),
+        ANSI_BRIGHT_BLUE("\u001b[34;1m", "<Blue>"),
+        ANSI_BRIGHT_MAGENTA("\u001b[35;1m", "<Magenta>"),
+        ANSI_BRIGHT_CYAN("\u001b[36;1m", "<Cyan>"),
+        ANSI_BRIGHT_WHITE("\u001b[37;1m", "<White>"),
+
+        ANSI_BACKGROUND_BLACK("\u001b[40m", "<b_black>"),
+        ANSI_BACKGROUND_RED("\u001b[41m", "<b_red>"),
+        ANSI_BACKGROUND_GREEN("\u001b[42m", "<b_green>"),
+        ANSI_BACKGROUND_YELLOW("\u001b[43m", "<b_yellow>"),
+        ANSI_BACKGROUND_BLUE("\u001b[44m", "<b_blue>"),
+        ANSI_BACKGROUND_MAGENTA("\u001b[45m", "<b_magenta>"),
+        ANSI_BACKGROUND_CYAN("\u001b[46m", "<b_cyan>"),
+        ANSI_BACKGROUND_WHITE("\u001b[47m", "<b_white>"),
+
+        ANSI_BACKGROUND_BRIGHT_BLACK("\u001b[40;1m", "<b_Black>"),
+        ANSI_BACKGROUND_BRIGHT_RED("\u001b[41;1m", "<b_Red>"),
+        ANSI_BACKGROUND_BRIGHT_GREEN("\u001b[42;1m", "<b_Green>"),
+        ANSI_BACKGROUND_BRIGHT_YELLOW("\u001b[43;1m", "<b_Yellow>"),
+        ANSI_BACKGROUND_BRIGHT_BLUE("\u001b[44;1m", "<b_Blue>"),
+        ANSI_BACKGROUND_BRIGHT_MAGENTA("\u001b[45;1m", "<b_Magenta>"),
+        ANSI_BACKGROUND_BRIGHT_CYAN("\u001b[46;1m", "<b_Cyan>"),
+        ANSI_BACKGROUND_BRIGHT_WHITE("\u001b[47;1m", "<b_White>"),
+
+        ANSI_BOLD("\u001b[1m", "<bold>"),
+        ANSI_UNDERLINE("\u001b[4m", "<underline>"),
+        ANSI_REVERSED("\u001b[7m", "<reversed>");
+
+        private String ansiCode;
+        private String formatterCommand = "<empty>";
+
+        Ansi(String ansiCode) {
+            this.ansiCode = ansiCode;
+        }
+
+        Ansi(String ansiCode, String formatterCommand) {
+            this.ansiCode = ansiCode;
+            this.formatterCommand = formatterCommand;
+        }
+
+        public static String format(String string) {
+            for (Ansi ansi : Ansi.values()) {
+                string = string.replace(ansi.formatterCommand, ansi.ansiCode);
+            }
+            return string;
+        }
+    }
+
     public static String ANSI_RESET   = "\u001b[0m";
 
     public static String ANSI_BLACK   = "\u001b[30m";
@@ -65,6 +128,10 @@ public class TerminalUtils {
     public static String indent4 = " -  ";
 
     private TerminalUtils() {}
+
+    public static String fAnsi(String string) {
+        return Ansi.format(string);
+    }
 
     public static String formatOutputVector(Vector3f vector) {
         String start    = "[ ";

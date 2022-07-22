@@ -10,9 +10,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 
-import static ecs.utils.TerminalUtils.*;
-import static ecs.utils.TerminalUtils.ANSI_RESET;
-
 public class Logger {
 
     public enum Level {
@@ -25,31 +22,31 @@ public class Logger {
         DEBUG(1) {
             @Override
             public String formatLevel() {
-                return ANSI_BRIGHT_BLUE + enclose(name()) + ANSI_RESET;
+                return String.format("<green>%s</>", enclose(name()));
             }
         },
         INFO(2) {
             @Override
             public String formatLevel() {
-                return enclose(name());
+                return String.format("<blue>%s</>", enclose(name()));
             }
         },
         WARN(3) {
             @Override
             public String formatLevel() {
-                return ANSI_YELLOW + enclose(name()) + ANSI_RESET;
+                return String.format("<yellow>%s</>", enclose(name()));
             }
         },
         ERROR(4) {
             @Override
             public String formatLevel() {
-                return ANSI_RED + enclose(name()) + ANSI_RESET;
+                return String.format("<red>%s</>", enclose(name()));
             }
         },
         FATAL(5) {
             @Override
             public String formatLevel() {
-                return ANSI_BRIGHT_RED + enclose(name()) + ANSI_RESET;
+                return String.format("<Red>%s</>", enclose(name()));
             }
         };
 
@@ -115,12 +112,14 @@ public class Logger {
     private static final DateFormat dateFormat = new SimpleDateFormat(dateTimeFormatPattern);
 
     private static void printf(Level level, String message) {
-        printer.print(String.format(
-                "\n" + ANSI_CYAN + "%s" + ANSI_RESET + "  [%8s] %s: %s",
-                dateFormat.format(Date.from(Instant.now())),
-                Thread.currentThread().getName(),
-                level.formatLevel(),
-                message
+        printer.print(TerminalUtils.fAnsi(
+                String.format(
+                        "\n<cyan>%s</>  [%8s] %s: %s",
+                        dateFormat.format(Date.from(Instant.now())),
+                        Thread.currentThread().getName(),
+                        level.formatLevel(),
+                        message
+                )
         ));
     }
 
