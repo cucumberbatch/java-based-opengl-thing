@@ -95,22 +95,6 @@ public class Engine implements Runnable, ISystem {
 
     // ---------------------  Game engine processes  -----------------------------------------------------------
 
-    public void init() throws Exception {
-        systemHandler.init();
-    }
-
-    public void input() {
-        gameLogic.input(window);
-    }
-
-    public void update(float deltaTime) {
-        systemHandler.update(deltaTime);
-    }
-
-    public void render(Window window) {
-        systemHandler.render(window);
-    }
-
     public void destroy() {
 
     }
@@ -124,9 +108,9 @@ public class Engine implements Runnable, ISystem {
         window.init();
 
         try {
-            init();
+            systemHandler.init();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error("System init exception", e);
         }
 
         gameLoop();
@@ -138,41 +122,28 @@ public class Engine implements Runnable, ISystem {
 
     private void gameLoop() {
         double previous = getTime();
-        double steps = 0.0;
         while (!glfwWindowShouldClose(window.getWindow())) {
             double loopStartTime = getTime();
             double elapsedTime = loopStartTime - previous;
             previous = loopStartTime;
-            steps += elapsedTime;
 
             Logger.trace(String.format("Started game loop iteration with <bold>dT: %fs</> and <bold>%d fps</>", elapsedTime, (int) (1 / elapsedTime)));
 
-            handleInput();
+            Input.updateInput();
 
-            update((float) elapsedTime);
+            try {
+                systemHandler.update((float) elapsedTime);
+            } catch (Exception e) {
+                Logger.error("System update exception", e);
+            }
 
-//            while (steps >= secondsPerFrame) {
-//                steps -= secondsPerFrame;
-//            }
-
-            render(window);
-            sync(loopStartTime);
-//            System.out.println((int) (1 / elapsedTime));
-
-//            try {
-//                showHierarchy();
-//            } catch (UnsupportedEncodingException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                systemHandler.render(window);
+            } catch (Exception e) {
+                Logger.error("System render exception", e);
+            }
+//            sync(loopStartTime);
         }
-    }
-
-    private void updateGameState() {
-
-    }
-
-    private void handleInput() {
-        Input.updateInput();
     }
 
     private void sync(double loopStartTime) {

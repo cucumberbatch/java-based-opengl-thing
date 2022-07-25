@@ -116,7 +116,10 @@ public class SystemHandler implements ISystem {
             }
         }
 
+        long millis = System.currentTimeMillis();
         glfwSwapBuffers(window.getWindow());
+        long diffMillis = System.currentTimeMillis() - millis;
+        Logger.trace(String.format("Graphics buffer swap ended! Spent time: <bold>%sms</>", diffMillis));
     }
 
     /* We are sure that each component object from system.getComponentList()

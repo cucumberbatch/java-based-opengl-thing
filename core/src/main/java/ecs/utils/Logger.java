@@ -1,56 +1,52 @@
 package ecs.utils;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 public class Logger {
 
     public enum Level {
-        TRACE(0) {
+        TRACE {
             @Override
             public String formatLevel() {
                 return enclose(name());
             }
         },
-        DEBUG(1) {
-            @Override
-            public String formatLevel() {
-                return String.format("<green>%s</>", enclose(name()));
-            }
-        },
-        INFO(2) {
+        DEBUG {
             @Override
             public String formatLevel() {
                 return String.format("<blue>%s</>", enclose(name()));
             }
         },
-        WARN(3) {
+        INFO{
+            @Override
+            public String formatLevel() {
+                return String.format("<green>%s</>", enclose(name()));
+            }
+        },
+        WARN {
             @Override
             public String formatLevel() {
                 return String.format("<yellow>%s</>", enclose(name()));
             }
         },
-        ERROR(4) {
+        ERROR {
             @Override
             public String formatLevel() {
                 return String.format("<red>%s</>", enclose(name()));
             }
         },
-        FATAL(5) {
+        FATAL {
             @Override
             public String formatLevel() {
                 return String.format("<Red>%s</>", enclose(name()));
             }
         };
-
-        private int priority;
 
         public abstract String formatLevel();
 
@@ -58,74 +54,93 @@ public class Logger {
             return String.format("%7s", name);
         }
 
-        Level(int priority) {
-            this.priority = priority;
-        }
     }
 
-    public interface Printer {
-        void print(String message);
+    interface LogWriter {
+        void write(String message) throws IOException;
+        PrintWriter getPrintWriter();
     }
 
-    public static class ConsolePrinter implements Printer {
+    public static class ConsoleLogWriter implements LogWriter {
+
         @Override
-        public void print(String message) {
+        public void write(String message) {
             System.out.print(message);
         }
+
+        @Override
+        public PrintWriter getPrintWriter() {
+            return null;
+        }
     }
 
-    public static class OutputFilePrinter implements Printer {
-
+    public static class FileLogWriter implements LogWriter {
+        private PrintWriter printWriter;
         private OutputStream stream;
-        private Printer attachedPrinter;
 
-        public OutputFilePrinter(String filePath) {
+        public FileLogWriter(String fileName) {
             try {
-                stream = new FileOutputStream(filePath);
+                stream = new FileOutputStream(fileName);
+                printWriter = new PrintWriter(stream);
             } catch (FileNotFoundException e) {
-                error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public void print(String message) {
-            try {
-                stream.write(message.getBytes(StandardCharsets.UTF_8));
-                attachedPrinter.print(message);
-            } catch (IOException e) {
-                error(e.getMessage());
-                throw new RuntimeException(e);
-            }
+        public void write(String message) throws IOException {
+            stream.write(message.getBytes(StandardCharsets.UTF_8));
         }
 
-        public OutputFilePrinter attach(Printer printer) {
-            this.attachedPrinter = printer;
-            return this;
+        @Override
+        public PrintWriter getPrintWriter() {
+            return printWriter;
         }
     }
+
+    public static void setLogWriter(LogWriter logWriter) {
+        writer = logWriter;
+    }
+
+    public static LogWriter writer;
 
     public static final Level LEVEL = ApplicationConfig.LOGGER_SEVERITY;
 
-    public static final String dateTimeFormatPattern = "HH:mm:ss.SSS";
-    public static final Printer printer = new ConsolePrinter();
-    private static final DateFormat dateFormat = new SimpleDateFormat(dateTimeFormatPattern);
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat(ApplicationConfig.LOGGER_TIME_INFO_PATTERN);
 
-    private static void printf(Level level, String message) {
-        printer.print(TerminalUtils.fAnsi(
-                String.format(
-                        "\n<cyan>%s</>  [%8s] %s: %s",
-                        dateFormat.format(Date.from(Instant.now())),
-                        Thread.currentThread().getName(),
-                        level.formatLevel(),
-                        message
-                )
-        ));
+    public static void log(Level level, String message, Throwable e) {
+        if (level.compareTo(ApplicationConfig.LOGGER_SEVERITY) < 0) return;
+
+        try {
+            writer.write(TerminalUtils.fAnsi(
+                    String.format(
+                            "\n<cyan>%s</>  [%8s] %s: %s",
+                            DATE_FORMAT.format(Date.from(Instant.now())),
+                            Thread.currentThread().getName(),
+                            level.formatLevel(),
+                            message
+                    )
+            ));
+
+            if (!Objects.isNull(e)) {
+                error("Unsupported logger case: usage of exceptions in logs are not supported yet!");
+                return;
+//                e.printStackTrace(writer.getPrintWriter());
+            }
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
     }
 
     public static void log(Level level, String message) {
-        if (level.priority < LEVEL.priority) return;
-        printf(level, message);
+        log(level, message, null);
+    }
+
+    public static void log(Level level, Throwable e) {
+        log(level, "", e);
     }
 
     public static void trace(String message) {
@@ -148,7 +163,23 @@ public class Logger {
         log(Level.ERROR, message);
     }
 
+    public static void error(Exception e) {
+        log(Level.ERROR, e);
+    }
+
+    public static void error(String message, Exception e) {
+        log(Level.ERROR, message, e);
+    }
+
     public static void fatal(String message) {
         log(Level.FATAL, message);
+    }
+
+    public static void fatal(Exception e) {
+        log(Level.FATAL, e);
+    }
+
+    public static void fatal(String message, Exception e) {
+        log(Level.FATAL, message, e);
     }
 }

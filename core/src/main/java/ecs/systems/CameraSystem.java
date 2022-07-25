@@ -2,6 +2,7 @@ package ecs.systems;
 
 import ecs.graphics.Shader;
 import ecs.components.Camera;
+import ecs.utils.Logger;
 import matrices.Matrix4f;
 import vectors.Vector2f;
 import vectors.Vector3f;
@@ -25,6 +26,7 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
 
     @Override
     public void init() throws Exception {
+        Logger.info(String.format("%s: started initialization..", this.getClass().getName()));
         component.eye.set(2f, 0f, -3f);
         component.up.set(Vector3f.up());
         component.at.set(Vector3f.add(component.eye, new Vector3f(1.0f, 0.0f, -1.0f)));

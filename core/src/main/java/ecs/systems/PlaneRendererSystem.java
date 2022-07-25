@@ -183,10 +183,6 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                 1.0f);
 
 
-        if (isCursorMoved) {
-//            System.out.printf("\ndisplacement: %s", displacement);
-        }
-
         previousPhysicalPosition = getRectangleCenter(cursor);
 
         setCursorPosition(imaginaryCursor, Input.getCursorPosition());
@@ -194,16 +190,6 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
         component.vertices = cursor.toVertices();
 
     }
-
-/*    private void logStateInfo(String state) {
-        System.out.printf(
-                "\n" + ANSI_CYAN + "[%s]" + ANSI_RESET + " [%-6.6s] STATE:\t" + ANSI_BOLD + "%s" + ANSI_RESET,
-                new SimpleDateFormat("HH:mm:ss.SSS").format(Date.from(Instant.now())),
-                Thread.currentThread().getName(),
-                state
-        );
-    }
-*/
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
         return center.mul(2f).sub(previousPhysicalPosition).sub(displacement.mul(springFactor * deltaTime * deltaTime / mass));

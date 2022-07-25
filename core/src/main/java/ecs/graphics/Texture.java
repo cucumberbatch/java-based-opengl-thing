@@ -1,10 +1,12 @@
 package ecs.graphics;
 
 import ecs.utils.BufferUtils;
+import ecs.utils.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -28,14 +30,22 @@ public class Texture {
 
     private int load(String path) {
         int[] pixels = null;
+        FileInputStream stream;
         try {
-            BufferedImage image = ImageIO.read(new FileInputStream(path));
+            stream = new FileInputStream(path);
+            BufferedImage image = ImageIO.read(stream);
             width = image.getWidth();
             height = image.getHeight();
             pixels = new int[width * height];
             image.getRGB(0, 0, width, height, pixels, 0, width);
+        } catch (FileNotFoundException e) {
+            Logger.error(String.format("Texture '<underline>%s</>' not found!", path), e);
+        } catch (SecurityException e) {
+            Logger.error(String.format("Texture file access denied on path '<underline>%s</>'!", path), e);
+        } catch (IllegalArgumentException e) {
+            Logger.error(String.format("Incorrect texture file path '<underline>%s</>'!", path), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(String.format("Error while loading texture '<underline>%s</>'!", path), e);
         }
 
         int[] data = new int[width * height];

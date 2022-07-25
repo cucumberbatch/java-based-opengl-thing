@@ -1,11 +1,15 @@
 package ecs;
 
 import ecs.entities.Entity;
+import ecs.utils.Logger;
+import ecs.utils.Logger.ConsoleLogWriter;
 import vectors.Vector3f;
 import ecs.systems.ECSSystem;
 
 public class MainThread {
     public static void main(String[] args) {
+        Logger.setLogWriter(new ConsoleLogWriter());
+
         int width = 920;
         int height = 570;
 
