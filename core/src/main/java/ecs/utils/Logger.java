@@ -5,8 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Logger {
 
@@ -75,8 +77,8 @@ public class Logger {
     }
 
     public static class FileLogWriter implements LogWriter {
-        private PrintWriter printWriter;
-        private OutputStream stream;
+        private final PrintWriter printWriter;
+        private final OutputStream stream;
 
         public FileLogWriter(String fileName) {
             try {
@@ -110,23 +112,29 @@ public class Logger {
 
     public static void log(Level level, String message, Throwable e) {
         if (level.compareTo(ApplicationConfig.LOGGER_SEVERITY) < 0) return;
+        StringBuilder string = new StringBuilder();
 
         try {
-            writer.write(TerminalUtils.fAnsi(
-                    String.format(
-                            "\n<cyan>%s</>  [%8s] %s: %s",
-                            DATE_FORMAT.format(Date.from(Instant.now())),
-                            Thread.currentThread().getName(),
-                            level.formatLevel(),
-                            message
-                    )
+            string.append(String.format(
+                    "\n<cyan>%s</>  [%8s] %s: %s",
+                    DATE_FORMAT.format(Date.from(Instant.now())),
+                    Thread.currentThread().getName(),
+                    level.formatLevel(),
+                    message
             ));
 
             if (!Objects.isNull(e)) {
-                error("Unsupported logger case: usage of exceptions in logs are not supported yet!");
-                return;
-//                e.printStackTrace(writer.getPrintWriter());
+                warn("Not full stack trace visibility! If there is exception catching/rethrowing in trace then there can be not enough of error info!");
+                string.append(String.format(
+                        " [::] <yellow>%s</>\n in %s",
+                        e.getClass().getName(),
+                        Arrays.stream(e.getStackTrace())
+                                .map(StackTraceElement::toString)
+                                .collect(Collectors.joining("\n\t"))
+                ));
             }
+
+            writer.write(TerminalUtils.fAnsi(string.toString()));
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);
