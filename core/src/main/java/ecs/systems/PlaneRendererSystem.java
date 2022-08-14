@@ -1,6 +1,9 @@
 package ecs.systems;
 
+import ecs.components.ECSComponent;
 import ecs.components.PlaneRenderer;
+import ecs.components.Transform;
+import ecs.entities.Entity;
 import ecs.shapes.Rectangle;
 import ecs.gl.Window;
 import ecs.graphics.Renderer2D;
@@ -20,6 +23,8 @@ import java.util.Date;
 
 import static ecs.utils.TerminalUtils.*;
 
+
+// todo: cursor movement needs to be related on entity transform data, not local vectors
 public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
     public static final int IDLE_CURSOR_STATE          = 0;
@@ -44,6 +49,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
     private Vector2f savedCursorPosition   = new Vector2f();
     private boolean  isCursorMoved         = false;
+    private boolean  isIntersects          = false;
 
     // cursor velocity for smoother movement, I guess
     private Vector2f cursorVelocity        = new Vector2f(1, 1);
@@ -60,7 +66,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
     @Override
     public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK | RENDER_MASK;
+        return INIT_MASK | UPDATE_MASK | RENDER_MASK | COLLISION_HANDLING_MASK;
     }
 
     @Override
@@ -74,6 +80,9 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
         renderer.texture    = new Texture("core/assets/textures/screen-frame-1024.png");
 
         setCursorPosition(imaginaryCursor, Input.getCursorPosition());
+
+        MeshCollider mesh = (MeshCollider) getComponent(Type.MESH_COLLIDER);
+        mesh.mesh = imaginaryCursor;
     }
 
     @Override
@@ -104,8 +113,9 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 //        cursor.bottomRight = Input.getCursorPosition().add(cursorIdleBottomRight);
 
 
+//        /*
 
-        if (button.isIntersects(imaginaryCursor)) {
+        if (isIntersects) {
             switch (cursorState) {
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     if (transitionTimeAccumulator > transitionTimeLimit) {
@@ -154,8 +164,8 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     } else {
                         transitionTimeAccumulator += deltaTime;
 //                        setCursorPosition(cursor, position);
-                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     position.add(cursorIdleTopLeft),     transitionTimeAccumulator / transitionTimeLimit);
-                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, position.add(cursorIdleBottomRight), transitionTimeAccumulator / transitionTimeLimit);
+                        cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     transitionTimeAccumulator / transitionTimeLimit);
+                        cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), transitionTimeAccumulator / transitionTimeLimit);
                         buttonColor        = Vector4f.lerp(buttonOnHoverColor, buttonDefaultColor,                  transitionTimeAccumulator / transitionTimeLimit);
                     }
                     break;
@@ -175,6 +185,10 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
             }
         }
 
+//        */
+
+        displacement  = getRectangleCenter(imaginaryCursor).sub(Input.getCursorPosition());
+        isCursorMoved = !displacement.equals(Vector2f.zero());
 
         cursorColor = new Vector4f(
                 Input.getCursorPosition().normalized().x,
@@ -183,12 +197,27 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                 1.0f);
 
 
+        Transform transform = component.transform;
+        transform.position.set(Input.getCursorPosition().x, Input.getCursorPosition().y, 0f);
+
         previousPhysicalPosition = getRectangleCenter(cursor);
 
-        setCursorPosition(imaginaryCursor, Input.getCursorPosition());
+        // cursor is tranform dependent now!
+        setCursorPosition(imaginaryCursor, new Vector2f(transform.position.x, transform.position.y));
 
-        component.vertices = cursor.toVertices();
+        if (isCursorMoved) {  }
 
+    }
+
+    @Override
+    public void onCollisionStart(Collision collision) {
+        component.button = ((MeshCollider) collision.A.getComponent(Type.MESH_COLLIDER)).mesh;
+        isIntersects = true;
+    }
+
+    @Override
+    public void onCollisionEnd(Collision collision)  {
+        isIntersects = false;
     }
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {

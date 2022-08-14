@@ -6,6 +6,8 @@ import ecs.utils.Instantiatable;
 import ecs.utils.Replicable;
 import ecs.utils.Turntable;
 
+import java.io.Externalizable;
+import java.io.Serializable;
 import java.util.UUID;
 
 public interface ECSComponent

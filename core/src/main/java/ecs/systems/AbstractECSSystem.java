@@ -17,6 +17,7 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
     public static final int UPDATE_MASK     = 1 << 1;
     public static final int RENDER_MASK     = 1 << 2;
     public static final int COLLISION_MASK  = 1 << 3;
+    public static final int COLLISION_HANDLING_MASK  = 1 << 4;
 
     class ComponentSetStructure {
         public List<E> componentList = new LinkedList<>();

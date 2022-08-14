@@ -5,6 +5,9 @@ import matrices.Matrix4f;
 import vectors.Vector3f;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
@@ -56,6 +59,12 @@ public class TerminalUtils {
         private String ansiCode;
         private String formatterCommand = "<empty>";
 
+        private static final Map<String, String> ansiCommandMap = new HashMap<>();
+
+        static {
+            Arrays.stream(Ansi.values()).forEach(ansi -> ansiCommandMap.put(ansi.formatterCommand, ansi.ansiCode));
+        }
+
         Ansi(String ansiCode) {
             this.ansiCode = ansiCode;
         }
@@ -66,10 +75,28 @@ public class TerminalUtils {
         }
 
         public static String format(String string) {
-            for (Ansi ansi : Ansi.values()) {
-                string = string.replace(ansi.formatterCommand, ansi.ansiCode);
+            StringBuilder resultString = new StringBuilder();
+            StringBuilder ansiCommand = new StringBuilder();
+            int b = 0;
+            int e = 0;
+            while (b < string.length()) {
+                if (string.charAt(b) == '<') {
+                    e = b;
+                    while (string.charAt(e) != '>') {
+                        ansiCommand.append(string.charAt(e));
+                        e++;
+                    };
+                    ansiCommand.append(string.charAt(e));
+                    b = e;
+                    resultString.append(ansiCommandMap.get(ansiCommand.toString()));
+                    ansiCommand = new StringBuilder();
+                } else {
+                    resultString.append(string.charAt(b));
+                }
+                b++;
             }
-            return string;
+
+            return resultString.toString();
         }
     }
 

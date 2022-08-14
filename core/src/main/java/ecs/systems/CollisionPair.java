@@ -1,19 +1,19 @@
 package ecs.systems;
 
-import vectors.Vector2f;
+import vectors.Vector3f;
 
 public class CollisionPair {
-    public Vector2f A;
-    public Vector2f B;
-    public Vector2f normal;
+    public Vector3f A;
+    public Vector3f B;
+    public Vector3f normal;
     public float depth;
     public boolean hasCollision;
 
-    public CollisionPair(Vector2f A, Vector2f B) {
-        this.A = new Vector2f(A);
-        this.B = new Vector2f(B);
-        Vector2f direction = new Vector2f(A.x - B.x, A.y - B.y);
-        this.normal.set(Vector2f.normalized(direction));
-        this.depth = direction.length();
+    public CollisionPair(Vector3f A, Vector3f B) {
+        this.A = new Vector3f(A);
+        this.B = new Vector3f(B);
+        Vector3f direction = new Vector3f(A.x - B.x, A.y - B.y, A.z - B.z);
+        this.normal = Vector3f.normalized(direction);
+        this.depth  = direction.length();
     }
 }

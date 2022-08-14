@@ -102,6 +102,7 @@ public class Logger {
 
     public static void setLogWriter(LogWriter logWriter) {
         writer = logWriter;
+        directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
     }
 
     public static LogWriter writer;
@@ -109,6 +110,14 @@ public class Logger {
     public static final Level LEVEL = ApplicationConfig.LOGGER_SEVERITY;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(ApplicationConfig.LOGGER_TIME_INFO_PATTERN);
+
+    private static void directPrint(String message) {
+        try {
+            writer.write(message);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void log(Level level, String message, Throwable e) {
         if (level.compareTo(ApplicationConfig.LOGGER_SEVERITY) < 0) return;

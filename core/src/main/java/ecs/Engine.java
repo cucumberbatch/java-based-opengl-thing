@@ -3,10 +3,7 @@ package ecs;
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
 import ecs.gl.Window;
-import ecs.managment.factory.ComponentFactory;
-import ecs.managment.factory.ComponentSystemFactory;
 import ecs.managment.factory.IFactory;
-import ecs.managment.factory.SystemFactory;
 import ecs.managment.memory.IPool;
 import ecs.managment.memory.Pool;
 import ecs.systems.ECSSystem;
@@ -36,8 +33,6 @@ public class Engine implements Runnable, ISystem {
 
     private final SystemHandler systemHandler = new SystemHandler();
 
-    private final ComponentSystemFactory<ECSSystem>    systemFactory    = new SystemFactory();
-    private final ComponentSystemFactory<ECSComponent> componentFactory = new ComponentFactory();
     private final IFactory<Entity>                     entityFactory    = new IFactory<Entity>() {
         private int counter;
 
@@ -55,11 +50,17 @@ public class Engine implements Runnable, ISystem {
 
 
     public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
+        Logger.info("Initializing engine..");
         window = new Window(windowTitle, width, height, vSync);
         this.gameLogic = gameLogic;
 
-       // createJFrame();
+        // createJFrame();
 
+        if (vSync) {
+            Logger.info("VSync is turned on!");
+        } else {
+            Logger.warn("VSync is turned off! Be sure that you are using frame sync!");
+        }
     }
 
     public Engine(Scene scene) {
@@ -113,7 +114,11 @@ public class Engine implements Runnable, ISystem {
             Logger.error("System init exception", e);
         }
 
-        gameLoop();
+        try {
+            gameLoop();
+        } catch (RuntimeException e) {
+            Logger.error(e);
+        }
 
         destroy();
 
@@ -122,14 +127,18 @@ public class Engine implements Runnable, ISystem {
 
     private void gameLoop() {
         double previous = getTime();
+        double loopStartTime;
+        double elapsedTime;
         while (!glfwWindowShouldClose(window.getWindow())) {
-            double loopStartTime = getTime();
-            double elapsedTime = loopStartTime - previous;
+            loopStartTime = getTime();
+            elapsedTime = loopStartTime - previous;
             previous = loopStartTime;
 
-            Logger.trace(String.format("Started game loop iteration with <bold>dT: %fs</> and <bold>%d fps</>", elapsedTime, (int) (1 / elapsedTime)));
+            Logger.trace(String.format("Started game loop iteration with <bold>dT: %.3f[s]</> and <bold>%d fps</>", elapsedTime, (int) (1 / elapsedTime)));
 
             Input.updateInput();
+
+            systemHandler.preUpdate();
 
             try {
                 systemHandler.update((float) elapsedTime);
@@ -137,12 +146,18 @@ public class Engine implements Runnable, ISystem {
                 Logger.error("System update exception", e);
             }
 
+            systemHandler.handleCollisionEnter();
+            systemHandler.handleCollisionHold();
+            systemHandler.handleCollisionExit();
+
             try {
                 systemHandler.render(window);
             } catch (Exception e) {
                 Logger.error("System render exception", e);
+
             }
-//            sync(loopStartTime);
+
+            sync(loopStartTime);
         }
     }
 
@@ -176,14 +191,15 @@ public class Engine implements Runnable, ISystem {
 
     public void addComponentToSystem(ECSSystem.Type type, ECSComponent component) {
         if (!systemHandler.hasSystem(type)) {
-            systemHandler.addSystem(type, systemFactory.create(type));
+            systemHandler.addSystem(type, type.createSystem());
         }
         systemHandler.linkComponentAndSystem(type, component);
     }
 
     @SuppressWarnings("unchecked")
     public <E extends ECSComponent> E instantiateNewComponent(ECSSystem.Type type) {
-        return (E) componentFactory.create(type);
+        return (E) type.createComponent();
+//        return (E) componentFactory.create(type);
     }
 
 //    public Component getComponentFromSystem(ComponentType type) {

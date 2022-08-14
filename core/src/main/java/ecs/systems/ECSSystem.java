@@ -1,23 +1,42 @@
 package ecs.systems;
 
-import ecs.components.ECSComponent;
+import ecs.components.*;
 import ecs.entities.Entity;
 import ecs.entities.IComponentManager;
 import ecs.systems.processes.ISystem;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentManager {
 
     /* Type of system */
     enum Type {
-        RENDERER,
-        TRANSFORM,
-        RIGIDBODY,
-        RIGIDBODY2D,
-        CAMERA,
-        PLANE;
+        RENDERER         (() -> new Renderer(),         () -> new RendererSystem()),
+        TRANSFORM        (() -> new Transform(),        () -> new TransformSystem()),
+        RIGIDBODY        (() -> new RigidBody(),        () -> new RigidBodySystem()),
+        RIGIDBODY2D      (() -> new RigidBody2d(),      () -> new RigidBody2dSystem()),
+        CAMERA           (() -> new Camera(),           () -> new CameraSystem()),
+        PLANE            (() -> new PlaneRenderer(),    () -> new PlaneRendererSystem()),
+        MESH_COLLIDER    (() -> new MeshCollider(),     () -> new MeshColliderSystem()),
+        BUTTON           (() -> new Button(),           () -> new ButtonSystem());
+
+        private final Supplier<ECSComponent> componentSupplier;
+        private final Supplier<ECSSystem<? extends ECSComponent>> systemSupplier;
+
+        Type(Supplier<ECSComponent> componentSupplier, Supplier<ECSSystem<? extends ECSComponent>> systemSupplier) {
+            this.componentSupplier = componentSupplier;
+            this.systemSupplier = systemSupplier;
+        }
+
+        public ECSSystem<? extends ECSComponent> createSystem() {
+            return (ECSSystem<? extends ECSComponent>) systemSupplier.get();
+        }
+
+        public ECSComponent createComponent() {
+            return componentSupplier.get();
+        }
     }
 
 
