@@ -43,6 +43,9 @@ public interface ECSComponent
 
     void setTransform(Transform transform);
 
+    byte getState();
+
+    void setState(byte state);
 
 }
  

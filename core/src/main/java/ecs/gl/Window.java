@@ -55,6 +55,9 @@ public class Window {
     public static int width;
     public static int height;
 
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+
     private long window = -1;
     private final boolean vSync;
 

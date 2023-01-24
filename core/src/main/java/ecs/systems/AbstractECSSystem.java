@@ -2,6 +2,7 @@ package ecs.systems;
 
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
+import ecs.exception.ComponentNotFoundException;
 import ecs.managment.memory.Pool;
 import ecs.managment.memory.IPool;
 import vectors.Vector3f;
@@ -137,7 +138,8 @@ public abstract class AbstractECSSystem<E extends ECSComponent> implements ECSSy
     }
 
     @Override
-    public <T extends ECSComponent> T getComponent(Type type) throws IllegalArgumentException, ClassCastException {
+    public <T extends ECSComponent> T getComponent(Type type)
+            throws IllegalArgumentException, ClassCastException, ComponentNotFoundException {
         return component.getEntity().getComponent(type);
     }
 

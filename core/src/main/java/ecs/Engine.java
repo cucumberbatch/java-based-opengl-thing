@@ -11,18 +11,21 @@ import ecs.systems.Input;
 import ecs.systems.SystemHandler;
 import ecs.systems.processes.ISystem;
 import ecs.utils.Logger;
-import ecs.utils.TerminalUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
+//todo:
+// * relative position (to parent entities)
+// * create serialization/deserialization flow for scenes
+// * add stateful animation controller
+// * add gamepad support (also xinput https://github.com/StrikerX3/JXInput)
 public class Engine implements Runnable, ISystem {
+    private static Engine engine;
     private final Window window;
-    private final Engine engine = this;
     private IGameLogic gameLogic;
     private Scene scene;
     private final List<Entity> entityList = new ArrayList<>();
@@ -33,7 +36,11 @@ public class Engine implements Runnable, ISystem {
 
     private final SystemHandler systemHandler = new SystemHandler();
 
-    private final IFactory<Entity>                     entityFactory    = new IFactory<Entity>() {
+    public void addComponent(Entity entity, ECSSystem.Type type) {
+        this.systemHandler.addEntityComponentInitPair(new SystemHandler.InitComponentPair(entity, type));
+    }
+
+    private final IFactory<Entity> entityFactory = new IFactory<Entity>() {
         private int counter;
 
         @Override
@@ -43,35 +50,29 @@ public class Engine implements Runnable, ISystem {
     };
 
     /* Pool for entities, that creates  */
-    private final IPool<Entity> entityPool = new Pool<>(entityFactory);
+    private final IPool<Entity> entityPool = new Pool<>(0, entityFactory);
 
 
     SceneView view;
 
+    public static Engine getInstance() {
+        if (engine == null) {
+            engine = new Engine("Default", 640, 480, true);
+        }
+        return engine;
+    };
 
-    public Engine(String windowTitle, int width, int height, boolean vSync, IGameLogic gameLogic) {
+    public Engine(String windowTitle, int width, int height, boolean vSync) {
         Logger.info("Initializing engine..");
         window = new Window(windowTitle, width, height, vSync);
-        this.gameLogic = gameLogic;
-
-        // createJFrame();
 
         if (vSync) {
             Logger.info("VSync is turned on!");
         } else {
             Logger.warn("VSync is turned off! Be sure that you are using frame sync!");
         }
-    }
 
-    public Engine(Scene scene) {
-        this.scene = scene;
-        this.window = null;
-
-       // createJFrame();
-    }
-
-    private void createJFrame() {
-        view = new SceneView("Scene view");
+        engine = this;
     }
 
     public void addEntity(Entity entity) {
@@ -81,6 +82,7 @@ public class Engine implements Runnable, ISystem {
     public Entity generateNewEntity() {
         return entityFactory.create();
     }
+
     public void deactivateEntity(Entity entity) {
         entity.reset();
         entityPool.put(entity);
@@ -138,7 +140,7 @@ public class Engine implements Runnable, ISystem {
 
             Input.updateInput();
 
-            systemHandler.preUpdate();
+            systemHandler.registerCollisions();
 
             try {
                 systemHandler.update((float) elapsedTime);
@@ -146,9 +148,7 @@ public class Engine implements Runnable, ISystem {
                 Logger.error("System update exception", e);
             }
 
-            systemHandler.handleCollisionEnter();
-            systemHandler.handleCollisionHold();
-            systemHandler.handleCollisionExit();
+            systemHandler.handleCollisions();
 
             try {
                 systemHandler.render(window);
@@ -162,7 +162,7 @@ public class Engine implements Runnable, ISystem {
     }
 
     private void sync(double loopStartTime) {
-        double loopSlot = 1.0d / 60.0d;
+        double loopSlot = 1.0d / 66.0d;
         double endTime = loopStartTime + loopSlot;
         while (getTime() < endTime) {
             try {

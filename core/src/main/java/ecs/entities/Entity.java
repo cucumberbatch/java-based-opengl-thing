@@ -4,6 +4,8 @@ import ecs.Engine;
 import ecs.Scene;
 import ecs.components.ECSComponent;
 import ecs.components.Transform;
+import ecs.exception.ComponentNotFoundException;
+import ecs.physics.Collidable;
 import ecs.systems.ECSSystem;
 import ecs.utils.*;
 
@@ -15,11 +17,16 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity implements IComponentManager, Turntable, Instantiatable<Entity>, Replicable<Entity> {
-    public Layer    layer;
+public class Entity implements IComponentManager, Turntable, Instantiatable<Entity>, Replicable<Entity>, Collidable {
+
+    public static final String NULL_ENTITY_NAME = "null_entity";
+    public static final Entity NULL_ENTITY = null;
+
+//    public Identity identity;
+    public Layer    layer = Layer.DEFAULT;
     public String   tag;
-    public UUID     id;
-    public String   name;
+    public UUID     id;   //deprecated: goes into identity
+    public String   name; //deprecated: goes into identity
 
     private Engine engine;
 
@@ -40,29 +47,24 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
 
 
     public Entity(String name, Engine engine, Scene scene) {
-        this(name, engine, scene, Layer.DEFAULT, "Default");
-    }
-
-    public Entity(
-            String name,
-            Engine engine,
-            Scene scene,
-            Layer layer,
-            String tag) {
         this.name = name;
         this.engine = engine;
         this.engine.setScene(scene);
-        this.layer = layer;
-        this.tag = tag;
         this.id = UUID.randomUUID();
 
-        addComponent(ECSSystem.Type.TRANSFORM);
-        transform = getComponent(ECSSystem.Type.TRANSFORM);
+        /** a very very very very poor code, the component instantiation/finding mechanism
+         * is not adapted to move like this
+         *
+         */
+
+//        addComponent(ECSSystem.Type.TRANSFORM);
+//        transform = getComponent(ECSSystem.Type.TRANSFORM);
 
         /* Such a weird stuff right here...
         actually, its a necessary reference manipulation which will help you to get
         the access to a transform component from any component or even entity itself */
-        transform.setTransform(transform);
+
+//        transform.setTransform(transform);
     }
 
     /* Get the root entity in this branch */
@@ -109,18 +111,28 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     @Override
     public void addComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
         if (!componentMap.containsKey(type)) {
-            ECSComponent component = initializeComponent(type);
-            componentMap.put(type, component);
-            engine.addComponentToSystem(type, component);
+            lateInitComponent(type);
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <E extends ECSComponent> E getComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
-        return (E) componentMap.get(type);
+    public void anotherInitComponentMethod(ECSSystem.Type type) {
+        ECSComponent component = initializeComponent(type);
+        componentMap.put(type, component);
+        engine.addComponentToSystem(type, component);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E extends ECSComponent> E getComponent(ECSSystem.Type type)
+            throws IllegalArgumentException, ClassCastException, ComponentNotFoundException {
+        E component = (E) componentMap.get(type);
+        if (component == null) {
+            throw new ComponentNotFoundException();
+        }
+        return component;
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public <E extends ECSComponent> E removeComponent(ECSSystem.Type type) throws IllegalArgumentException, ClassCastException {
         return (E) engine.removeComponentFromSystem(type, componentMap.remove(type));
@@ -132,6 +144,12 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
         component.setTransform(transform);
         component.setEntity(this);
         return component;
+    }
+
+    // todo: it needs to add a new components into another component list,
+    //  which would fill the list of components to update in the end of the update process
+    public void lateInitComponent(ECSSystem.Type type) {
+        engine.addComponent(this, type);
     }
 
     // ---------------------  Activity control interface  ------------------------------------------------------
@@ -152,6 +170,7 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     }
 
     // TODO: 07.06.2021 implementation isn't done yet
+    //  note: 23.12.2022 maybe, its not needed... idk
     @Override
     public Entity getInstance() {
         Entity clone = engine.generateNewEntity();
@@ -161,6 +180,7 @@ public class Entity implements IComponentManager, Turntable, Instantiatable<Enti
     }
 
     // TODO: 07.06.2021 implementation isn't done yet
+    //  note: 23.12.2022 maybe, its not needed... idk
     @Override
     public Entity getReplica() {
         throw new UnsupportedOperationException();

@@ -34,5 +34,7 @@ public class ApplicationConfig {
     // Assets
     public static final String ASSETS_DIRECTORY_PATH = "assets\\";
 
+    public static final boolean DEVELOP = true;
+
 
 }

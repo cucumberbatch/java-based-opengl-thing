@@ -6,7 +6,6 @@ class EngineTest {
 //    @Test
 //    void testEngineWorkflow() {
 //        Scene scene     = new Scene();
-//        Engine engine   = new Engine(scene);
 //        Entity object   = new Entity("test", engine, scene);
 //
 //        class MyComponent extends AbstractECSComponent {

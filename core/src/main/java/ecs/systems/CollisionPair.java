@@ -7,7 +7,6 @@ public class CollisionPair {
     public Vector3f B;
     public Vector3f normal;
     public float depth;
-    public boolean hasCollision;
 
     public CollisionPair(Vector3f A, Vector3f B) {
         this.A = new Vector3f(A);

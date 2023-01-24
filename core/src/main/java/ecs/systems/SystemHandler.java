@@ -1,9 +1,11 @@
 package ecs.systems;
 
+import ecs.IGameLogic;
+import ecs.components.AbstractECSComponent;
 import ecs.components.ECSComponent;
 import ecs.entities.Entity;
+import ecs.exception.ComponentNotFoundException;
 import ecs.gl.Window;
-import ecs.systems.processes.ISystem;
 import ecs.utils.Logger;
 
 import java.util.*;
@@ -16,7 +18,19 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
 
 @SuppressWarnings("rawtypes")
-public class SystemHandler implements ISystem {
+public class SystemHandler implements IGameLogic {
+
+    private List<InitComponentPair> listOfLateInitSystems = new ArrayList<>();
+
+    public static class InitComponentPair {
+        public Entity entity;
+        public ECSSystem.Type type;
+
+        public InitComponentPair(Entity entity, Type type) {
+            this.entity = entity;
+            this.type = type;
+        }
+    }
 
     private final Map<ECSSystem.Type, ECSSystem> systemMap  = new HashMap<>();
 
@@ -36,10 +50,12 @@ public class SystemHandler implements ISystem {
                 that.A == other.B && that.B == other.A) ? 0 : -1;
     }
 
+    @Override
     public boolean hasSystem(ECSSystem.Type type) {
         return systemMap.containsKey(type);
     }
 
+    @Override
     public void addSystem(ECSSystem.Type type, ECSSystem system) {
         if (systemMap.put(type, system) == null) attachToSystemLists(system);
     }
@@ -54,17 +70,20 @@ public class SystemHandler implements ISystem {
         if ((mask & COLLISION_HANDLING_MASK) > 0) listOfSystemsForCollisionHandling.add(system);
     }
 
+    @Override
     public ECSSystem getSystem(ECSSystem.Type type) {
         return systemMap.get(type);
     }
 
 
+    @Override
     public void linkComponentAndSystem(ECSSystem.Type type, ECSComponent component) {
         ECSSystem system = systemMap.get(type);
         system.addComponent(component);
         component.setSystem(system);
     }
 
+    @Override
     public void removeComponent(ECSSystem.Type type, ECSComponent component) {
         systemMap.get(type).removeComponent(component);
     }
@@ -76,16 +95,30 @@ public class SystemHandler implements ISystem {
     generates objects of ECSComponent type */
     @SuppressWarnings("unchecked")
     public void init() throws Exception {
+
+        Iterator<ECSSystem> iterator = listOfSystemsForInit.iterator();
+
+
         for (ECSSystem system : listOfSystemsForInit) {
-            Logger.trace(String.format("Handling init system [%s]", system.getClass().getName()));
-            for (Object component : system.getComponentList()) {
-                system.setComponent((ECSComponent) component);
-                system.init();
+            Logger.debug(String.format("Handling init system [%s]", system.getClass().getName()));
+            for (ECSComponent component : (List<ECSComponent>) system.getComponentList()) {
+                if (component.getState() >= AbstractECSComponent.READY_TO_INIT_STATE) {
+                    try {
+                        system.setComponent(component);
+                        system.init();
+                        component.setState(AbstractECSComponent.READY_TO_OPERATE_STATE);
+                    } catch (ComponentNotFoundException | NullPointerException e) {
+                        component.setState(AbstractECSComponent.LATE_INIT_STATE);
+                    }
+                } else if (component.getState() == AbstractECSComponent.LATE_INIT_STATE) {
+                    component.setState(AbstractECSComponent.READY_TO_INIT_STATE);
+                }
             }
         }
     }
 
-    public void preUpdate() {
+    @Override
+    public void registerCollisions() {
         if (listOfSystemsForCollision.isEmpty()) return;
 
         List<MeshCollider> componentList;
@@ -182,17 +215,29 @@ public class SystemHandler implements ISystem {
 
         for (ECSSystem system : listOfSystemsForUpdate) {
             Logger.trace(String.format("Handling update system [%s]", system.getClass().getName()));
-            for (Object component : system.getComponentList()) {
-                system.setComponent((ECSComponent) component);
-                system.update(deltaTime);
+            for (ECSComponent component : (List<ECSComponent>) system.getComponentList()) {
+                if (component.getState() >= AbstractECSComponent.READY_TO_OPERATE_STATE) {
+                    try {
+                        system.setComponent(component);
+                        system.update(deltaTime);
+                    } catch (ComponentNotFoundException | NullPointerException e) {
+                        component.setState(AbstractECSComponent.READY_TO_INIT_STATE);
+                    }
+                }
             }
         }
 
         float diffMillis = (float) (System.nanoTime() - nanos) / 1_000_000L;
         Logger.trace(String.format("Update systems handling ended! Spent time: <bold>%.3f[ms]</>", diffMillis));
+
+        // initialize components that the addComponent method was called in update method
+        for (InitComponentPair pair : listOfLateInitSystems) {
+            pair.entity.anotherInitComponentMethod(pair.type);
+        }
+        listOfLateInitSystems.clear();
     }
 
-    public void handleCollisionEnter() {
+    private void handleCollisionEnter() {
         for (ECSSystem system : listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
@@ -204,7 +249,7 @@ public class SystemHandler implements ISystem {
         }
     }
 
-    public void handleCollisionHold() {
+    private void handleCollisionHold() {
         for (ECSSystem system : listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
@@ -216,7 +261,7 @@ public class SystemHandler implements ISystem {
         }
     }
 
-    public void handleCollisionExit() {
+    private void handleCollisionExit() {
         for (ECSSystem system : listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setComponent((ECSComponent) component);
@@ -226,6 +271,13 @@ public class SystemHandler implements ISystem {
                 }
             }
         }
+    }
+
+    @Override
+    public void handleCollisions() {
+        handleCollisionEnter();
+        handleCollisionHold();
+        handleCollisionExit();
     }
 
     @Override
@@ -239,9 +291,17 @@ public class SystemHandler implements ISystem {
 
         for (ECSSystem system : listOfSystemsForRender) {
             Logger.trace(String.format("Handling render system [%s]", system.getClass().getName()));
-            for (Object component : system.getComponentList()) {
-                system.setComponent((ECSComponent) component);
-                system.render(window);
+            for (ECSComponent component : (List<ECSComponent>) system.getComponentList()) {
+                if (component.getState() >= AbstractECSComponent.READY_TO_OPERATE_STATE) {
+                    try {
+                        system.setComponent(component);
+                        system.render(window);
+                    } catch (ComponentNotFoundException | NullPointerException e) {
+                        component.setState(AbstractECSComponent.READY_TO_INIT_STATE);
+                    }
+                } else if (component.getState() == AbstractECSComponent.READY_TO_INIT_STATE) {
+                    component.setState(AbstractECSComponent.READY_TO_OPERATE_STATE);
+                }
             }
         }
 
@@ -254,4 +314,7 @@ public class SystemHandler implements ISystem {
         Logger.trace(String.format("Graphics buffer swap ended! Spent time: <bold>%.3f[ms]</>", diffMillis));
     }
 
+    public void addEntityComponentInitPair(InitComponentPair pair) {
+        this.listOfLateInitSystems.add(pair);
+    }
 }

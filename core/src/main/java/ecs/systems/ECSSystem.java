@@ -20,7 +20,8 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
         CAMERA           (() -> new Camera(),           () -> new CameraSystem()),
         PLANE            (() -> new PlaneRenderer(),    () -> new PlaneRendererSystem()),
         MESH_COLLIDER    (() -> new MeshCollider(),     () -> new MeshColliderSystem()),
-        BUTTON           (() -> new Button(),           () -> new ButtonSystem());
+        BUTTON           (() -> new Button(),           () -> new ButtonSystem()),
+        INIT_ENTITIES    (() -> new InitEntities(),     () -> new InitEntitiesSystem());
 
         private final Supplier<ECSComponent> componentSupplier;
         private final Supplier<ECSSystem<? extends ECSComponent>> systemSupplier;
@@ -40,7 +41,6 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
     }
 
 
-    /* -------------- Getters -------------- */
     List<E> getComponentList();
 
     Set<E> componentSet();
@@ -49,7 +49,7 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
 
     int getWorkflowMask();
 
-    /* -------------- Setters -------------- */
+
     void componentList(List<E> componentList);
 
     void componentSet(Set<E> componentSet);
@@ -57,7 +57,6 @@ public interface ECSSystem<E extends ECSComponent> extends ISystem, IComponentMa
     void setComponent(E component);
 
 
-    /* -------------- Other methods -------------- */
     void addComponent(E component);
 
     E getComponent(E component);

@@ -12,6 +12,7 @@ import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 import ecs.utils.Logger;
 import matrices.Matrix4f;
+import org.lwjgl.glfw.GLFW;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
@@ -43,6 +44,8 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     public Vector4f buttonColor            = new Vector4f(buttonDefaultColor);
 
     public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public Vector4f cursorDefaultColor     = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public Vector4f cursorOnHoverColor     = new Vector4f(0.6f, 0.9f, 1.0f, 1.0f);
 
     public Vector2f cursorIdleTopLeft      = new Vector2f(-20f, -20f);
     public Vector2f cursorIdleBottomRight  = new Vector2f(20f, 20f);
@@ -63,6 +66,9 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
 
     private Rectangle imaginaryCursor      = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
+
+    private Entity selectedEntity = null;
+
 
     @Override
     public int getWorkflowMask() {
@@ -124,9 +130,11 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                         Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
-                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     button.topLeft,     transitionTimeAccumulator / transitionTimeLimit);
-                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, button.bottomRight, transitionTimeAccumulator / transitionTimeLimit);
-                        buttonColor        = Vector4f.lerp(buttonDefaultColor, buttonOnHoverColor, transitionTimeAccumulator / transitionTimeLimit);
+                        float ratio = transitionTimeAccumulator / transitionTimeLimit;
+                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, new Vector2f(-5, -5)),   ratio);
+                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, new Vector2f(5, 5)), ratio);
+                        buttonColor        = Vector4f.lerp(buttonDefaultColor, buttonOnHoverColor, ratio);
+                        cursorColor        = Vector4f.lerp(cursorDefaultColor, cursorOnHoverColor, ratio);
                     }
                     break;
 
@@ -141,11 +149,15 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     break;
 
                 case HOVER_CURSOR_STATE:
+                    if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
+                        selectedEntity.parent.position.x = cursor.topLeft.x;
+                        selectedEntity.parent.position.y = cursor.topLeft.y;
+                    }
                     break;
             }
         } else {
             displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
-            isCursorMoved = !displacement.equals(Vector2f.zero());
+//            isCursorMoved = !displacement.equals(Vector2f.zero());
 
             Vector2f position = calculatePosition(
                     getRectangleCenter(cursor), previousPhysicalPosition,
@@ -164,9 +176,11 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     } else {
                         transitionTimeAccumulator += deltaTime;
 //                        setCursorPosition(cursor, position);
-                        cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     transitionTimeAccumulator / transitionTimeLimit);
-                        cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), transitionTimeAccumulator / transitionTimeLimit);
-                        buttonColor        = Vector4f.lerp(buttonOnHoverColor, buttonDefaultColor,                  transitionTimeAccumulator / transitionTimeLimit);
+                        float ratio = transitionTimeAccumulator / transitionTimeLimit;
+                        cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     ratio);
+                        cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), ratio);
+                        buttonColor        = Vector4f.lerp(buttonOnHoverColor, buttonDefaultColor, ratio);
+                        cursorColor        = Vector4f.lerp(cursorOnHoverColor, cursorDefaultColor, ratio);
                     }
                     break;
 
@@ -190,11 +204,11 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
         displacement  = getRectangleCenter(imaginaryCursor).sub(Input.getCursorPosition());
         isCursorMoved = !displacement.equals(Vector2f.zero());
 
-        cursorColor = new Vector4f(
-                Input.getCursorPosition().normalized().x,
-                Input.getCursorPosition().normalized().y,
-                component.transform.position.x,
-                1.0f);
+//        cursorColor = new Vector4f(
+//                Input.getCursorPosition().normalized().x,
+//                Input.getCursorPosition().normalized().y,
+//                component.transform.position.x,
+//                1.0f);
 
 
         Transform transform = component.transform;
@@ -211,12 +225,14 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
     @Override
     public void onCollisionStart(Collision collision) {
-        component.button = ((MeshCollider) collision.A.getComponent(Type.MESH_COLLIDER)).mesh;
+        selectedEntity = (Entity) collision.A;
+        component.button = ((MeshCollider) ((Entity) collision.A).getComponent(Type.MESH_COLLIDER)).mesh;
         isIntersects = true;
     }
 
     @Override
     public void onCollisionEnd(Collision collision)  {
+        selectedEntity = null;
         isIntersects = false;
     }
 

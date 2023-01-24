@@ -1,10 +1,11 @@
 package ecs.systems;
 
 import ecs.entities.Entity;
+import ecs.physics.Collidable;
 
 public class Collision {
-    public Entity A;
-    public Entity B;
+    public Collidable A;
+    public Collidable B;
     public CollisionPair pair;
     public byte state;
     public boolean isModified;
@@ -13,11 +14,11 @@ public class Collision {
     public static final byte HOLD    = 1;
     public static final byte EXITED  = 2;
 
-    public Collision(Entity A, Entity B, CollisionPair pair, byte state) {
+    public Collision(Collidable A, Collidable B, CollisionPair pair, byte state) {
         register(A, B, pair, state);
     }
 
-    public Collision register(Entity A, Entity B, CollisionPair pair, byte state) {
+    public Collision register(Collidable A, Collidable B, CollisionPair pair, byte state) {
         this.A = A;
         this.B = B;
         this.pair = pair;
