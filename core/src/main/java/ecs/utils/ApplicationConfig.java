@@ -8,7 +8,8 @@ import java.util.Date;
 public class ApplicationConfig {
 
     private static final String APPLICATION_VERSION = "0.0.001";
-    public static final String LOGGER_HEADER_TEXT = TerminalUtils.fAnsi("<Blue>" +
+    public static final String LOGGER_HEADER_TEXT = TerminalUtils.fAnsi("<blue>{ debug build }</>\n");
+            /*"<Blue>" +
 
             "\n" +
             "\t███╗   ██╗ ██████╗ ██████╗ ████████╗██╗  ██╗\n" +
@@ -20,7 +21,7 @@ public class ApplicationConfig {
             "\t                        game engine v" + APPLICATION_VERSION + "\n" +
             "\t                                   2020-" + LocalDate.now().getYear() + "\n" +
 
-            "</>");
+            "</>");*/
 
     private ApplicationConfig() {}
 

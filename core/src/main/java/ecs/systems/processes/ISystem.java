@@ -13,7 +13,7 @@ public interface ISystem {
      * @throws Exception
      * @author cucumberbatch
      */
-    default void init() throws Exception {}
+    default void init() throws RuntimeException {}
 
     /**
      * An interface method that allows the

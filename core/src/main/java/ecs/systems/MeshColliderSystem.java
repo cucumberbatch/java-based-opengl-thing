@@ -2,7 +2,7 @@ package ecs.systems;
 
 import ecs.components.Transform;
 
-public class MeshColliderSystem extends AbstractECSSystem<MeshCollider> {
+public class MeshColliderSystem extends AbstractSystem<MeshCollider> {
 
     private static final int xOffsetLeft = 10;
     private static final int yOffsetUp = 10;

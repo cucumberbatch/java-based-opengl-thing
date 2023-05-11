@@ -1,18 +1,16 @@
 package ecs.components;
 
 import ecs.entities.Entity;
-import ecs.systems.ECSSystem;
 import ecs.utils.Logger;
 
 import java.util.Arrays;
-import java.util.UUID;
 
-public abstract class AbstractECSComponent implements ECSComponent {
+public abstract class AbstractComponent implements Component {
 
     public enum State {
-        LATE_INIT_STATE(AbstractECSComponent.LATE_INIT_STATE),
-        READY_TO_INIT_STATE(AbstractECSComponent.READY_TO_INIT_STATE),
-        READY_TO_OPERATE_STATE(AbstractECSComponent.READY_TO_OPERATE_STATE);
+        LATE_INIT_STATE(AbstractComponent.LATE_INIT_STATE),
+        READY_TO_INIT_STATE(AbstractComponent.READY_TO_INIT_STATE),
+        READY_TO_OPERATE_STATE(AbstractComponent.READY_TO_OPERATE_STATE);
 
         private byte value;
 
@@ -29,26 +27,20 @@ public abstract class AbstractECSComponent implements ECSComponent {
     public static final byte READY_TO_INIT_STATE    = 1; // a state when constructor is already been executed
     public static final byte READY_TO_OPERATE_STATE = 2; // a state when init method was called for each component
 
-
-    /* Name of component */
+    public long id;
     public String name;
 
     /* Entity which this component is belongs to */
     public Entity entity;
-
-    /* If you need to execute a special method of the component
-    you can get a reference to the system it belongs */
-    public ECSSystem<? extends ECSComponent> system;
 
     /* Reference to the transform component of its entity */
     public Transform transform;
 
     /* Activity state of component */
     public boolean isActive = true;
-    public UUID id;
 
     /* State of component lifecycle */
-    private byte state = LATE_INIT_STATE;
+    private byte state = READY_TO_INIT_STATE;
 
 
     @Override
@@ -57,16 +49,29 @@ public abstract class AbstractECSComponent implements ECSComponent {
         transform = null;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Component> T getInstance() {
+        return (T) this;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Component> T getReplica() {
+        return (T) this;
+    }
+
+
     /*
      Getters and setters implementation by an abstract component class
      */
     @Override
-    public UUID getId() {
+    public long getId() {
         return id;
     }
 
     @Override
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -88,16 +93,6 @@ public abstract class AbstractECSComponent implements ECSComponent {
     @Override
     public void setEntity(Entity entity) {
         this.entity = entity;
-    }
-
-    @Override
-    public ECSSystem<? extends ECSComponent> getSystem() {
-        return system;
-    }
-
-    @Override
-    public void setSystem(ECSSystem<? extends ECSComponent> system) {
-        this.system = system;
     }
 
     @Override
@@ -134,19 +129,8 @@ public abstract class AbstractECSComponent implements ECSComponent {
     @Override
     public void setState(byte state) {
         if (this.state == state) return;
-        Logger.info(String.format("Component \'%s\' state changed\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s", getName(), State.fromValue(this.state), State.fromValue(state)));
+        Logger.info(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s", getId(), getClass().getSimpleName(), State.fromValue(this.state), State.fromValue(state)));
         this.state = state;
     }
 
-    // TODO: 07.06.2021 implementation isn't done yet
-    @Override
-    public <E extends ECSComponent> E getInstance() {
-        throw new UnsupportedOperationException();
-    }
-
-    // TODO: 07.06.2021 implementation isn't done yet
-    @Override
-    public <E extends ECSComponent> E getReplica() {
-        throw new UnsupportedOperationException();
-    }
 }

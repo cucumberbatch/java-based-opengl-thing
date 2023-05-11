@@ -3,7 +3,7 @@ package ecs.systems;
 import ecs.components.Transform;
 import vectors.Vector3f;
 
-public class TransformSystem extends AbstractECSSystem<Transform> {
+public class TransformSystem extends AbstractSystem<Transform> {
 
     public Vector3f getWorldPosition() {
         Transform iterableTransform = component.getTransform();

@@ -1,0 +1,21 @@
+# Game engine dev tasks to do
+- [ ] XML scene file loader
+  - [ ] XML format of scene
+- [ ] Scene object loader
+- [ ] Editor
+  - [ ] Multifunctional editor cursor
+    - [ ] Editor scene game object cursor selection
+    - [ ] Editor cursor states
+- [ ] Physics improvements
+  - [ ] Chop world scene into squares/partitions and store them in tree
+- [ ] Graphics API
+  - [ ] Pass into `render()` system method an abstract `Graphics` object instead of `Window`
+  - [ ] Implement OpenGL graphics engine API
+  - [ ] Implement OpenGL ES graphics engine API
+  - [ ] Implement Swing/AWT CPU graphics engine API
+- [ ] Implement networking API
+  - [ ] TCP sockets API for fast game data transferring
+- [ ] Sounds
+  - [ ] Sounds and music controller API
+  - [ ] Different kinds of hardware audio API support
+- [ ] 

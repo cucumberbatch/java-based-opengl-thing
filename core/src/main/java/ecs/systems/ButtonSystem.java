@@ -3,7 +3,7 @@ package ecs.systems;
 import ecs.components.Button;
 import ecs.shapes.Rectangle;
 
-public class ButtonSystem extends AbstractECSSystem<Button> {
+public class ButtonSystem extends AbstractSystem<Button> {
 
     @Override
     public int getWorkflowMask() {
@@ -11,8 +11,8 @@ public class ButtonSystem extends AbstractECSSystem<Button> {
     }
 
     @Override
-    public void init() throws Exception {
-        MeshCollider meshComponent = getComponent(Type.MESH_COLLIDER);
+    public void init() throws RuntimeException {
+        MeshCollider meshComponent = componentManager.getComponent(component.entity, MeshCollider.class);
         meshComponent.mesh = new Rectangle(component.topLeft, component.bottomRight);
     }
 }

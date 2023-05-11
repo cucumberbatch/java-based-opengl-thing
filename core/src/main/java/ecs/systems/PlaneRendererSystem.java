@@ -1,6 +1,5 @@
 package ecs.systems;
 
-import ecs.components.ECSComponent;
 import ecs.components.PlaneRenderer;
 import ecs.components.Transform;
 import ecs.entities.Entity;
@@ -16,17 +15,8 @@ import org.lwjgl.glfw.GLFW;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
-
-import static ecs.utils.TerminalUtils.*;
-
-
 // todo: cursor movement needs to be related on entity transform data, not local vectors
-public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
+public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
 
     public static final int IDLE_CURSOR_STATE          = 0;
     public static final int HOVER_CURSOR_STATE         = 1;
@@ -44,7 +34,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     public Vector4f buttonColor            = new Vector4f(buttonDefaultColor);
 
     public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    public Vector4f cursorDefaultColor     = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public Vector4f cursorDefaultColor     = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
     public Vector4f cursorOnHoverColor     = new Vector4f(0.6f, 0.9f, 1.0f, 1.0f);
 
     public Vector2f cursorIdleTopLeft      = new Vector2f(-20f, -20f);
@@ -76,9 +66,9 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() throws RuntimeException {
 
-        PlaneRenderer renderer = getComponent();
+        PlaneRenderer renderer = this.getComponent();
         renderer.cursor = new Rectangle(new Vector2f(170, 170).add(cursorIdleTopLeft), new Vector2f(170, 170).add(cursorIdleBottomRight));
         renderer.button = new Rectangle(renderer.initialTopLeftVertex, renderer.initialBottomRightVertex);
 
@@ -87,7 +77,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
         setCursorPosition(imaginaryCursor, Input.getCursorPosition());
 
-        MeshCollider mesh = (MeshCollider) getComponent(Type.MESH_COLLIDER);
+        MeshCollider mesh = component.entity.getComponent(MeshCollider.class);
         mesh.mesh = imaginaryCursor;
     }
 
@@ -131,8 +121,8 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
-                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, new Vector2f(-5, -5)),   ratio);
-                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, new Vector2f(5, 5)), ratio);
+                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, Vector2f.zero()),   ratio);
+                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, Vector2f.zero()), ratio);
                         buttonColor        = Vector4f.lerp(buttonDefaultColor, buttonOnHoverColor, ratio);
                         cursorColor        = Vector4f.lerp(cursorDefaultColor, cursorOnHoverColor, ratio);
                     }
@@ -150,8 +140,8 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
                 case HOVER_CURSOR_STATE:
                     if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
-                        selectedEntity.parent.position.x = cursor.topLeft.x;
-                        selectedEntity.parent.position.y = cursor.topLeft.y;
+                        selectedEntity.parent.transform.position.x = cursor.topLeft.x;
+                        selectedEntity.parent.transform.position.y = cursor.topLeft.y;
                     }
                     break;
             }
@@ -216,7 +206,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
 
         previousPhysicalPosition = getRectangleCenter(cursor);
 
-        // cursor is tranform dependent now!
+        // cursor is transform dependent now!
         setCursorPosition(imaginaryCursor, new Vector2f(transform.position.x, transform.position.y));
 
         if (isCursorMoved) {  }
@@ -226,7 +216,7 @@ public class PlaneRendererSystem extends AbstractECSSystem<PlaneRenderer> {
     @Override
     public void onCollisionStart(Collision collision) {
         selectedEntity = (Entity) collision.A;
-        component.button = ((MeshCollider) ((Entity) collision.A).getComponent(Type.MESH_COLLIDER)).mesh;
+        component.button = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
         isIntersects = true;
     }
 

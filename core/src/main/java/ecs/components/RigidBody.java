@@ -2,7 +2,7 @@ package ecs.components;
 
 import vectors.Vector3f;
 
-public class RigidBody extends AbstractECSComponent {
+public class RigidBody extends AbstractComponent {
 
     public float mass = 1.0f;
 
@@ -37,7 +37,7 @@ public class RigidBody extends AbstractECSComponent {
 
     // TODO: 07.06.2021 implementation isn't done yet
     @Override
-    public <E extends ECSComponent> E getReplica() {
+    public <E extends Component> E getReplica() {
         throw new UnsupportedOperationException();
     }
 

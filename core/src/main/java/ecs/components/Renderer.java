@@ -3,7 +3,7 @@ package ecs.components;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 
-public class Renderer extends AbstractECSComponent {
+public class Renderer extends AbstractComponent {
 
 //    public float[] vertices = new float[]{
 //            -0.5f, -0.5f, 0.0f,

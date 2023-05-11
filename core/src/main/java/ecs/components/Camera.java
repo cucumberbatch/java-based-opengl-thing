@@ -3,9 +3,7 @@ package ecs.components;
 import matrices.Matrix4f;
 import vectors.Vector3f;
 
-import ecs.utils.TerminalUtils;
-
-public class Camera extends AbstractECSComponent {
+public class Camera extends AbstractComponent {
     public Vector3f at      = new Vector3f();
     public Vector3f up      = new Vector3f();
     public Vector3f eye     = new Vector3f();

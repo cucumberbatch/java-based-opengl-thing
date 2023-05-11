@@ -102,10 +102,12 @@ public class Logger {
 
     public static void setLogWriter(LogWriter logWriter) {
         writer = logWriter;
-        directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
+
+        // Appears in start of application
+        // directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
     }
 
-    public static LogWriter writer;
+    public static LogWriter writer = new Logger.ConsoleLogWriter(); // console output by default
 
     public static final Level LEVEL = ApplicationConfig.LOGGER_SEVERITY;
 
@@ -125,7 +127,7 @@ public class Logger {
 
         try {
             string.append(String.format(
-                    "\n<cyan>%s</>  [%8s] %s: %s",
+                    "<cyan>%s</>  [%8s] %s: %s\n",
                     DATE_FORMAT.format(Date.from(Instant.now())),
                     Thread.currentThread().getName(),
                     level.formatLevel(),

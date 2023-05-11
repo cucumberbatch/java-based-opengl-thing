@@ -5,7 +5,7 @@ import ecs.components.Transform;
 import ecs.physics.Physics;
 import vectors.Vector2f;
 
-public class RigidBody2dSystem extends AbstractECSSystem<RigidBody2d> {
+public class RigidBody2dSystem extends AbstractSystem<RigidBody2d> {
 
     @Override
     public void update(float deltaTime) {

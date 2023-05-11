@@ -8,7 +8,7 @@ import vectors.Vector2f;
 import vectors.Vector3f;
 
 
-public class CameraSystem extends AbstractECSSystem<Camera> {
+public class CameraSystem extends AbstractSystem<Camera> {
 
     float near = 0.1f;
     float far = 100f;
@@ -25,7 +25,7 @@ public class CameraSystem extends AbstractECSSystem<Camera> {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() throws RuntimeException {
         Logger.info(String.format("%s: started initialization..", this.getClass().getName()));
         component.eye.set(2f, 0f, -3f);
         component.up.set(Vector3f.up());

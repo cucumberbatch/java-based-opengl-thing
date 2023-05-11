@@ -8,7 +8,7 @@ import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 import matrices.Matrix4f;
 
-public class RendererSystem extends AbstractECSSystem<Renderer> {
+public class RendererSystem extends AbstractSystem<Renderer> {
 
     @Override
     public int getWorkflowMask() {
@@ -16,7 +16,7 @@ public class RendererSystem extends AbstractECSSystem<Renderer> {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() throws RuntimeException {
         Renderer renderer = getComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
         renderer.texture = new Texture("textures/screen-frame-1024.png");

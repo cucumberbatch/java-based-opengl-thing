@@ -2,7 +2,7 @@ package ecs.components;
 
 import vectors.Vector2f;
 
-public class RigidBody2d extends AbstractECSComponent {
+public class RigidBody2d extends AbstractComponent {
 
     public float    mass                = 1.0f;
 

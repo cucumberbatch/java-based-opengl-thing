@@ -8,19 +8,13 @@ import vectors.Vector3f;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractECSComponent {
+public class Transform extends AbstractComponent {
     public Transform parent;
 
-    public Vector3f position;
-    public Vector3f rotation;
-    public Vector3f scale;
+    public Vector3f position = new Vector3f();
+    public Vector3f rotation = new Vector3f();
+    public Vector3f scale    = new Vector3f();
 
-
-    public Transform() {
-        position = new Vector3f();
-        rotation = new Vector3f();
-        scale = new Vector3f();
-    }
 
     @Override
     public void reset() {

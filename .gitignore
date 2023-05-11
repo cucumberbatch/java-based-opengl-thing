@@ -16,6 +16,9 @@
 .idea/
 target/
 
+# Idea files #
+.iml
+
 # Package Files #
 *.jar
 *.war

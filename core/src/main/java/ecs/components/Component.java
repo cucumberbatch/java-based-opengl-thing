@@ -1,22 +1,17 @@
 package ecs.components;
 
 import ecs.entities.Entity;
-import ecs.systems.ECSSystem;
 import ecs.utils.Instantiatable;
 import ecs.utils.Replicable;
 import ecs.utils.Turntable;
 
-import java.io.Externalizable;
-import java.io.Serializable;
-import java.util.UUID;
-
-public interface ECSComponent
-        extends Turntable, Instantiatable<ECSComponent>, Replicable<ECSComponent> {
+public interface Component
+        extends Turntable, Instantiatable<Component>, Replicable<Component> {
 
     /* Get and set methods for Id of component */
-    UUID getId();
+    long getId();
 
-    void setId(UUID Id);
+    void setId(int id);
 
     void reset();
 
@@ -30,13 +25,6 @@ public interface ECSComponent
     Entity getEntity();
 
     void setEntity(Entity entity);
-
-
-    /* Get and set methods for the system */
-    ECSSystem<? extends ECSComponent> getSystem();
-
-    void setSystem(ECSSystem<? extends ECSComponent> system);
-
 
     /* Get and set methods for the transform component */
     Transform getTransform();
