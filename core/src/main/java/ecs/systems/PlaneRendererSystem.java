@@ -153,7 +153,7 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
                     getRectangleCenter(cursor), previousPhysicalPosition,
                     displacement, springFactor, mass, deltaTime);
 
-            if (cursorState != HOVER_TO_IDLE_CURSOR_STATE && cursorState != HOVER_CURSOR_STATE) {
+            if (cursorState != HOVER_CURSOR_STATE) {
                 setCursorPosition(cursor, position);
             }
 
