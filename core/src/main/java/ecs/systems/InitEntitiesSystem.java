@@ -2,15 +2,12 @@ package ecs.systems;
 
 import ecs.Engine;
 import ecs.Scene;
+import ecs.components.Button;
 import ecs.components.InitEntities;
-import ecs.components.PlaneRenderer;
+import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.config.EngineConfig;
 import ecs.entities.Entity;
-import ecs.exception.ComponentAlreadyExistsException;
-import ecs.utils.Logger;
-
-import static ecs.utils.ApplicationConfig.DEVELOP;
 
 public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 
@@ -57,22 +54,13 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 Entity generatedButton = new Entity("g_button_" + h + "_" + w);
                 scene.addEntity(generatedButton);
 
-                Transform transform   = new Transform();
-                MeshCollider collider = new MeshCollider();
+                Transform    transform = new Transform();
+                MeshCollider collider  = new MeshCollider();
+                Button       button    = new Button();
 
-                try {
-                    componentManager.addComponent(generatedButton, transform);
-                } catch (ComponentAlreadyExistsException e) {
-                    transform = componentManager.getComponent(generatedButton, Transform.class);
-                    Logger.error(e);
-                }
-
-                try {
-                    componentManager.addComponent(generatedButton, collider);
-                } catch (ComponentAlreadyExistsException e) {
-                    collider = componentManager.getComponent(generatedButton, MeshCollider.class);
-                    Logger.error(e);
-                }
+                componentManager.addComponent(generatedButton, transform);
+                componentManager.addComponent(generatedButton, collider);
+                componentManager.addComponent(generatedButton, button);
 
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
@@ -81,6 +69,9 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 
                 collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
+
+                button.buttonShape.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
+                button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
                 entityManager.linkWithParent(parentEntity, generatedButton);
@@ -97,26 +88,15 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 //
         Transform transform = new Transform();
         MeshCollider meshCollider = new MeshCollider();
-        PlaneRenderer planeRenderer = new PlaneRenderer();
+        VisualCursor visualCursor = new VisualCursor();
 
         transform.entity = cursor;
         meshCollider.entity = cursor;
-        planeRenderer.entity = cursor;
+        visualCursor.entity = cursor;
 
-        try {
-            componentManager.addComponent(cursor, transform);
-        } catch (ComponentAlreadyExistsException e) {
-        }
-
-        try {
-            componentManager.addComponent(cursor, meshCollider);
-        } catch (ComponentAlreadyExistsException e) {
-        }
-
-        try {
-            componentManager.addComponent(cursor, planeRenderer);
-        } catch (ComponentAlreadyExistsException e) {
-        }
+        componentManager.addComponent(cursor, transform);
+        componentManager.addComponent(cursor, meshCollider);
+        componentManager.addComponent(cursor, visualCursor);
 
 //            camera.addComponent(ECSSystem.Type.CAMERA);
 

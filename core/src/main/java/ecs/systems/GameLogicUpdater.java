@@ -14,6 +14,7 @@ import ecs.exception.ComponentNotFoundException;
 import ecs.gl.Window;
 import ecs.managment.FrameTiming;
 import ecs.managment.SystemManager;
+import ecs.physics.Collidable;
 import ecs.utils.Logger;
 import vectors.Vector3f;
 
@@ -80,15 +81,15 @@ public class GameLogicUpdater implements GameLogic {
 
     @Override
     /* We are sure that each component object from system.getComponentList()
-    is an ECSComponent type, because the only way of adding a component into
+    is a Component type, because the only way of adding a component into
     component list is through component factory method call, that by definition
-    generates objects of ECSComponent type */
+    generates objects of Component type */
     @SuppressWarnings("unchecked")
     public void init() throws RuntimeException {
         for (System system : systemManager.listOfSystemsForInit) {
             for (Component component : (List<Component>) system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_INIT_STATE) {
-                    Logger.debug(String.format(
+                    Logger.trace(String.format(
                             "Handling init component [%s: %s]",
                             system.getClass().getName(),
                             component.getEntity().getName())
@@ -147,17 +148,16 @@ public class GameLogicUpdater implements GameLogic {
                 that = componentList.get(lindex);
                 for (rindex = lindex + 1; rindex < componentListSize; rindex++) {
                     other = componentList.get(rindex);
+                    A = that.entity;
+                    B = other.entity;
                     if (that.mesh == null || other.mesh == null) return;
                     if (that.mesh.isIntersects(other.mesh)) {
-                        A = that.entity;
-                        B = other.entity;
                         positionA = componentManager.getComponent(A, Transform.class).position;
                         positionB = componentManager.getComponent(B, Transform.class).position;
                         isCollisionFound = false;
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = systemManager.collisions.get(cindex);
-                            if (previousFrameCollision.A == A && previousFrameCollision.B == B ||
-                                previousFrameCollision.A == B && previousFrameCollision.B == A) {
+                            if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
                                 isCollisionFound = true;
                                 if (Collision.ENTERED == previousFrameCollision.state) {
                                     previousFrameCollision.pair = new CollisionPair(positionA, positionB);
@@ -174,7 +174,7 @@ public class GameLogicUpdater implements GameLogic {
                         }
                         if (!isCollisionFound) {
                             collisionState = Collision.ENTERED;
-                            pair = new CollisionPair(positionA, positionB);
+                            pair      = new CollisionPair(positionA, positionB);
                             collision = new Collision(A, B, pair, collisionState);
                             collision.isModified = true;
                             systemManager.collisions.add(collision);
@@ -186,12 +186,9 @@ public class GameLogicUpdater implements GameLogic {
                             ));
                         }
                     } else {
-                        A = that.entity;
-                        B = other.entity;
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = systemManager.collisions.get(cindex);
-                            if (previousFrameCollision.A == A && previousFrameCollision.B == B ||
-                                previousFrameCollision.A == B && previousFrameCollision.B == A) {
+                            if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
                                 if (Collision.EXITED != previousFrameCollision.state) {
                                     previousFrameCollision.isModified = true;
                                     previousFrameCollision.state = Collision.EXITED;
@@ -225,6 +222,11 @@ public class GameLogicUpdater implements GameLogic {
         }
     }
 
+    private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Collidable A, Collidable B) {
+        return (previousFrameCollision.A == A && previousFrameCollision.B == B) ||
+               (previousFrameCollision.A == B && previousFrameCollision.B == A);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void update(float deltaTime) {
@@ -234,7 +236,7 @@ public class GameLogicUpdater implements GameLogic {
         for (System system : systemManager.listOfSystemsForUpdate) {
             for (Component component : (List<Component>) system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
-                    Logger.debug(String.format(
+                    Logger.trace(String.format(
                             "Handling update component [%s: %s]",
                             system.getClass().getName(),
                             component.getEntity().getName())
@@ -259,8 +261,10 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
-                    if (Collision.ENTERED == collision.state)
+                    if (Collision.ENTERED == collision.state) {
+                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionStart(collision);
+                    }
                 }
             }
         }
@@ -271,8 +275,10 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
-                    if (Collision.HOLD == collision.state)
+                    if (Collision.HOLD == collision.state) {
+                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollision(collision);
+                    }
                 }
             }
         }
@@ -283,11 +289,19 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
-                    if (Collision.EXITED == collision.state)
+                    if (Collision.EXITED == collision.state) {
+                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionEnd(collision);
+                    }
                 }
             }
         }
+    }
+
+    private void swapCollisionEntities(Collision collision) {
+        Collidable temp = collision.B;
+        collision.B = collision.A;
+        collision.A = temp;
     }
 
     @Override
@@ -309,7 +323,7 @@ public class GameLogicUpdater implements GameLogic {
         for (System system : systemManager.listOfSystemsForRender) {
             for (Component component : (List<Component>) system.getComponentList()) {
                 if (component.getState() >= AbstractComponent.READY_TO_OPERATE_STATE) {
-                    Logger.debug(String.format(
+                    Logger.trace(String.format(
                             "Handling render component [%s: %s]",
                             system.getClass().getName(),
                             component.getEntity().getName())

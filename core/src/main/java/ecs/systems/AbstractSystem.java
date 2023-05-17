@@ -14,10 +14,10 @@ import vectors.Vector3f;
 import java.util.*;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
-    public static final int INIT_MASK       = 1 << 0;
-    public static final int UPDATE_MASK     = 1 << 1;
-    public static final int RENDER_MASK     = 1 << 2;
-    public static final int COLLISION_MASK  = 1 << 3;
+    public static final int INIT_MASK                = 1 << 0;
+    public static final int UPDATE_MASK              = 1 << 1;
+    public static final int RENDER_MASK              = 1 << 2;
+    public static final int COLLISION_MASK           = 1 << 3;
     public static final int COLLISION_HANDLING_MASK  = 1 << 4;
 
     private int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
@@ -73,7 +73,6 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
         }
         componentMap.put(component.getId(), (E) component);
         Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
-//        component.getEntity().addComponent(component);
     }
 
     @Override
@@ -89,15 +88,5 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     public E removeComponent(long componentId) {
         return componentMap.remove(componentId);
     }
-
-//    @Override
-//    public E getComponent(Class<E> componentClass) throws IllegalArgumentException, ClassCastException, ComponentNotFoundException {
-//        return component.getEntity().getComponent(componentClass);
-//    }
-//
-//    @Override
-//    public E removeComponent(Class<E> componentClass) throws IllegalArgumentException, ClassCastException {
-//        return component.getEntity().removeComponent(componentClass);
-//    }
 
 }

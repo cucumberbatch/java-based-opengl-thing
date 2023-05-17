@@ -6,7 +6,7 @@ import vectors.Vector2f;
 import ecs.shapes.Rectangle;
 
 
-public class PlaneRenderer extends AbstractComponent {
+public class VisualCursor extends AbstractComponent {
 
     public Vector2f initialTopLeftVertex     = new Vector2f(380.f, 320.f);
     public Vector2f initialBottomRightVertex = new Vector2f(440.f, 480.f);
@@ -32,11 +32,9 @@ public class PlaneRenderer extends AbstractComponent {
             1,  1
     };
 
-    public VertexArray background;
     public Texture     texture;
     public Rectangle   cursor;
-    public Rectangle   button;
-    public VertexArray buttonBackground;
-    public Texture     buttonTexture;
+    public VertexArray background;
+//    public VertexArray buttonBackground;
 
 }

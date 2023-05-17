@@ -40,7 +40,7 @@ public class SystemManager {
         systemMap.put(RigidBody.class,     new RigidBodySystem());
         systemMap.put(RigidBody2d.class,   new RigidBody2dSystem());
         systemMap.put(Camera.class,        new CameraSystem());
-        systemMap.put(PlaneRenderer.class, new PlaneRendererSystem());
+        systemMap.put(VisualCursor.class, new VisualCursorSystem());
         systemMap.put(MeshCollider.class,  new MeshColliderSystem());
         systemMap.put(Button.class,        new ButtonSystem());
         systemMap.put(InitEntities.class,  new InitEntitiesSystem());

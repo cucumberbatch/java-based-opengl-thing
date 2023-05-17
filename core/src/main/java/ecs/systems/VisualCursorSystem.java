@@ -1,6 +1,7 @@
 package ecs.systems;
 
-import ecs.components.PlaneRenderer;
+import ecs.components.Button;
+import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.shapes.Rectangle;
@@ -15,8 +16,10 @@ import org.lwjgl.glfw.GLFW;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
+import java.util.Objects;
+
 // todo: cursor movement needs to be related on entity transform data, not local vectors
-public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
+public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
     public static final int IDLE_CURSOR_STATE          = 0;
     public static final int HOVER_CURSOR_STATE         = 1;
@@ -26,12 +29,12 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
 
     public int cursorState = 0;
 
-    public float transitionTimeAccumulator = 0.0f;
     public float transitionTimeLimit       = 0.2f;
+    public float transitionTimeAccumulator = 0.0f;
 
-    public Vector4f buttonDefaultColor     = new Vector4f(0.75f, 0.75f, 0.75f, 1.0f);
-    public Vector4f buttonOnHoverColor     = new Vector4f(0.87f, 0.87f, 1.00f, 1.0f);
-    public Vector4f buttonColor            = new Vector4f(buttonDefaultColor);
+    public Rectangle previouslySelectedButtonShape;
+    public Button previouslySelectedButtonComponent;
+
 
     public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     public Vector4f cursorDefaultColor     = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
@@ -55,7 +58,7 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
 
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
 
-    private Rectangle imaginaryCursor      = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
+    private Rectangle imaginaryCursorShape = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
 
     private Entity selectedEntity = null;
 
@@ -68,17 +71,14 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
     @Override
     public void init() throws RuntimeException {
 
-        PlaneRenderer renderer = this.getComponent();
-        renderer.cursor = new Rectangle(new Vector2f(170, 170).add(cursorIdleTopLeft), new Vector2f(170, 170).add(cursorIdleBottomRight));
-        renderer.button = new Rectangle(renderer.initialTopLeftVertex, renderer.initialBottomRightVertex);
+        VisualCursor cursorComponent = this.getComponent();
+        cursorComponent.cursor = new Rectangle(new Vector2f(0, 0).add(cursorIdleTopLeft), new Vector2f(0, 0).add(cursorIdleBottomRight));
+        cursorComponent.texture = new Texture("core/assets/textures/screen-frame-1024.png");
 
-        renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
-        renderer.texture    = new Texture("core/assets/textures/screen-frame-1024.png");
-
-        setCursorPosition(imaginaryCursor, Input.getCursorPosition());
+        setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
 
         MeshCollider mesh = component.entity.getComponent(MeshCollider.class);
-        mesh.mesh = imaginaryCursor;
+        mesh.mesh = imaginaryCursorShape;
     }
 
     @Override
@@ -88,28 +88,12 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
         float yFactor = 1f;
         float zFactor = 1f;
 
-        Shader.BACKGROUND.setUniform1i("u_tex", Shader.BACKGROUND.getId());
-
-        Shader.BACKGROUND.setUniformMat4f("u_model",
-                // Matrix4f.multiply(
-                        Matrix4f.translation(component.transform.position));
-                        // Matrix4f.multiply(
-                        //         Matrix4f.multiply(
-                        //             Matrix4f.rotation(Vector3f.right(), currentComponent.transform.rotation.x),
-                        //             Matrix4f.rotation(Vector3f.up(),    currentComponent.transform.rotation.y)),
-                        //         Matrix4f.rotation(Vector3f.forward(), currentComponent.transform.rotation.z)
-                        // )));
-
-//        Shader.BACKGROUND.setUniformMat4f("u_view", Matrix4f.identity());
+        Shader.BACKGROUND.setUniform1i("u_tex",      Shader.BACKGROUND.getId());
+        Shader.BACKGROUND.setUniformMat4f("u_model", Matrix4f.translation(component.transform.position));
 
         Rectangle cursor = component.cursor;
-        Rectangle button = component.button;
+        Rectangle button = previouslySelectedButtonShape;
 
-//        cursor.topLeft     = Input.getCursorPosition().add(cursorIdleTopLeft);
-//        cursor.bottomRight = Input.getCursorPosition().add(cursorIdleBottomRight);
-
-
-//        /*
 
         if (isIntersects) {
             switch (cursorState) {
@@ -123,16 +107,12 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
                         cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, Vector2f.zero()),   ratio);
                         cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, Vector2f.zero()), ratio);
-                        buttonColor        = Vector4f.lerp(buttonDefaultColor, buttonOnHoverColor, ratio);
                         cursorColor        = Vector4f.lerp(cursorDefaultColor, cursorOnHoverColor, ratio);
+                        ButtonSystem.lightUpButtonHighlight(previouslySelectedButtonComponent, ratio);
                     }
                     break;
 
                 case HOVER_TO_IDLE_CURSOR_STATE:
-                    cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
-                    break;
-
                 case IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
                     Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
@@ -147,7 +127,7 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
             }
         } else {
             displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
-//            isCursorMoved = !displacement.equals(Vector2f.zero());
+            isCursorMoved = !displacement.equals(Vector2f.zero());
 
             Vector2f position = calculatePosition(
                     getRectangleCenter(cursor), previousPhysicalPosition,
@@ -161,6 +141,8 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
                 case HOVER_TO_IDLE_CURSOR_STATE:
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
+                        previouslySelectedButtonShape = null;
+                        previouslySelectedButtonComponent = null;
                         cursorState = IDLE_CURSOR_STATE;
                         Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
                     } else {
@@ -169,16 +151,12 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
                         cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     ratio);
                         cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), ratio);
-                        buttonColor        = Vector4f.lerp(buttonOnHoverColor, buttonDefaultColor, ratio);
                         cursorColor        = Vector4f.lerp(cursorOnHoverColor, cursorDefaultColor, ratio);
+                        ButtonSystem.lightDownButtonHighlight(previouslySelectedButtonComponent, ratio);
                     }
                     break;
 
                 case HOVER_CURSOR_STATE:
-                    cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
-                    break;
-
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
                     Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
@@ -189,17 +167,8 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
             }
         }
 
-//        */
-
-        displacement  = getRectangleCenter(imaginaryCursor).sub(Input.getCursorPosition());
+        displacement  = getRectangleCenter(imaginaryCursorShape).sub(Input.getCursorPosition());
         isCursorMoved = !displacement.equals(Vector2f.zero());
-
-//        cursorColor = new Vector4f(
-//                Input.getCursorPosition().normalized().x,
-//                Input.getCursorPosition().normalized().y,
-//                component.transform.position.x,
-//                1.0f);
-
 
         Transform transform = component.transform;
         transform.position.set(Input.getCursorPosition().x, Input.getCursorPosition().y, 0f);
@@ -207,7 +176,7 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
         previousPhysicalPosition = getRectangleCenter(cursor);
 
         // cursor is transform dependent now!
-        setCursorPosition(imaginaryCursor, new Vector2f(transform.position.x, transform.position.y));
+        setCursorPosition(imaginaryCursorShape, new Vector2f(transform.position.x, transform.position.y));
 
         if (isCursorMoved) {  }
 
@@ -215,8 +184,10 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
 
     @Override
     public void onCollisionStart(Collision collision) {
+        if (Objects.equals(collision.A, this)) return;
         selectedEntity = (Entity) collision.A;
-        component.button = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
+        previouslySelectedButtonShape = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
+        previouslySelectedButtonComponent = ((Entity) collision.A).getComponent(Button.class);
         isIntersects = true;
     }
 
@@ -241,36 +212,13 @@ public class PlaneRendererSystem extends AbstractSystem<PlaneRenderer> {
 
     @Override
     public void render(Window window) {
-        // System.out.println(Shader.GUI.getUniform("pos_shift"));
-
         VertexArray cursorVertices = new VertexArray(
                 component.cursor.toVertices(),
                 component.indices,
                 component.uv);
 
-        VertexArray buttonVertices = new VertexArray(
-                component.button.toVertices(),
-                component.indices,
-                component.uv);
-
-
-        // glBegin(GL_LINES);
-        // glVertex2f(Input.getCursorPosition().x, 0.0f);
-        // glVertex2f(Input.getCursorPosition().x, Window.height);
-        // glEnd();
-
-        // currentComponent.transform.position = currentComponent.transform.position.normalized();        
-
-        Shader.GUI.setUniform4f("u_color", buttonColor);
-
-        Renderer2D.draw(buttonVertices, getComponent().texture, Shader.GUI);
-
         Shader.GUI.setUniform4f("u_color", cursorColor);
 
-        // Renderer2D.draw(getCurrentComponent().background, getCurrentComponent().texture, Shader.BACKGROUND);
-        Renderer2D.draw(cursorVertices, getComponent().texture, Shader.GUI);
-
-
+        Renderer2D.draw(cursorVertices, component.texture, Shader.GUI);
     }
-
 }

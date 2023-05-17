@@ -5,8 +5,8 @@ import vectors.Vector3f;
 
 public class TransformSystem extends AbstractSystem<Transform> {
 
-    public Vector3f getWorldPosition() {
-        Transform iterableTransform = component.getTransform();
+    public static Vector3f getWorldPosition(Transform transform) {
+        Transform iterableTransform = transform;
         Vector3f worldPosition = new Vector3f();
         while (iterableTransform.parent != null) {
             worldPosition.add(iterableTransform.position);
@@ -15,8 +15,8 @@ public class TransformSystem extends AbstractSystem<Transform> {
         return worldPosition;
     }
 
-    public Vector3f getWorldRotation() {
-        Transform iterableTransform = component.getTransform();
+    public static Vector3f getWorldRotation(Transform transform) {
+        Transform iterableTransform = transform;
         Vector3f worldRotation = new Vector3f();
         while (iterableTransform.parent != null) {
             worldRotation.add(iterableTransform.rotation);
@@ -25,8 +25,8 @@ public class TransformSystem extends AbstractSystem<Transform> {
         return worldRotation;
     }
 
-    public Vector3f getWorldScale() {
-        Transform iterableTransform = component.getTransform();
+    public static Vector3f getWorldScale(Transform transform) {
+        Transform iterableTransform = transform;
         Vector3f worldScale = new Vector3f();
         while (iterableTransform.parent != null) {
             worldScale.add(iterableTransform.scale);
@@ -35,8 +35,8 @@ public class TransformSystem extends AbstractSystem<Transform> {
         return worldScale;
     }
 
-    public Transform getWorldTransform() {
-        Transform iterableTransform = component.getTransform();
+    public static Transform getWorldTransform(Transform transform) {
+        Transform iterableTransform = transform;
         Transform worldTransform = new Transform();
         while (iterableTransform.parent != null) {
             worldTransform.position.add(iterableTransform.position);

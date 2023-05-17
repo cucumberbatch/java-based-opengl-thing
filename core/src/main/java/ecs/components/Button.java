@@ -1,8 +1,35 @@
 package ecs.components;
 
+import ecs.graphics.Texture;
+import ecs.shapes.Rectangle;
 import vectors.Vector2f;
+import vectors.Vector4f;
 
 public class Button extends AbstractComponent {
-    public Vector2f topLeft = new Vector2f(380.f, 320.f);
-    public Vector2f bottomRight = new Vector2f(440.f, 480.f);
+
+    public float[] vertices = new float[]{
+            -0.5f, -0.5f, 0.0f,
+            -0.5f,  0.5f, 0.0f,
+            0.5f,  0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f
+    };
+
+    public byte[] indices = new byte[]{
+            0, 1, 2, 2, 3, 0,
+    };
+
+    public float[] uv = new float[]{
+            0,  1,
+            0,  0,
+            1,  0,
+            1,  1
+    };
+
+    public Vector4f buttonDefaultColor = new Vector4f(0.75f, 0.75f, 0.75f, 1.0f);
+    public Vector4f buttonOnHoverColor = new Vector4f(0.87f, 0.87f, 1.00f, 1.0f);
+    public Vector4f buttonColor        = new Vector4f(buttonDefaultColor);
+
+    public Rectangle buttonShape       = new Rectangle(Vector2f.zero(), Vector2f.zero());;
+    public Texture   buttonTexture;
+
 }

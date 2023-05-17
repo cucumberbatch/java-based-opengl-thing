@@ -33,6 +33,7 @@ public class Entity implements TreeNode, Collidable {
 
     public void addComponent(Component component) {
         components.put(component.getClass(), component);
+        component.setEntity(this);
     }
 
     public <E extends Component> E getComponent(Class<E> clazz) {
