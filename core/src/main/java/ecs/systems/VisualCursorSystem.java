@@ -33,8 +33,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     public float transitionTimeAccumulator = 0.0f;
 
     public Rectangle previouslySelectedButtonShape;
-    public Button previouslySelectedButtonComponent;
-
 
     public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     public Vector4f cursorDefaultColor     = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
@@ -72,7 +70,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     public void init() throws RuntimeException {
 
         VisualCursor cursorComponent = this.getComponent();
-        cursorComponent.cursor = new Rectangle(new Vector2f(0, 0).add(cursorIdleTopLeft), new Vector2f(0, 0).add(cursorIdleBottomRight));
+        cursorComponent.cursor  = new Rectangle(new Vector2f(0, 0).add(cursorIdleTopLeft), new Vector2f(0, 0).add(cursorIdleBottomRight));
         cursorComponent.texture = new Texture("core/assets/textures/screen-frame-1024.png");
 
         setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
@@ -108,7 +106,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                         cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, Vector2f.zero()),   ratio);
                         cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, Vector2f.zero()), ratio);
                         cursorColor        = Vector4f.lerp(cursorDefaultColor, cursorOnHoverColor, ratio);
-                        ButtonSystem.lightUpButtonHighlight(previouslySelectedButtonComponent, ratio);
                     }
                     break;
 
@@ -142,7 +139,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         previouslySelectedButtonShape = null;
-                        previouslySelectedButtonComponent = null;
                         cursorState = IDLE_CURSOR_STATE;
                         Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
                     } else {
@@ -152,7 +148,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                         cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     ratio);
                         cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), ratio);
                         cursorColor        = Vector4f.lerp(cursorOnHoverColor, cursorDefaultColor, ratio);
-                        ButtonSystem.lightDownButtonHighlight(previouslySelectedButtonComponent, ratio);
                     }
                     break;
 
@@ -184,10 +179,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
     @Override
     public void onCollisionStart(Collision collision) {
-        if (Objects.equals(collision.A, this)) return;
         selectedEntity = (Entity) collision.A;
         previouslySelectedButtonShape = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
-        previouslySelectedButtonComponent = ((Entity) collision.A).getComponent(Button.class);
         isIntersects = true;
     }
 

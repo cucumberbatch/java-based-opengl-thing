@@ -32,4 +32,8 @@ public class Button extends AbstractComponent {
     public Rectangle buttonShape       = new Rectangle(Vector2f.zero(), Vector2f.zero());;
     public Texture   buttonTexture;
 
+    public float transitionTimeLimit       = 1.2f;
+    public float transitionTimeAccumulator = 0.0f;
+
+    public int buttonState = 0;
 }

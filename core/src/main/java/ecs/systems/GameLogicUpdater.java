@@ -261,6 +261,8 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
+                    Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
+                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
                     if (Collision.ENTERED == collision.state) {
                         if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionStart(collision);
@@ -275,6 +277,8 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
+                    Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
+                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
                     if (Collision.HOLD == collision.state) {
                         if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollision(collision);
@@ -289,6 +293,8 @@ public class GameLogicUpdater implements GameLogic {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
                 for (Collision collision : systemManager.collisions) {
+                    Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
+                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
                     if (Collision.EXITED == collision.state) {
                         if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionEnd(collision);

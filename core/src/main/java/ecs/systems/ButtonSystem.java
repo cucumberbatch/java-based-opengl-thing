@@ -1,6 +1,7 @@
 package ecs.systems;
 
 import ecs.components.Button;
+import ecs.entities.Entity;
 import ecs.gl.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
@@ -9,20 +10,24 @@ import ecs.graphics.VertexArray;
 import ecs.shapes.Rectangle;
 import vectors.Vector4f;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class ButtonSystem extends AbstractSystem<Button> {
 
+    public static final int IDLE_BUTTON_STATE          = 0;
+    public static final int HOVER_BUTTON_STATE         = 1;
+    public static final int IDLE_TO_HOVER_BUTTON_STATE = 2;
+    public static final int HOVER_TO_IDLE_BUTTON_STATE = 3;
+
+
     @Override
     public int getWorkflowMask() {
-        return INIT_MASK | RENDER_MASK;
+        return INIT_MASK | UPDATE_MASK | RENDER_MASK | COLLISION_HANDLING_MASK;
     }
 
     @Override
     public void init() throws RuntimeException {
-//        MeshCollider meshComponent = componentManager.getComponent(component.entity, MeshCollider.class);
-//        meshComponent.mesh      = new Rectangle(component.topLeft, component.bottomRight);
-//        component.buttonShape   = new Rectangle(component.topLeft, component.bottomRight);
         component.buttonTexture = new Texture("core/assets/textures/screen-frame-1024.png");
         component.buttonOnHoverColor = new Vector4f(
                 new Random().nextFloat(),
@@ -30,6 +35,50 @@ public class ButtonSystem extends AbstractSystem<Button> {
                 new Random().nextFloat(),
                 1.0f
         );
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        float transitionTimeLimit = component.transitionTimeLimit;
+
+        switch (component.buttonState) {
+            case IDLE_BUTTON_STATE:
+                break;
+            case HOVER_BUTTON_STATE:
+                break;
+            case IDLE_TO_HOVER_BUTTON_STATE: {
+                if (component.transitionTimeAccumulator > transitionTimeLimit) {
+                    component.transitionTimeAccumulator = .0f;
+                    component.buttonState = HOVER_BUTTON_STATE;
+                } else {
+                    component.transitionTimeAccumulator += deltaTime;
+                    float ratio = component.transitionTimeAccumulator / transitionTimeLimit;
+                    component.buttonColor = Vector4f.lerp(component.buttonDefaultColor, component.buttonOnHoverColor, ratio);
+                }
+                break;
+            }
+            case HOVER_TO_IDLE_BUTTON_STATE: {
+                if (component.transitionTimeAccumulator > transitionTimeLimit) {
+                    component.transitionTimeAccumulator = .0f;
+                    component.buttonState = IDLE_BUTTON_STATE;
+                } else {
+                    component.transitionTimeAccumulator += deltaTime;
+                    float ratio = component.transitionTimeAccumulator / transitionTimeLimit;
+                    component.buttonColor = Vector4f.lerp(component.buttonOnHoverColor, component.buttonDefaultColor, ratio);
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onCollisionStart(Collision collision) {
+        component.buttonState = IDLE_TO_HOVER_BUTTON_STATE;
+    }
+
+    @Override
+    public void onCollisionEnd(Collision collision)  {
+        component.buttonState = HOVER_TO_IDLE_BUTTON_STATE;
     }
 
     @Override
@@ -44,11 +93,4 @@ public class ButtonSystem extends AbstractSystem<Button> {
         Renderer2D.draw(buttonVertices, component.buttonTexture, Shader.GUI);
     }
 
-    public static void lightUpButtonHighlight(Button button, float ratio) {
-        button.buttonColor = Vector4f.lerp(button.buttonDefaultColor, button.buttonOnHoverColor, ratio);
-    }
-
-    public static void lightDownButtonHighlight(Button button, float ratio) {
-        button.buttonColor = Vector4f.lerp(button.buttonOnHoverColor, button.buttonDefaultColor, ratio);
-    }
 }
