@@ -17,7 +17,7 @@
 target/
 
 # Idea files #
-.iml
+*.iml
 
 # Package Files #
 *.jar
