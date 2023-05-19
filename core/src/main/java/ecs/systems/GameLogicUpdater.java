@@ -16,6 +16,7 @@ import ecs.managment.FrameTiming;
 import ecs.managment.SystemManager;
 import ecs.physics.Collidable;
 import ecs.utils.Logger;
+import ecs.utils.Stopwatch;
 import vectors.Vector3f;
 
 import java.util.*;
@@ -117,6 +118,8 @@ public class GameLogicUpdater implements GameLogic {
     @Override
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
+        Stopwatch.start();
+
         if (systemManager.listOfSystemsForCollision.isEmpty()) return;
 
         List<MeshCollider> componentList;
@@ -152,6 +155,7 @@ public class GameLogicUpdater implements GameLogic {
                     B = other.entity;
                     if (that.mesh == null || other.mesh == null) return;
                     if (that.mesh.isIntersects(other.mesh)) {
+                        if (that.isStatic && other.isStatic) continue;
                         positionA = componentManager.getComponent(A, Transform.class).position;
                         positionB = componentManager.getComponent(B, Transform.class).position;
                         isCollisionFound = false;
@@ -220,6 +224,8 @@ public class GameLogicUpdater implements GameLogic {
                 ));
             }
         }
+
+        Stopwatch.stop("Collision register systems handling ended! Spent time: <bold>%.3f[ms]</>");
     }
 
     private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Collidable A, Collidable B) {
@@ -230,7 +236,7 @@ public class GameLogicUpdater implements GameLogic {
     @Override
     @SuppressWarnings("unchecked")
     public void update(float deltaTime) {
-        long nanos = java.lang.System.nanoTime();
+        Stopwatch.start();
         glfwPollEvents();
 
         for (System system : systemManager.listOfSystemsForUpdate) {
@@ -252,11 +258,13 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        float diffMillis = (float) (java.lang.System.nanoTime() - nanos) / 1_000_000L;
-        Logger.trace(String.format("Update systems handling ended! Spent time: <bold>%.3f[ms]</>", diffMillis));
+        Stopwatch.stop("Update systems handling ended! Spent time: <bold>%.3f[ms]</>");
     }
 
+    // @Performance
     private void handleCollisionEnter() {
+        Stopwatch.start();
+
         for (System system : systemManager.listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
@@ -270,9 +278,14 @@ public class GameLogicUpdater implements GameLogic {
                 }
             }
         }
+
+        Stopwatch.stop("Collision enter handling ended! Spent time: <bold>%.3f[ms]</>");
     }
 
+    // @Performance
     private void handleCollisionHold() {
+        Stopwatch.start();
+
         for (System system : systemManager.listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
@@ -286,9 +299,14 @@ public class GameLogicUpdater implements GameLogic {
                 }
             }
         }
+
+        Stopwatch.stop("Collision hold handling ended! Spent time: <bold>%.3f[ms]</>");
     }
 
+    // @Performance
     private void handleCollisionExit() {
+        Stopwatch.start();
+
         for (System system : systemManager.listOfSystemsForCollisionHandling) {
             for (Object component : system.getComponentList()) {
                 system.setCurrentComponent((Component) component);
@@ -302,6 +320,8 @@ public class GameLogicUpdater implements GameLogic {
                 }
             }
         }
+
+        Stopwatch.stop("Collision exit handling ended! Spent time: <bold>%.3f[ms]</>");
     }
 
     private void swapCollisionEntities(Collision collision) {
@@ -322,13 +342,11 @@ public class GameLogicUpdater implements GameLogic {
     public void render(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float diffMillis;
-        long nanosBufferSwap;
-        long nanosRender = java.lang.System.nanoTime();
+        Stopwatch.start();
 
         for (System system : systemManager.listOfSystemsForRender) {
             for (Component component : (List<Component>) system.getComponentList()) {
-                if (component.getState() >= AbstractComponent.READY_TO_OPERATE_STATE) {
+                if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
                     Logger.trace(String.format(
                             "Handling render component [%s: %s]",
                             system.getClass().getName(),
@@ -341,19 +359,15 @@ public class GameLogicUpdater implements GameLogic {
                         Logger.error(e);
                         component.setState(AbstractComponent.READY_TO_INIT_STATE);
                     }
-                } else if (component.getState() == AbstractComponent.READY_TO_INIT_STATE) {
-                    component.setState(AbstractComponent.READY_TO_OPERATE_STATE);
                 }
             }
         }
 
-        diffMillis = (float) (java.lang.System.nanoTime() - nanosRender) / 1_000_000L;
-        Logger.trace(String.format("Graphics systems handling ended! Spent time: <bold>%.3f[ms]</>", diffMillis));
+        Stopwatch.stop("Graphics systems handling ended! Spent time: <bold>%.3f[ms]</>");
 
-        nanosBufferSwap = java.lang.System.nanoTime();
+        Stopwatch.start();
         glfwSwapBuffers(window.getWindow());
-        diffMillis = (float) (java.lang.System.nanoTime() - nanosBufferSwap) / 1_000_000L;
-        Logger.trace(String.format("Graphics buffer swap ended! Spent time: <bold>%.3f[ms]</>", diffMillis));
+        Stopwatch.stop("Graphics buffer swap ended! Spent time: <bold>%.3f[ms]</>");
     }
 
 }
