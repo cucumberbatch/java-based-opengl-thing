@@ -1,6 +1,7 @@
 package ecs.components;
 
 import ecs.graphics.Texture;
+import ecs.graphics.VertexArray;
 import ecs.shapes.Rectangle;
 import vectors.Vector2f;
 import vectors.Vector4f;
@@ -24,6 +25,8 @@ public class Button extends AbstractComponent {
             1,  0,
             1,  1
     };
+
+    public VertexArray vertexBuffer;
 
     public Vector4f buttonDefaultColor = new Vector4f(0.75f, 0.75f, 0.75f, 1.0f);
     public Vector4f buttonOnHoverColor = new Vector4f(0.87f, 0.87f, 1.00f, 1.0f);

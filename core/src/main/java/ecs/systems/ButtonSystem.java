@@ -1,6 +1,7 @@
 package ecs.systems;
 
 import ecs.components.Button;
+import ecs.components.VisualCursor;
 import ecs.entities.Entity;
 import ecs.gl.Window;
 import ecs.graphics.Renderer2D;
@@ -8,6 +9,8 @@ import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 import ecs.shapes.Rectangle;
+import ecs.utils.Logger;
+import ecs.utils.Stopwatch;
 import vectors.Vector4f;
 
 import java.util.Objects;
@@ -35,6 +38,12 @@ public class ButtonSystem extends AbstractSystem<Button> {
                 new Random().nextFloat(),
                 1.0f
         );
+
+        component.vertexBuffer = new VertexArray(
+                component.buttonShape.toVertices(),
+                component.indices,
+                component.uv);
+
     }
 
     @Override
@@ -73,6 +82,8 @@ public class ButtonSystem extends AbstractSystem<Button> {
 
     @Override
     public void onCollisionStart(Collision collision) {
+        VisualCursor visualCursor = ((Entity) collision.A).getComponent(VisualCursor.class);
+        if (visualCursor != null && visualCursor.isIntersects && visualCursor.previouslySelectedButtonShape != component.buttonShape) return;
         component.buttonState = IDLE_TO_HOVER_BUTTON_STATE;
     }
 
@@ -83,14 +94,9 @@ public class ButtonSystem extends AbstractSystem<Button> {
 
     @Override
     public void render(Window window) {
-        VertexArray buttonVertices = new VertexArray(
-                component.buttonShape.toVertices(),
-                component.indices,
-                component.uv);
-
+        component.vertexBuffer.updateVertexBuffer(component.buttonShape.toVertices());
         Shader.GUI.setUniform4f("u_color", component.buttonColor);
-
-        Renderer2D.draw(buttonVertices, component.buttonTexture, Shader.GUI);
+        Renderer2D.draw(component.vertexBuffer, component.buttonTexture, Shader.GUI);
     }
 
 }

@@ -32,9 +32,14 @@ public class VisualCursor extends AbstractComponent {
             1,  1
     };
 
+    public VertexArray vertexBuffer;
+
     public Texture     texture;
     public Rectangle   cursor;
     public VertexArray background;
 //    public VertexArray buttonBackground;
+
+    public Rectangle previouslySelectedButtonShape;
+    public boolean   isIntersects = false;
 
 }

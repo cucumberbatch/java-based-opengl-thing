@@ -225,7 +225,7 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Collision register systems handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Collision register systems handling ended!");
     }
 
     private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Collidable A, Collidable B) {
@@ -258,7 +258,7 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Update systems handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Update systems handling ended!");
     }
 
     // @Performance
@@ -279,7 +279,7 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Collision enter handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Collision enter handling ended!");
     }
 
     // @Performance
@@ -300,7 +300,7 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Collision hold handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Collision hold handling ended!");
     }
 
     // @Performance
@@ -321,7 +321,7 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Collision exit handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Collision exit handling ended!");
     }
 
     private void swapCollisionEntities(Collision collision) {
@@ -344,6 +344,15 @@ public class GameLogicUpdater implements GameLogic {
 
         Stopwatch.start();
 
+        //
+        // Somewhere in component render function JVM crashes with code:
+        //
+        //    EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ff9e1cf13c7, pid=16376, tid=21524
+        //
+        // solved: The issue was in loading vertices, indices and other stuff
+        //         into GPU for already loaded meshes each frame, even if the
+        //         mesh wasn't move at all. Also, it solves the performance
+        //         problem in render function
         for (System system : systemManager.listOfSystemsForRender) {
             for (Component component : (List<Component>) system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
@@ -363,11 +372,11 @@ public class GameLogicUpdater implements GameLogic {
             }
         }
 
-        Stopwatch.stop("Graphics systems handling ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Graphics systems handling ended!");
 
         Stopwatch.start();
         glfwSwapBuffers(window.getWindow());
-        Stopwatch.stop("Graphics buffer swap ended! Spent time: <bold>%.3f[ms]</>");
+        Stopwatch.stop("Graphics buffer swap ended!");
     }
 
 }

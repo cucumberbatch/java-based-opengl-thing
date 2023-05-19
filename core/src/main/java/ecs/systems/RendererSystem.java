@@ -19,7 +19,7 @@ public class RendererSystem extends AbstractSystem<Renderer> {
     public void init() throws RuntimeException {
         Renderer renderer = getComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
-        renderer.texture = new Texture("textures/screen-frame-1024.png");
+        renderer.texture = new Texture("core/assets/textures/screen-frame-1024.png");
     }
 
     @Override
@@ -42,6 +42,6 @@ public class RendererSystem extends AbstractSystem<Renderer> {
         Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.orthographic(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
 //        Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.perspective(100f, 0.1f, 100.0f, 16.0f / 9.0f));
 
-        Renderer2D.draw(getComponent().background, getComponent().texture, Shader.BACKGROUND);
+        Renderer2D.draw(component.background, component.texture, Shader.BACKGROUND);
     }
 }

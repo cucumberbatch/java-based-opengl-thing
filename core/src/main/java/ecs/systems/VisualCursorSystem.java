@@ -32,18 +32,15 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     public float transitionTimeLimit       = 0.2f;
     public float transitionTimeAccumulator = 0.0f;
 
-    public Rectangle previouslySelectedButtonShape;
-
     public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     public Vector4f cursorDefaultColor     = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
     public Vector4f cursorOnHoverColor     = new Vector4f(0.6f, 0.9f, 1.0f, 1.0f);
 
     public Vector2f cursorIdleTopLeft      = new Vector2f(-20f, -20f);
-    public Vector2f cursorIdleBottomRight  = new Vector2f(20f, 20f);
+    public Vector2f cursorIdleBottomRight  = new Vector2f(+20f, +20f);
 
     private Vector2f savedCursorPosition   = new Vector2f();
     private boolean  isCursorMoved         = false;
-    private boolean  isIntersects          = false;
 
     // cursor velocity for smoother movement, I guess
     private Vector2f cursorVelocity        = new Vector2f(1, 1);
@@ -77,6 +74,11 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
         MeshCollider mesh = component.entity.getComponent(MeshCollider.class);
         mesh.mesh = imaginaryCursorShape;
+
+        component.vertexBuffer = new VertexArray(
+                component.cursor.toVertices(),
+                component.indices,
+                component.uv);
     }
 
     @Override
@@ -90,10 +92,10 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         Shader.BACKGROUND.setUniformMat4f("u_model", Matrix4f.translation(component.transform.position));
 
         Rectangle cursor = component.cursor;
-        Rectangle button = previouslySelectedButtonShape;
+        Rectangle button = component.previouslySelectedButtonShape;
 
 
-        if (isIntersects) {
+        if (component.isIntersects) {
             switch (cursorState) {
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     if (transitionTimeAccumulator > transitionTimeLimit) {
@@ -138,12 +140,11 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                 case HOVER_TO_IDLE_CURSOR_STATE:
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
-                        previouslySelectedButtonShape = null;
+                        component.previouslySelectedButtonShape = null;
                         cursorState = IDLE_CURSOR_STATE;
                         Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
-//                        setCursorPosition(cursor, position);
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
                         cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     ratio);
                         cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), ratio);
@@ -180,14 +181,14 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     @Override
     public void onCollisionStart(Collision collision) {
         selectedEntity = (Entity) collision.A;
-        previouslySelectedButtonShape = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
-        isIntersects = true;
+        component.previouslySelectedButtonShape = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
+        component.isIntersects = true;
     }
 
     @Override
     public void onCollisionEnd(Collision collision)  {
         selectedEntity = null;
-        isIntersects = false;
+        component.isIntersects = false;
     }
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
@@ -205,13 +206,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
     @Override
     public void render(Window window) {
-        VertexArray cursorVertices = new VertexArray(
-                component.cursor.toVertices(),
-                component.indices,
-                component.uv);
-
+        component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
         Shader.GUI.setUniform4f("u_color", cursorColor);
-
-        Renderer2D.draw(cursorVertices, component.texture, Shader.GUI);
+        Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);
     }
 }
