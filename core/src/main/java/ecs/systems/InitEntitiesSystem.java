@@ -121,18 +121,18 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         scene.addEntity(parentEntity);
 
         int height = EngineConfig.instance.windowHeight;
-        int width = EngineConfig.instance.windowWidth;
+        int width  = EngineConfig.instance.windowWidth;
 
-        int wCount      = 8;
-        int hCount      = 8;
+        int wCount      = 4;
+        int hCount      = 4;
 
-        int xOffsetLeft = 30;
-        int zOffsetUp   = 30;
+        int xOffsetLeft = (height / wCount) / 2;
+        int zOffsetUp   = (width  / hCount) / 2;
 
         int heightStep  = height / hCount;
         int widthStep   = width  / wCount;
-        for (int h = 0; h < height + heightStep; h += heightStep) {
-            for (int w = 0; w < width + widthStep; w += widthStep) {
+        for (int h = 0; h <= height - heightStep; h += heightStep) {
+            for (int w = 0; w <= width - widthStep; w += widthStep) {
                 Entity generatedButton = new Entity("g_button_" + h + "_" + w);
                 scene.addEntity(generatedButton);
 

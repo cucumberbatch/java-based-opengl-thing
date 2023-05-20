@@ -10,9 +10,9 @@ import ecs.systems.GameLogicUpdater;
 import ecs.utils.Logger;
 
 public class EngineConfig {
-    public final int windowWidth    = 482;
-    public final int windowHeight   = 482;
-    public final boolean vsync      = true;
+    public final int windowWidth    = 480;
+    public final int windowHeight   = 480;
+    public final boolean vsync      = false;
     public final String windowTitle = "test_engine";
 
     public final Window        window        = new Window(windowTitle, windowWidth, windowHeight, vsync);
