@@ -153,9 +153,9 @@ public class GameLogicUpdater implements GameLogic {
                     other = componentList.get(rindex);
                     A = that.entity;
                     B = other.entity;
-                    if (that.mesh == null || other.mesh == null) return;
+                    if (that.isStatic && other.isStatic) continue;
+                    if (that.mesh == null || other.mesh == null) continue;
                     if (that.mesh.isIntersects(other.mesh)) {
-                        if (that.isStatic && other.isStatic) continue;
                         positionA = componentManager.getComponent(A, Transform.class).position;
                         positionB = componentManager.getComponent(B, Transform.class).position;
                         isCollisionFound = false;
