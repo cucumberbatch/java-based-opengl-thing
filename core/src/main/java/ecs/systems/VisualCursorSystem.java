@@ -1,6 +1,5 @@
 package ecs.systems;
 
-import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
@@ -15,8 +14,6 @@ import matrices.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import vectors.Vector4f;
 import vectors.Vector2f;
-
-import java.util.Objects;
 
 // todo: cursor movement needs to be related on entity transform data, not local vectors
 public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
@@ -88,8 +85,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         float yFactor = 1f;
         float zFactor = 1f;
 
-        Shader.BACKGROUND.setUniform1i("u_tex",      Shader.BACKGROUND.getId());
-        Shader.BACKGROUND.setUniformMat4f("u_model", Matrix4f.translation(component.transform.position));
+//        Shader.BACKGROUND.setUniform("u_tex",      Shader.BACKGROUND.getId());
+//        Shader.BACKGROUND.setUniformMat4f("u_model", Matrix4f.translation(component.transform.position));
 
         Rectangle cursor = component.cursor;
         Rectangle button = component.previouslySelectedButtonShape;
@@ -207,7 +204,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     @Override
     public void render(Window window) {
         component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
-        Shader.GUI.setUniform4f("u_color", cursorColor);
+        Shader.GUI.setUniform("u_color", cursorColor);
         Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);
     }
 }

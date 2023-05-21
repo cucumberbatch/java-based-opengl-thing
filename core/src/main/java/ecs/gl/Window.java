@@ -8,6 +8,7 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import vectors.Vector2f;
@@ -96,8 +97,14 @@ public class Window {
         GL.createCapabilities();
 
 
-        GL30.glClearColor(0.16f, 0.16f, 0.16f, 1.0f);
+//        GL30.glClearColor(0.16f, 0.16f, 0.16f, 1.0f);
+        GL30.glClearColor(0f, 0f, 0f, 0f);
         GL30.glEnable(GL30.GL_DEPTH_TEST);
+
+        // enable blending
+        GL30.glEnable(GL30.GL_BLEND);
+        GL30.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         GL30.glActiveTexture(GL30.GL_TEXTURE1);
         Shader.loadAll();
     }

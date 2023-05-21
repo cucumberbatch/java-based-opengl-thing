@@ -1,4 +1,7 @@
-package ecs.utils;
+package ecs.config;
+
+import ecs.utils.Logger;
+import ecs.utils.TerminalUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;

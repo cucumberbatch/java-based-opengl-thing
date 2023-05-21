@@ -12,6 +12,7 @@ public class Renderer extends AbstractComponent {
 //             0.5f, -0.5f, 0.0f
 //    };
 
+    /*
     public float[] vertices = new float[]{
             -0.5f, -0.5f, -0.5f,
             -0.5f,  0.5f, -0.5f,
@@ -53,6 +54,25 @@ public class Renderer extends AbstractComponent {
             0,  0,
             1,  0,
             1,  1,
+            0,  1,
+            0,  0,
+            1,  0,
+            1,  1
+    };
+    */
+
+    public float[] vertices = new float[]{
+            -1.0f, -1.0f, +0.0f,
+            -1.0f, +1.0f, +0.0f,
+            +1.0f, +1.0f, +0.0f,
+            +1.0f, -1.0f, +0.0f
+    };
+
+    public byte[] indices = new byte[]{
+            0, 1, 2, 2, 3, 0,
+    };
+
+    public float[] uv = new float[]{
             0,  1,
             0,  0,
             1,  0,

@@ -8,12 +8,8 @@ import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
-import ecs.shapes.Rectangle;
-import ecs.utils.Logger;
-import ecs.utils.Stopwatch;
 import vectors.Vector4f;
 
-import java.util.Objects;
 import java.util.Random;
 
 public class ButtonSystem extends AbstractSystem<Button> {
@@ -95,7 +91,7 @@ public class ButtonSystem extends AbstractSystem<Button> {
     @Override
     public void render(Window window) {
         component.vertexBuffer.updateVertexBuffer(component.buttonShape.toVertices());
-        Shader.GUI.setUniform4f("u_color", component.buttonColor);
+        Shader.GUI.setUniform("u_color", component.buttonColor);
         Renderer2D.draw(component.vertexBuffer, component.buttonTexture, Shader.GUI);
     }
 

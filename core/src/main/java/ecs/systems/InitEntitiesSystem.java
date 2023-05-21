@@ -22,12 +22,11 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 
         super.init();
 
-        initScene3();
+        initScene1();
 
     }
 
     private void initScene1() {
-        Engine engine = Engine.engine;
         Scene scene = new Scene("scene name");
 
         Entity cursor       = new Entity("cursor");
@@ -94,22 +93,25 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
     }
 
     private void initScene2() {
-        Engine engine   = Engine.engine;
-        Scene  scene    = new Scene("scene name 2");
-
-        Entity rendererEntity = new Entity("renderer");
-
-        scene.addEntity(rendererEntity);
+        Entity rendererEntity = new Entity("screen");
+        Entity cursor         = new Entity("cursor");
 
         Transform transform = new Transform();
-        Renderer renderer = new Renderer();
+        Renderer  renderer  = new Renderer();
 
         componentManager.addComponent(rendererEntity, transform);
         componentManager.addComponent(rendererEntity, renderer);
+
+        transform = new Transform();
+        MeshCollider meshCollider = new MeshCollider();
+        VisualCursor visualCursor = new VisualCursor();
+
+        componentManager.addComponent(cursor, transform);
+        componentManager.addComponent(cursor, meshCollider);
+        componentManager.addComponent(cursor, visualCursor);
     }
 
     private void initScene3() {
-        Engine engine = Engine.engine;
         Scene scene = new Scene("scene name 3");
 
         Entity cursor       = new Entity("cursor");
