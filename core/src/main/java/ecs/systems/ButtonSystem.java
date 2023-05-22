@@ -3,7 +3,6 @@ package ecs.systems;
 import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.entities.Entity;
-import ecs.gl.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;
@@ -54,6 +53,7 @@ public class ButtonSystem extends AbstractSystem<Button> {
             case IDLE_TO_HOVER_BUTTON_STATE: {
                 if (component.transitionTimeAccumulator > transitionTimeLimit) {
                     component.transitionTimeAccumulator = .0f;
+                    component.buttonColor = component.buttonOnHoverColor;
                     component.buttonState = HOVER_BUTTON_STATE;
                 } else {
                     component.transitionTimeAccumulator += deltaTime;
@@ -65,6 +65,7 @@ public class ButtonSystem extends AbstractSystem<Button> {
             case HOVER_TO_IDLE_BUTTON_STATE: {
                 if (component.transitionTimeAccumulator > transitionTimeLimit) {
                     component.transitionTimeAccumulator = .0f;
+                    component.buttonColor = component.buttonDefaultColor;
                     component.buttonState = IDLE_BUTTON_STATE;
                 } else {
                     component.transitionTimeAccumulator += deltaTime;

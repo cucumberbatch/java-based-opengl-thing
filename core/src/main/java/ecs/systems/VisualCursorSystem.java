@@ -10,7 +10,6 @@ import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 import ecs.utils.Logger;
-import matrices.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import vectors.Vector4f;
 import vectors.Vector2f;
@@ -178,14 +177,17 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     @Override
     public void onCollisionStart(Collision collision) {
         selectedEntity = (Entity) collision.A;
-        component.previouslySelectedButtonShape = ((Entity) collision.A).getComponent(MeshCollider.class).mesh;
+        component.previouslySelectedButtonShape = selectedEntity.getComponent(MeshCollider.class).mesh;
         component.isIntersects = true;
+        cursorState = HOVER_TO_IDLE_CURSOR_STATE;
     }
 
     @Override
     public void onCollisionEnd(Collision collision)  {
-        selectedEntity = null;
-        component.isIntersects = false;
+        if (collision.A == selectedEntity) {
+            selectedEntity = null;
+            component.isIntersects = false;
+        }
     }
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
@@ -193,8 +195,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     }
 
     private void setCursorPosition(Rectangle rectangle, Vector2f position) {
-        rectangle.topLeft.set(new Vector2f(position).add(cursorIdleTopLeft));
-        rectangle.bottomRight.set(new Vector2f(position).add(cursorIdleBottomRight));
+        rectangle.topLeft.set(position).add(cursorIdleTopLeft);
+        rectangle.bottomRight.set(position).add(cursorIdleBottomRight);
     }
 
     private Vector2f getRectangleCenter(Rectangle rectangle) {
