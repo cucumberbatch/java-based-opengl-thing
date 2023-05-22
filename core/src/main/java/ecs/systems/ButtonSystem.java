@@ -3,6 +3,7 @@ package ecs.systems;
 import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.entities.Entity;
+import ecs.graphics.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;

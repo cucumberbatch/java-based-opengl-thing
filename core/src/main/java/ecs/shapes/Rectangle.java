@@ -1,7 +1,7 @@
 package ecs.shapes;
 
 import vectors.Vector2f;
-import ecs.gl.Window;
+import ecs.graphics.Window;
 
 
 public class Rectangle implements Shape2d {

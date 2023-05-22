@@ -29,7 +29,7 @@ public class ApplicationConfig {
     private ApplicationConfig() {}
 
     // Logger
-    public static final Logger.Level LOGGER_SEVERITY = Logger.Level.DEBUG;
+    public static final Logger.Level LOGGER_SEVERITY = Logger.Level.INFO;
     public static final String LOGGER_TIME_INFO_PATTERN = "HH:mm:ss.SSS";
     public static final String LOG_FILE_PATH = String.format(
             "C:\\Users\\Владислав\\Desktop\\java\\%s.log",

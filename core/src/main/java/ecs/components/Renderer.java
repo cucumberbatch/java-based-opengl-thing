@@ -80,7 +80,7 @@ public class Renderer extends AbstractComponent {
     };
 
     public VertexArray background;
-    public Texture texture;
+    public Texture     texture;
 
 
     @Override

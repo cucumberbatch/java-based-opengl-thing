@@ -1,12 +1,14 @@
 package ecs.graphics;
 
 public class Material {
-    private long id;
-    private String name;
-    private Shader shader;
+    public long    id;
+    public String  name;
+    public Shader  shader;
+    public Texture texture;
 
-    public Material(String name, Shader shader) {
-        this.name = name;
-        this.shader = shader;
+    public Material(String name, Shader shader, Texture texture) {
+        this.name    = name;
+        this.shader  = shader;
+        this.texture = texture;
     }
 }

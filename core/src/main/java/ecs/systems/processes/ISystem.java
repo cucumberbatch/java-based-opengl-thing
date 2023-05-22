@@ -1,6 +1,6 @@
 package ecs.systems.processes;
 
-import ecs.gl.Window;
+import ecs.graphics.Window;
 import ecs.systems.Collision;
 
 public interface ISystem {

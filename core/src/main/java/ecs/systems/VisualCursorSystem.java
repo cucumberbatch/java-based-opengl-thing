@@ -4,7 +4,7 @@ import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.shapes.Rectangle;
-import ecs.gl.Window;
+import ecs.graphics.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
 import ecs.graphics.Texture;

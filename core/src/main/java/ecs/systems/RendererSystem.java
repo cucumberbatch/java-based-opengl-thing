@@ -1,10 +1,9 @@
 package ecs.systems;
 
 import ecs.components.Renderer;
-import ecs.gl.Window;
+import ecs.graphics.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;
-import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 
 public class RendererSystem extends AbstractSystem<Renderer> {
@@ -18,7 +17,6 @@ public class RendererSystem extends AbstractSystem<Renderer> {
     public void init() throws RuntimeException {
         Renderer renderer = getComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
-        renderer.texture    = new Texture("core/assets/textures/screen-frame-1024.png");
 //        renderer.texture    = new Texture("core/assets/textures/bg.jpeg");
 
     }

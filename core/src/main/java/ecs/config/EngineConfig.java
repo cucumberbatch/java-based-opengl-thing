@@ -4,7 +4,7 @@ import ecs.GameLogic;
 import ecs.architecture.ComponentManager;
 import ecs.architecture.EntityManager;
 import ecs.architecture.TreeEntityManager;
-import ecs.gl.Window;
+import ecs.graphics.Window;
 import ecs.managment.SystemManager;
 import ecs.systems.GameLogicUpdater;
 import ecs.utils.Logger;

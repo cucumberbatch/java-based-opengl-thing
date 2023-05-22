@@ -1,6 +1,6 @@
 package ecs;
 
-import ecs.gl.Window;
+import ecs.graphics.Window;
 import ecs.systems.processes.ISystem;
 
 public interface GameLogic extends Runnable, ISystem {
