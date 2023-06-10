@@ -3,11 +3,7 @@ package ecs.systems;
 import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.entities.Entity;
-import ecs.graphics.Window;
-import ecs.graphics.Renderer2D;
-import ecs.graphics.Shader;
-import ecs.graphics.Texture;
-import ecs.graphics.VertexArray;
+import ecs.graphics.*;
 import vectors.Vector4f;
 
 import java.util.Random;
@@ -91,7 +87,7 @@ public class ButtonSystem extends AbstractSystem<Button> {
     }
 
     @Override
-    public void render(Window window) {
+    public void render(Graphics graphics) {
         component.vertexBuffer.updateVertexBuffer(component.buttonShape.toVertices());
         Shader.GUI.setUniform("u_color", component.buttonColor);
         Renderer2D.draw(component.vertexBuffer, component.buttonTexture, Shader.GUI);

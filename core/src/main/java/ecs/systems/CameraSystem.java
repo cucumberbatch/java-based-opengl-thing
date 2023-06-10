@@ -60,9 +60,9 @@ public class CameraSystem extends AbstractSystem<Camera> {
                 Matrix4f.translation(component.transform.position));
 
         // finally, pass view matrix to shader
-        Shader.BACKGROUND.setUniformMat4f("u_view", component.lookAtMatrix);
+        Shader.BACKGROUND.setUniform("u_view", component.lookAtMatrix);
 
-        Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.orthographic(-5.0f, 5.0f, -5.0f, 5.0f, -5.0f, 5.0f));
-       // Shader.BACKGROUND.setUniformMat4f("u_projection", Matrix4f.perspective(angle, near, far, ratio));
+        Shader.BACKGROUND.setUniform("u_projection", Matrix4f.orthographic(-5.0f, 5.0f, -5.0f, 5.0f, -5.0f, 5.0f));
+       // Shader.BACKGROUND.setUniform("u_projection", Matrix4f.perspective(angle, near, far, ratio));
     }
 }

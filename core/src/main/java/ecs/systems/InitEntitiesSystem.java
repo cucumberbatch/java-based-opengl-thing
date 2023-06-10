@@ -21,7 +21,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
     public void init() throws RuntimeException {
         super.init();
 
-        initScene2();
+        initScene3();
     }
 
     private void initScene1() {

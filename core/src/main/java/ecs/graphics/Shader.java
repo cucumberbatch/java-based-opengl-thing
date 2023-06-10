@@ -102,7 +102,7 @@ public class Shader {
         GL20.glUniform4f(getUniformLocation(name), vector4.x, vector4.y, vector4.z, vector4.w);
     }
 
-    public void setUniformMat4f(String name, Matrix4f matrix4f) {
+    public void setUniform(String name, Matrix4f matrix4f) {
         if (!enabled) enable();
         GL20.glUniformMatrix4fv(getUniformLocation(name), false, BufferUtils.createFloatBuffer(matrix4f.elements));
     }

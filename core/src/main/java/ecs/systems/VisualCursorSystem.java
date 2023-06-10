@@ -3,14 +3,11 @@ package ecs.systems;
 import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
+import ecs.graphics.*;
 import ecs.shapes.Rectangle;
-import ecs.graphics.Window;
-import ecs.graphics.Renderer2D;
-import ecs.graphics.Shader;
-import ecs.graphics.Texture;
-import ecs.graphics.VertexArray;
 import ecs.utils.Logger;
 import org.lwjgl.glfw.GLFW;
+import vectors.Vector3f;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
@@ -85,7 +82,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         float zFactor = 1f;
 
 //        Shader.BACKGROUND.setUniform("u_tex",      Shader.BACKGROUND.getId());
-//        Shader.BACKGROUND.setUniformMat4f("u_model", Matrix4f.translation(component.transform.position));
+//        Shader.BACKGROUND.setUniform("u_model", Matrix4f.translation(component.transform.position));
 
         Rectangle cursor = component.cursor;
         Rectangle button = component.previouslySelectedButtonShape;
@@ -163,7 +160,11 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         isCursorMoved = !displacement.equals(Vector2f.zero());
 
         Transform transform = component.transform;
-        transform.position.set(Input.getCursorPosition().x, Input.getCursorPosition().y, 0f);
+        transform.position.set(
+                (Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
+                (Input.getCursorPosition().y - Window.height / 2f) / Window.height,
+                0f
+        );
 
         previousPhysicalPosition = getRectangleCenter(cursor);
 
@@ -204,9 +205,10 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     }
 
     @Override
-    public void render(Window window) {
-        component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
-        Shader.GUI.setUniform("u_color", cursorColor);
-        Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);
+    public void render(Graphics graphics) {
+        graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
+//        component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
+//        Shader.GUI.setUniform("u_color", cursorColor);
+//        Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);
     }
 }

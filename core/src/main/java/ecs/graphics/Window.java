@@ -99,7 +99,11 @@ public class Window {
 
 //        GL30.glClearColor(0.16f, 0.16f, 0.16f, 1.0f);
         GL30.glClearColor(0f, 0f, 0f, 0f);
-        GL30.glEnable(GL30.GL_DEPTH_TEST);
+
+//        GL30.glClearDepth(1f);
+//        GL30.glDepthRange(0f, 1f);
+//        GL30.glEnable(GL30.GL_DEPTH_TEST);
+//        GL30.glDepthFunc(GL11.GL_LEQUAL);
 
         // enable blending
         GL30.glEnable(GL30.GL_BLEND);

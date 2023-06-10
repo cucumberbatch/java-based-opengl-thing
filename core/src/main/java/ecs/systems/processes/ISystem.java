@@ -1,5 +1,6 @@
 package ecs.systems.processes;
 
+import ecs.graphics.Graphics;
 import ecs.graphics.Window;
 import ecs.systems.Collision;
 
@@ -33,10 +34,10 @@ public interface ISystem {
     /**
      * An interface method that renders component content
      *
-     * @param window a window handle in which render occurs
+     * @param graphics a graphics api for rendering objects
      * @author cucumberbatch
      */
-    default void render(Window window) {}
+    default void render(Graphics graphics) {}
 
 
     default void onCollisionStart(Collision collision) { }

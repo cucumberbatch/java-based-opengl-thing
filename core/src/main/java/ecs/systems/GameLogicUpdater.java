@@ -10,6 +10,7 @@ import ecs.components.Component;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.exception.ComponentNotFoundException;
+import ecs.graphics.Graphics;
 import ecs.graphics.Window;
 import ecs.managment.FrameTiming;
 import ecs.managment.SystemManager;
@@ -31,9 +32,11 @@ public class GameLogicUpdater implements GameLogic {
     private Window window;
     private SceneInitializer sceneInitializer;
     private Scene scene;
+    private Graphics graphics;
 
     public GameLogicUpdater(Window window) {
         this.window = window;
+        this.graphics = new Graphics();
     }
 
     public void setScene(Scene scene) {
@@ -362,7 +365,7 @@ public class GameLogicUpdater implements GameLogic {
                     );
                     try {
                         system.setCurrentComponent(component);
-                        system.render(window);
+                        system.render(graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
                         component.setState(AbstractComponent.READY_TO_INIT_STATE);

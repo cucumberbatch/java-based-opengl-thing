@@ -5,6 +5,8 @@ import ecs.utils.BufferUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL30.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL30.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL30.GL_FLOAT;
@@ -67,13 +69,14 @@ public class VertexArray {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    public void draw() {
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_BYTE, 0);
+    public void draw(int mode) {
+        glEnable(GL_DEPTH_TEST);
+        glDrawElements(mode, count, GL_UNSIGNED_BYTE, 0);
     }
 
-    public void render() {
+    public void render(int mode) {
         bind();
-        draw();
+        draw(mode);
         unbind();
     }
 

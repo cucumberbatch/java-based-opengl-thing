@@ -2,13 +2,14 @@
 
 layout (location = 0) out vec4 color;
 
-uniform sampler2D u_tex;
+//in vec2 texture_coordinates;
+in vec3 inColor;
 
-in DATA {
-    vec2 uv;
-} fs_in;
-
+//uniform sampler2D u_tex;
+uniform vec4 u_color;
 
 void main() {
-    color = texture(u_tex, fs_in.uv);
+//    color = texture(u_tex, texture_coordinates);
+//    color = u_color;
+    color = vec4(inColor, 1);
 }

@@ -16,6 +16,18 @@ public final class Vector3f {
         this.z = z;
     }
 
+    public Vector3f(Vector2f other, float z) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = z;
+    }
+
+    public Vector3f(float x, Vector2f other) {
+        this.x = x;
+        this.y = other.x;
+        this.z = other.y;
+    }
+
     public Vector3f(Vector3f other) {
         this.x = other.x;
         this.y = other.y;
