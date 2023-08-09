@@ -1,7 +1,9 @@
 package ecs.systems;
 
 import ecs.components.Transform;
+import ecs.reflection.ComponentHandler;
 
+@ComponentHandler(MeshCollider.class)
 public class MeshColliderSystem extends AbstractSystem<MeshCollider> {
 
     private static final int xOffsetLeft = 10;

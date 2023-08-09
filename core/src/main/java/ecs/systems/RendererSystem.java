@@ -2,7 +2,9 @@ package ecs.systems;
 
 import ecs.components.Renderer;
 import ecs.graphics.*;
+import ecs.reflection.ComponentHandler;
 
+@ComponentHandler(Renderer.class)
 public class RendererSystem extends AbstractSystem<Renderer> {
 
     @Override

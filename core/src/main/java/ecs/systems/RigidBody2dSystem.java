@@ -3,8 +3,10 @@ package ecs.systems;
 import ecs.components.RigidBody2d;
 import ecs.components.Transform;
 import ecs.physics.Physics;
+import ecs.reflection.ComponentHandler;
 import vectors.Vector2f;
 
+@ComponentHandler(RigidBody2d.class)
 public class RigidBody2dSystem extends AbstractSystem<RigidBody2d> {
 
     @Override

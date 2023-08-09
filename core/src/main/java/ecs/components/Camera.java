@@ -8,8 +8,8 @@ public class Camera extends AbstractComponent {
     public Vector3f up      = new Vector3f();
     public Vector3f eye     = new Vector3f();
 
-    public Matrix4f lookAtMatrix = new Matrix4f();
-    public Matrix4f viewMatrix   = new Matrix4f();
+    public Matrix4f viewMatrix       = new Matrix4f();
+    public Matrix4f projectionMatrix = new Matrix4f();
 
     @Override
     public String getName() {
@@ -25,11 +25,11 @@ public class Camera extends AbstractComponent {
             TerminalUtils.formatOutputMatrix(viewMatrix)
         );*/
         
-                "\nat:   " + at  +
-                "\nup:   " + up  +
-                "\neye:  " + eye +
-                "\nlook: " + lookAtMatrix +
-                "\nview: " + viewMatrix;
-        
+                "\nat:   "       + at  +
+                "\nup:   "       + up  +
+                "\neye:  "       + eye +
+                "\nview: "       + viewMatrix +
+                "\nprojection: " + projectionMatrix;
+
     }
 }

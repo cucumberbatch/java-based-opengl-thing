@@ -23,15 +23,7 @@ public class Graphics {
 
     public Shader   basicShader;
 
-//    public static Matrix4f projection = Matrix4f.perspective(90, -1f, 1f, 1);
-//    public static Matrix4f projection = Matrix4f.perspective2(90, -1f, 1, 1);
-//    public static Matrix4f projection = Matrix4f.orthographic(-1, 1, -1, 1, -1, 1);
-//    public static Matrix4f projection = Matrix4f.orthographic2(-1, 1, -1, 1, -1, 1);
-    public static Matrix4f projection = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
-//    public static Matrix4f projection = Matrix4f.perspective3(120, 1, -0.2f, 0.5f);
-
-    public Vector3f cameraDirection = Vector3f.forward();
-
+    public static Matrix4f projection = Matrix4f.identity();
     public static Matrix4f view = Matrix4f.lookAt(Vector3f.backward(), Vector3f.forward(), Vector3f.up());
 
     public Graphics(Window window) {
@@ -46,11 +38,6 @@ public class Graphics {
         Renderer2D.draw(renderer.mesh.vertexArray, renderer.texture, renderer.shader);
     }
 
-    // 1 = sin2(x) + cos2(x)
-//    public float circleEquation(float x, float y) {
-//
-//    }
-
     public void drawMesh(Mesh mesh) {
         //todo
     }
@@ -60,13 +47,9 @@ public class Graphics {
 
     private Vector2f cursorPosition = null;
 
+
     public void drawMesh(Mesh mesh, Vector4f color, Transform transform) {
 
-//        projection = Matrix4f.lerp(
-//                Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1),
-//                Matrix4f.perspective3(90, 1, -0.2f, 1),
-//                (float) (Math.sin(ratio) + 1) / 2
-//        );
 
 
         if (cursorPosition == null) {
@@ -74,9 +57,6 @@ public class Graphics {
             Logger.info("window height: " + Window.height);
             Logger.info("window width: " + Window.width);
         }
-
-
-        ratio += 0.05f;
 
         if (basicShader == null)
             basicShader = Shader.BACKGROUND;

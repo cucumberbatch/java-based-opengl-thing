@@ -4,14 +4,12 @@ import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.entities.Entity;
 import ecs.graphics.*;
-import ecs.utils.Logger;
+import ecs.reflection.ComponentHandler;
 import vectors.Vector4f;
 
-import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Collectors;
 
+@ComponentHandler(Button.class)
 public class ButtonSystem extends AbstractSystem<Button> {
 
     public static final int IDLE_BUTTON_STATE          = 0;

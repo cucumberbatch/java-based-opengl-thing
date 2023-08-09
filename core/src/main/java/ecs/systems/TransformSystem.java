@@ -1,8 +1,10 @@
 package ecs.systems;
 
 import ecs.components.Transform;
+import ecs.reflection.ComponentHandler;
 import vectors.Vector3f;
 
+@ComponentHandler(Transform.class)
 public class TransformSystem extends AbstractSystem<Transform> {
 
     public static Vector3f getWorldPosition(Transform transform) {

@@ -4,15 +4,15 @@ import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.graphics.*;
+import ecs.reflection.ComponentHandler;
 import ecs.shapes.Rectangle;
 import ecs.utils.Logger;
-import org.lwjgl.assimp.Assimp;
 import org.lwjgl.glfw.GLFW;
-import vectors.Vector3f;
 import vectors.Vector4f;
 import vectors.Vector2f;
 
 // todo: cursor movement needs to be related on entity transform data, not local vectors
+@ComponentHandler(VisualCursor.class)
 public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
     public static final int IDLE_CURSOR_STATE          = 0;

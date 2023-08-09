@@ -5,7 +5,9 @@ import ecs.components.*;
 import ecs.config.EngineConfig;
 import ecs.entities.Entity;
 import ecs.graphics.Texture;
+import ecs.reflection.ComponentHandler;
 
+@ComponentHandler(InitEntities.class)
 public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 
     public InitEntitiesSystem() {

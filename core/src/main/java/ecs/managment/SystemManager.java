@@ -2,8 +2,10 @@ package ecs.managment;
 
 import ecs.components.*;
 import ecs.exception.ComponentNotFoundException;
+import ecs.reflection.scanner.ComponentHandlerScanner;
 import ecs.systems.*;
 import ecs.systems.System;
+import ecs.utils.Logger;
 
 import java.util.*;
 
@@ -35,15 +37,14 @@ public class SystemManager {
     }
 
     private void initComponentSystemAssociation() {
-        systemMap.put(Transform.class,     new TransformSystem());
-        systemMap.put(Renderer.class,      new RendererSystem());
-        systemMap.put(RigidBody.class,     new RigidBodySystem());
-        systemMap.put(RigidBody2d.class,   new RigidBody2dSystem());
-        systemMap.put(Camera.class,        new CameraSystem());
-        systemMap.put(VisualCursor.class, new VisualCursorSystem());
-        systemMap.put(MeshCollider.class,  new MeshColliderSystem());
-        systemMap.put(Button.class,        new ButtonSystem());
-        systemMap.put(InitEntities.class,  new InitEntitiesSystem());
+        try {
+            ComponentHandlerScanner scanner = new ComponentHandlerScanner();
+            scanner.getAnnotatedClassesInPackage("ecs/systems")
+                    .forEach(pair -> systemMap.put(pair.component, pair.system));
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     private void groupSystemsByProcesses() {
