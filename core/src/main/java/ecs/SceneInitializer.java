@@ -12,10 +12,7 @@ public class SceneInitializer {
     }
 
     public void initSceneInUpdater(GameLogicUpdater updater) {
-        for (Entity entity: scene.entities) {
-            for (Component component: entity.components.values()) {
-                updater.componentManager.addComponent(entity, component);
-            }
-        }
+        scene.entities.forEach(entity -> entity.components.values()
+                .forEach(component -> updater.componentManager.addComponent(entity, component)));
     }
 }

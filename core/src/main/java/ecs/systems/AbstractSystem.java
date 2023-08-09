@@ -1,5 +1,6 @@
 package ecs.systems;
 
+import ecs.MainThread;
 import ecs.architecture.ComponentManager;
 import ecs.architecture.EntityManager;
 import ecs.architecture.TreeEntityManager;

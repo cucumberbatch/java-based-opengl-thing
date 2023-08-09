@@ -202,6 +202,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
 
         int heightStep  = height / hCount;
         int widthStep   = width  / wCount;
+        /*
         for (int h = 0; h <= height - heightStep; h += heightStep) {
             for (int w = 0; w <= width - widthStep; w += widthStep) {
                 Entity generatedButton = new Entity("g_button_" + h + "_" + w);
@@ -232,19 +233,26 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 entityManager.linkWithParent(parentEntity, generatedButton);
             }
         }
+         */
 
 
         Transform transform = new Transform();
+        Transform cameraTransform = new Transform();
         MeshCollider meshCollider = new MeshCollider();
         VisualCursor visualCursor = new VisualCursor();
+        Camera cameraComponent = new Camera();
 
         transform.entity = cursor;
         meshCollider.entity = cursor;
         visualCursor.entity = cursor;
+        cameraTransform.entity = camera;
+        cameraComponent.entity = camera;
 
         componentManager.addComponent(cursor, transform);
         componentManager.addComponent(cursor, meshCollider);
         componentManager.addComponent(cursor, visualCursor);
+        componentManager.addComponent(camera, cameraTransform);
+        componentManager.addComponent(camera, cameraComponent);
 
     }
 

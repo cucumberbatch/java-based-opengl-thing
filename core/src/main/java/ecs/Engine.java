@@ -9,11 +9,15 @@ import ecs.managment.SystemManager;
 import ecs.systems.GameLogicUpdater;
 import ecs.utils.Logger;
 
-//todo:
-// * relative position (to parent entities)
-// * create serialization/deserialization flow for scenes
-// * add stateful animation controller
-// * add gamepad support (also xinput https://github.com/StrikerX3/JXInput)
+// todo:
+//  - relative position (to parent entities)
+//  - create serialization/deserialization flow for scenes (XML for a while)
+//  - add stateful animation controller
+//  - add gamepad support (also xinput https://github.com/StrikerX3/JXInput)
+//  - dependency injection manager, that works on application start in main method
+//  - editor mode (Vim like behaviour)
+//    - developer console
+//    - editor visual cursor, that can select and manipulate objects in scene
 public class Engine extends Thread {
     public static Engine     engine;
     public final  Window     window;

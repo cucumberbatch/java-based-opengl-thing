@@ -1,11 +1,16 @@
 package ecs.systems;
 
-import ecs.graphics.Shader;
+import ecs.graphics.Graphics;
+import ecs.graphics.PredefinedMeshes;
 import ecs.components.Camera;
+import ecs.graphics.Window;
 import ecs.utils.Logger;
 import matrices.Matrix4f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 import vectors.Vector2f;
 import vectors.Vector3f;
+import vectors.Vector4f;
 
 
 public class CameraSystem extends AbstractSystem<Camera> {
@@ -16,12 +21,14 @@ public class CameraSystem extends AbstractSystem<Camera> {
     float ratio = 16f / 9f;
 
     Vector3f planePosition = new Vector3f(1f, 0f, -1f); //currentComponent.entity.getEngine().getEntityByName("side_plane").transform.position;
-    
 
+
+    Vector3f cameraPosition = new Vector3f();
+    Vector3f point = Vector3f.zero();
 
     @Override
     public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK;
+        return INIT_MASK | UPDATE_MASK | RENDER_MASK;
     }
 
     @Override
@@ -29,40 +36,61 @@ public class CameraSystem extends AbstractSystem<Camera> {
         Logger.info(String.format("%s: started initialization..", this.getClass().getName()));
         component.eye.set(2f, 0f, -3f);
         component.up.set(Vector3f.up());
-        component.at.set(Vector3f.add(component.eye, new Vector3f(1.0f, 0.0f, -1.0f)));
+        component.at.set(new Vector3f(1.0f, 0.0f, -1.0f).add(component.eye));
     }
 
     @Override
     public void update(float deltaTime) {
-        Vector2f pos = Input.getCursorPosition();
+        Vector2f cursorPosition = Input.getCursorPosition();
 
+        float verticalAngle   = +cursorPosition.y / (Window.width / 256f) - 180;
+        float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
-        // precalculating trigonometry for circular camera rotation
-        float sinx = (float) Math.sin(Math.toRadians(pos.x));
-        float cosx = (float) Math.cos(Math.toRadians(pos.x));
+        float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.9f, 89.9f);
 
-        float siny = (float) Math.sin(Math.toRadians(pos.y));
-        float cosy = (float) Math.cos(Math.toRadians(pos.y));
+        Vector3f point = Vector3f.forward().rotation(restrictedVerticalAngle, horizontalAngle, 0);
 
-        // setting camera target view point around the camera position (XZ plane)
-       // currentComponent.at.set(
-       //         Vector3f.add(currentComponent.eye, new Vector3f(1f, 1f, 0f)));
+        float speedFactor;
 
-        // setting camera target view point around the camera position (YZ plane)
-       // currentComponent.up.set(
-       //         Vector3f.add(currentComponent.eye, new Vector3f(0f, 1f, 1f)));
+        if (Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT)) {
+            speedFactor = 3f;
+        } else {
+            speedFactor = 1f;
+        }
 
-        // calculating view matrix for camera rotation and position
-       component.lookAtMatrix = Matrix4f.lookAt(component.eye, component.at, component.up);
+        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
+            component.transform.position.add(deltaTime * speedFactor, 0, 0);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
+            component.transform.position.add(-deltaTime * speedFactor, 0, 0);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
+            component.transform.position.add(0, deltaTime * speedFactor, 0);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
+            component.transform.position.add(0, -deltaTime * speedFactor, 0);
+        }
 
-        component.viewMatrix = Matrix4f.multiply(
-                component.lookAtMatrix,
-                Matrix4f.translation(component.transform.position));
+        component.viewMatrix = Matrix4f.lookAt(cameraPosition, point, Vector3f.up());
 
-        // finally, pass view matrix to shader
-        Shader.BACKGROUND.setUniform("u_view", component.lookAtMatrix);
+        Graphics.setView(component.viewMatrix);
+    }
 
-        Shader.BACKGROUND.setUniform("u_projection", Matrix4f.orthographic(-5.0f, 5.0f, -5.0f, 5.0f, -5.0f, 5.0f));
-       // Shader.BACKGROUND.setUniform("u_projection", Matrix4f.perspective(angle, near, far, ratio));
+    @Override
+    public void render(Graphics graphics) {
+        if (Input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
+            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        }
+
+        if (Input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+            Logger.info("Left mouse button is pressed!");
+        }
+
+        graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
+    }
+
+    private float restrictAngle(float angle, float lowest, float highest) {
+        return Math.min(Math.max(angle, lowest), highest);
     }
 }

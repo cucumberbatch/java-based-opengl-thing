@@ -1,10 +1,13 @@
 package vectors;
 
 import interpolation.Interpolation;
+import matrices.Matrix3f;
 
 import java.util.Objects;
 
 public final class Vector3f {
+    public static final float DELTA = 0.000000001f;
+
     public float x, y, z;
 
 
@@ -83,11 +86,50 @@ public final class Vector3f {
         return this;
     }
 
+    public Vector3f mul(Matrix3f matrix) {
+        double x = this.x;
+        double y = this.y;
+        double z = this.z;
+
+        this.x = (float) ((double) matrix.elements[0 + 0 * 3] * x + (double) matrix.elements[0 + 1 * 3] * y + (double) matrix.elements[0 + 2 * 3] * z);
+        this.y = (float) ((double) matrix.elements[1 + 0 * 3] * x + (double) matrix.elements[1 + 1 * 3] * y + (double) matrix.elements[1 + 2 * 3] * z);
+        this.z = (float) ((double) matrix.elements[2 + 0 * 3] * x + (double) matrix.elements[2 + 1 * 3] * y + (double) matrix.elements[2 + 2 * 3] * z);
+
+        return this;
+    }
+
     public Vector3f div(float val) {
         this.x /= val;
         this.y /= val;
         this.z /= val;
         return this;
+    }
+
+    public Vector3f rotation(float a, float b, float c) {
+        Matrix3f rotationMatrix = Matrix3f.identity();
+
+        double angleA = Math.toRadians(a);
+        double angleB = Math.toRadians(b);
+        double angleC = Math.toRadians(c);
+
+        double sinA = Math.sin(angleA);
+        double sinB = Math.sin(angleB);
+        double sinC = Math.sin(angleC);
+        double cosA = Math.cos(angleA);
+        double cosB = Math.cos(angleB);
+        double cosC = Math.cos(angleC);
+
+        rotationMatrix.elements[0 + 0 * 3] = (float) (cosB * cosC);
+        rotationMatrix.elements[1 + 0 * 3] = (float) (cosB * sinC);
+        rotationMatrix.elements[2 + 0 * 3] = (float) (-sinB);
+        rotationMatrix.elements[0 + 1 * 3] = (float) (sinA * sinB * cosC - cosA * sinC);
+        rotationMatrix.elements[1 + 1 * 3] = (float) (sinA * sinB * sinC + cosA * cosC);
+        rotationMatrix.elements[2 + 1 * 3] = (float) (sinA * cosB);
+        rotationMatrix.elements[0 + 2 * 3] = (float) (cosA * sinB * cosC + sinA * sinC);
+        rotationMatrix.elements[1 + 2 * 3] = (float) (cosA * sinB * sinC - sinA * cosC);
+        rotationMatrix.elements[2 + 2 * 3] = (float) (cosA * cosB);
+
+        return this.mul(rotationMatrix);
     }
 
     public float dot(Vector3f other) {
@@ -187,9 +229,9 @@ public final class Vector3f {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vector3f vector3 = (Vector3f) o;
-        return Float.compare(vector3.x, x) == 0 &&
-                Float.compare(vector3.y, y) == 0 &&
-                Float.compare(vector3.z, z) == 0;
+        return Math.abs(vector3.x - x) < DELTA &&
+               Math.abs(vector3.y - y) < DELTA &&
+               Math.abs(vector3.z - z) < DELTA;
     }
 
     @Override

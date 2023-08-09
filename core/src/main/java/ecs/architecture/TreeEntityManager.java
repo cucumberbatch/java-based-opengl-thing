@@ -44,7 +44,8 @@ public class TreeEntityManager implements EntityManager {
     //   4
     //    \
     //     1  <- на данный момент возможна такая привязка,
-    //           которая при вызове метода получения корня образует бесконечный цикл
+    //    / \     которая при вызове метода получения корня образует бесконечный цикл
+    //  ..  ..
     @Override
     public void linkWithParent(Entity parent, Entity entity) {
         if (entity.parent != null) {

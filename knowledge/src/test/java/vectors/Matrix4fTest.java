@@ -72,8 +72,8 @@ class Matrix4fTest {
 //                0,    0,    2, 10,
 //                0,    0,    0, 1});
 //
-//        Matrix4f result = Matrix4f.multiply(
-//                Matrix4f.multiply(scale, position),
+//        Matrix4f result = Matrix4f.mul(
+//                Matrix4f.mul(scale, position),
 //                rotation
 //        );
 //
@@ -88,7 +88,7 @@ class Matrix4fTest {
                 0, 0, 2, 5,
                 0, 0, 0, 1});
 
-        Matrix4f result = Matrix4f.multiply(position, scale);
+        Matrix4f result = Matrix4f.mul(position, scale);
 
         assertEquals(expected, result);
     }
@@ -102,7 +102,7 @@ class Matrix4fTest {
 
     @Test
     public void testMultiplication1() {
-        Matrix4f result = Matrix4f.multiply(testMatrix1, testMatrix2);
+        Matrix4f result = Matrix4f.mul(testMatrix1, testMatrix2);
 
         assertEquals(testMultiplicationMatrices1and2, result);
     }

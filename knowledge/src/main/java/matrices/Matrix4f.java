@@ -23,6 +23,20 @@ public class Matrix4f {
         return this;
     }
 
+    public Matrix4f mul(Matrix4f other) {
+        float sum;
+        for (int verticalIndex = 0; verticalIndex < 4; verticalIndex++) {
+            for (int horizontalIndex = 0; horizontalIndex < 4; horizontalIndex++) {
+                sum = 0f;
+                for (int runnerIndex = 0; runnerIndex < 4; runnerIndex++) {
+                    sum += this.elements[horizontalIndex + runnerIndex * 4] * other.elements[runnerIndex + verticalIndex * 4];
+                }
+                this.elements[horizontalIndex + verticalIndex * 4] = sum;
+            }
+        }
+        return this;
+    }
+
     public static Matrix4f identity() {
         Matrix4f result = new Matrix4f();
 
@@ -80,17 +94,15 @@ public class Matrix4f {
     }
 
     public static Matrix4f orthographic3(float left, float right, float bottom, float top, float near, float far) {
-        Matrix4f result = new Matrix4f();
+        Matrix4f result = Matrix4f.identity();
 
-        result.elements[0 + 0 * 4] =  2.0f * near / (right - left);
-        result.elements[1 + 1 * 4] =  2.0f * near / (top - bottom);
-        result.elements[3 + 2 * 4] =  1.0f;
+        result.elements[0 + 0 * 4] = 2.0f / (right - left);
+        result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
+        result.elements[2 + 2 * 4] = 2.0f / (near - far);
 
-        result.elements[3 + 0 * 4] =  (right + left) / (right - left);
-        result.elements[3 + 1 * 4] =  (top + bottom) / (top - bottom);
-        result.elements[2 + 2 * 4] = -(far + near) / (far - near);
-
-        result.elements[3 + 3 * 4] = -2.0f * far * near / (far - near);
+        result.elements[0 + 3 * 4] = (left + right) / (left - right);
+        result.elements[1 + 3 * 4] = (bottom + top) / (bottom - top);
+        result.elements[2 + 3 * 4] = (far + near) / (far - near);
 
         return result;
     }
@@ -126,6 +138,23 @@ public class Matrix4f {
         float width   = height * ratio;                      // half width of near plane
 
         return orthographic2(-width, width, -height, height, near, far);
+    }
+
+    public static Matrix4f perspective3(float fov, float ratio, float near, float far) {
+        Matrix4f result = Matrix4f.identity();
+
+        float q = 1.0f / (float) Math.tan(Math.toRadians(fov / 2));
+        float a =  q / ratio;
+        float b = (near + far) / (near - far);
+        float c = (2.0f * near * far) / (near - far);
+
+        result.elements[0 + 0 * 4] = a;
+        result.elements[1 + 1 * 4] = q;
+        result.elements[2 + 2 * 4] = b;
+        result.elements[3 + 2 * 4] = -1.0f;
+        result.elements[2 + 3 * 4] = c;
+
+        return result;
     }
 
     public static Matrix4f translation(Vector3f position, Vector3f rotation, Vector3f scale) {
@@ -178,7 +207,7 @@ public class Matrix4f {
 
 //        result.elements[3 + 3 * 4] = 1f;
 
-        return Matrix4f.multiply(Matrix4f.multiply(Matrix4f.multiply(Matrix4f.multiply(translation, scaleMat), rotationX), rotationY), rotationZ);
+        return Matrix4f.mul(Matrix4f.mul(Matrix4f.mul(Matrix4f.mul(translation, scaleMat), rotationX), rotationY), rotationZ);
     }
 
     public static Matrix4f translation(Vector3f vector3) {
@@ -191,6 +220,42 @@ public class Matrix4f {
         return result;
     }
 
+    public static Matrix4f scale(Vector3f vector3) {
+        Matrix4f result = identity();
+
+        result.elements[0 + 0 * 4] = vector3.x;
+        result.elements[1 + 1 * 4] = vector3.y;
+        result.elements[2 + 2 * 4] = vector3.z;
+
+        return result;
+    }
+
+    public static Matrix4f rotation(float angle, Vector3f axis) {
+        Matrix4f result = Matrix4f.identity();
+
+        float radians = (float) Math.toRadians(angle);
+        float cos = (float) Math.cos(radians);
+        float sin = (float) Math.cos(radians);
+        float omc = 1.0f - cos;
+
+        float x = axis.x;
+        float y = axis.y;
+        float z = axis.z;
+
+        result.elements[0 + 0 * 4] = x * omc + cos;
+        result.elements[1 + 0 * 4] = y * x * omc + z * sin;
+        result.elements[2 + 0 * 4] = x * z * omc - y * sin;
+
+        result.elements[0 + 1 * 4] = x * y * omc - z * sin;
+        result.elements[1 + 1 * 4] = y * omc + cos;
+        result.elements[2 + 1 * 4] = y * z * omc + x * sin;
+
+        result.elements[0 + 2 * 4] = x * z * omc + y * sin;
+        result.elements[1 + 2 * 4] = y * z * omc - x * sin;
+        result.elements[2 + 2 * 4] = z * omc + cos;
+
+        return result;
+    }
 
     public static Matrix4f rotateAroundOX(float angle) {
         Matrix4f result = identity();
@@ -240,36 +305,7 @@ public class Matrix4f {
         return result;
     }
 
-    public static Matrix4f scale(Vector3f vector3) {
-        Matrix4f result = identity();
-
-        result.elements[0 + 0 * 4] = vector3.x;
-        result.elements[1 + 1 * 4] = vector3.y;
-        result.elements[2 + 2 * 4] = vector3.z;
-
-        return result;
-    }
-
-    /**
-     * Multiplies two 4x4 matrices with next pattern:
-     * 
-     * <p/><code>
-     * <p>c1:1 = (a1:1 x b1:1) + (a1:2 x b2:1) + ... + (a1:4 x b4:1),</p>
-     * <p>c1:2 = (a1:1 x b1:2) + (a1:2 x b2:2) + ... + (a1:4 x b4:2),</p>
-     * <p>  ...  </p>
-     * <p>c1:4 = (a1:1 x b1:4) + (a1:2 x b2:4) + ... + (a1:4 x b4:4),</p>
-     * <p>c2:1 = (a2:1 x b1:1) + (a2:2 x b2:1) + ... + (a2:4 x b4:1),</p>
-     * <p>c2:2 = (a2:1 x b1:2) + (a2:2 x b2:2) + ... + (a2:4 x b4:2),</p>
-     * <p>  ...  </p>
-     * <p>c4:4 = (a4:1 x b1:4) + (a4:2 x b2:4) + ... + (a4:4 x b4:4);</p>
-     * </code>
-     * where a1:1 , b1:1 and c1:1 are the first elements in first row of A, B and result C matrices respectively.
-     * 
-     * @param  that  a matrix A
-     * @param  other a matrix B
-     * @return       a result of A and B matrices multiplication
-     */
-    public static Matrix4f multiply(Matrix4f that, Matrix4f other) {
+    public static Matrix4f mul(Matrix4f that, Matrix4f other) {
         Matrix4f result = new Matrix4f();
         float sum;
 
@@ -277,7 +313,7 @@ public class Matrix4f {
             for (int horizontalIndex = 0; horizontalIndex < 4; horizontalIndex++) {
                 sum = 0f;
                 for (int runnerIndex = 0; runnerIndex < 4; runnerIndex++) {
-                    sum += that.elements[runnerIndex + verticalIndex * 4] * other.elements[horizontalIndex + runnerIndex * 4];
+                    sum += that.elements[horizontalIndex + runnerIndex * 4] * other.elements[runnerIndex + verticalIndex * 4];
                 }
                 result.elements[horizontalIndex + verticalIndex * 4] = sum;
             }
@@ -286,10 +322,37 @@ public class Matrix4f {
         return result;
     }
 
+    public static Matrix4f lookAt2(Vector3f eye, Vector3f at, Vector3f up) {
+        Vector3f forward = Vector3f.sub(eye, at).normalized();
+        Vector3f left = Vector3f.cross(up, forward).normalized();
+        Vector3f top = Vector3f.cross(forward, left);
+
+        Matrix4f result = Matrix4f.identity();
+
+        result.elements[0 + 0 * 4] = left.x;
+        result.elements[0 + 1 * 4] = left.y;
+        result.elements[0 + 2 * 4] = left.z;
+
+        result.elements[1 + 0 * 4] = top.x;
+        result.elements[1 + 1 * 4] = top.y;
+        result.elements[1 + 2 * 4] = top.z;
+
+        result.elements[2 + 0 * 4] = forward.x;
+        result.elements[2 + 1 * 4] = forward.y;
+        result.elements[2 + 2 * 4] = forward.z;
+
+        result.elements[0 + 3 * 4] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
+        result.elements[1 + 3 * 4] = -top.x * eye.x - top.y * eye.y - top.z * eye.z;
+        result.elements[2 + 3 * 4] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+
+        return result;
+    }
+
     public static Matrix4f lookAt(Vector3f eye, Vector3f at, Vector3f up) {
-        Vector3f zAxis = Vector3f.normalized(Vector3f.sub(at, eye));
-        Vector3f xAxis = Vector3f.normalized(Vector3f.cross(up, zAxis));
+        Vector3f zAxis = Vector3f.sub(at, eye).normalized();
+        Vector3f xAxis = Vector3f.cross(up, zAxis).normalized();
         Vector3f yAxis = Vector3f.cross(zAxis, xAxis);
+
 
 //        return new Matrix4f(new float[]{
 //                xAxis.x, xAxis.y, xAxis.z, eye.x,
@@ -299,11 +362,25 @@ public class Matrix4f {
 //        });
 
         return new Matrix4f(new float[]{
-                xAxis.x, xAxis.y, xAxis.z, 0f,
-                yAxis.x, yAxis.y, yAxis.z, 0f,
-                zAxis.x, zAxis.y, zAxis.z, 0f,
-                eye.x,   eye.y,   eye.z,   1f
+                xAxis.x, yAxis.x, zAxis.x, eye.x,
+                xAxis.y, yAxis.y, zAxis.y, eye.y,
+                xAxis.z, yAxis.z, zAxis.z, eye.z,
+                0f,      0f,      0f,      1f
         });
+
+//        return new Matrix4f(new float[]{
+//                xAxis.x, xAxis.y, xAxis.z, 0f,
+//                yAxis.x, yAxis.y, yAxis.z, 0f,
+//                zAxis.x, zAxis.y, zAxis.z, 0f,
+//                eye.x,   eye.y,   eye.z,   1f
+//        });
+
+//        return new Matrix4f(new float[]{
+//                xAxis.x, yAxis.x, zAxis.x, 0f,
+//                xAxis.y, yAxis.y, zAxis.y, 0f,
+//                xAxis.z, yAxis.z, zAxis.z, 0f,
+//                eye.x,   eye.y,   eye.z,   1f
+//        });
 
 //        return new Matrix4f(new float[]{
 //                xAxis.x, yAxis.x, zAxis.x, 0f,

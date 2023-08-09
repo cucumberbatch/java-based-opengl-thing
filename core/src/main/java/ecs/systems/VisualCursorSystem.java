@@ -6,6 +6,7 @@ import ecs.entities.Entity;
 import ecs.graphics.*;
 import ecs.shapes.Rectangle;
 import ecs.utils.Logger;
+import org.lwjgl.assimp.Assimp;
 import org.lwjgl.glfw.GLFW;
 import vectors.Vector3f;
 import vectors.Vector4f;
@@ -206,7 +207,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
     @Override
     public void render(Graphics graphics) {
-        graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
+//        graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
 //        component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
 //        Shader.GUI.setUniform("u_color", cursorColor);
 //        Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);

@@ -1,6 +1,7 @@
 package ecs.graphics;
 
 import ecs.utils.BufferUtils;
+import ecs.utils.Logger;
 import matrices.Matrix4f;
 import org.lwjgl.opengl.GL20;
 import vectors.Vector2f;
@@ -40,7 +41,7 @@ public class Shader {
         }
         int result = GL20.glGetUniformLocation(id, name);
         if (result == -1) {
-            System.err.println("Couldn't find uniform variable '" + name + "'!");
+            Logger.error("Couldn't find uniform variable '" + name + "'!");
         } else {
             uniformLocationCache.put(name, result);
         }

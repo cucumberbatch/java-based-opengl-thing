@@ -13,7 +13,7 @@ public class Transform extends AbstractComponent {
 
     public Vector3f position = new Vector3f();
     public Vector3f rotation = new Vector3f();
-    public Vector3f scale    = new Vector3f();
+    public Vector3f scale    = Vector3f.one();
 
 
     @Override

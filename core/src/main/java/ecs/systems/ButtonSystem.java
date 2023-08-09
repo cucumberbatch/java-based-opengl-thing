@@ -4,9 +4,13 @@ import ecs.components.Button;
 import ecs.components.VisualCursor;
 import ecs.entities.Entity;
 import ecs.graphics.*;
+import ecs.utils.Logger;
 import vectors.Vector4f;
 
+import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ButtonSystem extends AbstractSystem<Button> {
 

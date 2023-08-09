@@ -33,8 +33,8 @@ public class RendererSystem extends AbstractSystem<Renderer> {
 
 
 //        Shader.BACKGROUND.setUniform("u_model",
-//                Matrix4f.multiply(
-//                        Matrix4f.multiply(
+//                Matrix4f.mul(
+//                        Matrix4f.mul(
 //                                Matrix4f.rotateAroundOY(component.transform.rotation.y),
 //                                Matrix4f.rotateAroundOX(component.transform.rotation.x)),
 //                        Matrix4f.translation(component.transform.position)));

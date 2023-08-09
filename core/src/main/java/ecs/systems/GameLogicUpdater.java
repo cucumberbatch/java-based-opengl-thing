@@ -36,7 +36,7 @@ public class GameLogicUpdater implements GameLogic {
 
     public GameLogicUpdater(Window window) {
         this.window = window;
-        this.graphics = new Graphics();
+        this.graphics = new Graphics(window);
     }
 
     public void setScene(Scene scene) {

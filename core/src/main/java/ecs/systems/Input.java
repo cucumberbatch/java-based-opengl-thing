@@ -1,5 +1,6 @@
 package ecs.systems;
 
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import vectors.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -20,12 +21,13 @@ public class Input {
     public static boolean[] releasedKeys    = new boolean[KEYS_ARRAY_SIZE];
     public static boolean[] holdenKeys      = new boolean[KEYS_ARRAY_SIZE];
 
+    public static List<Integer> lastPressedKeys = new ArrayList<>();
+
     public static Vector2f  cursorPosition  = new Vector2f();
 
 
     public static class KeyboardInput extends GLFWKeyCallback {
 
-        private static List<Integer> lastPressedKeys = new ArrayList<>();
 
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
@@ -39,6 +41,19 @@ public class Input {
         }
     }
 
+    public static class MouseInput extends GLFWMouseButtonCallback {
+        @Override
+        public void invoke(long window, int button, int action, int mods) {
+            releasedKeys[button]   = action == GLFW_RELEASE;
+            pressedKeys[button]    = action == GLFW_PRESS;
+            holdenKeys[button]     = action == GLFW_REPEAT;
+
+            if (action == GLFW_PRESS) {
+                lastPressedKeys.add(button);
+            }
+        }
+    }
+
     public static class CursorPositionInput extends GLFWCursorPosCallback {
         @Override
         public void invoke(long window, double xpos, double ypos) {
@@ -48,7 +63,7 @@ public class Input {
     }
 
     public static void updateInput() {
-        for (Integer key : KeyboardInput.lastPressedKeys) {
+        for (Integer key : lastPressedKeys) {
             if (pressedKeys[key]) {
                 pressedKeys[key]    = false;
                 holdenKeys[key]     = true;

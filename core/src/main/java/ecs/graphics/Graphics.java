@@ -1,12 +1,11 @@
 package ecs.graphics;
 
-import ecs.Engine;
 import ecs.components.MeshRenderer;
 import ecs.components.Transform;
-import ecs.config.EngineConfig;
 import ecs.systems.Input;
 import ecs.systems.TransformSystem;
 import ecs.utils.Logger;
+import ecs.utils.TerminalUtils;
 import matrices.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import vectors.Vector2f;
@@ -24,19 +23,20 @@ public class Graphics {
 
     public Shader   basicShader;
 
-//    public Matrix4f projection = Matrix4f.perspective(90, -1f, 1f, 1);
-    public Matrix4f projection = Matrix4f.perspective2(90, -1f, 1, 1);
-//    public Matrix4f projection = Matrix4f.orthographic(-1, 1, -1, 1, -1, 1);
-//    public Matrix4f projection = Matrix4f.orthographic2(-1, 1, -1, 1, -1, 1);
+//    public static Matrix4f projection = Matrix4f.perspective(90, -1f, 1f, 1);
+//    public static Matrix4f projection = Matrix4f.perspective2(90, -1f, 1, 1);
+//    public static Matrix4f projection = Matrix4f.orthographic(-1, 1, -1, 1, -1, 1);
+//    public static Matrix4f projection = Matrix4f.orthographic2(-1, 1, -1, 1, -1, 1);
+    public static Matrix4f projection = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
+//    public static Matrix4f projection = Matrix4f.perspective3(120, 1, -0.2f, 0.5f);
 
     public Vector3f cameraDirection = Vector3f.forward();
 
-    public Matrix4f view = Matrix4f.lookAt(Vector3f.backward(), Vector3f.forward(), Vector3f.up());
+    public static Matrix4f view = Matrix4f.lookAt(Vector3f.backward(), Vector3f.forward(), Vector3f.up());
 
-    public Vector3f experimentVector = Vector3f.zero();
-
-    public Graphics() {
+    public Graphics(Window window) {
         this.basicShader = Shader.BACKGROUND;
+        this.window = window;
     }
 
     public void render(MeshRenderer renderer) {
@@ -63,9 +63,9 @@ public class Graphics {
     public void drawMesh(Mesh mesh, Vector4f color, Transform transform) {
 
 //        projection = Matrix4f.lerp(
-//                Matrix4f.perspective2(90, -1f, 1, 1),
-//                Matrix4f.orthographic(1, -1, 1, -1, 1, -1),
-//                (float) Math.sin(ratio)
+//                Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1),
+//                Matrix4f.perspective3(90, 1, -0.2f, 1),
+//                (float) (Math.sin(ratio) + 1) / 2
 //        );
 
 
@@ -75,69 +75,34 @@ public class Graphics {
             Logger.info("window width: " + Window.width);
         }
 
-//        Vector2f cursorPositionDiff = cursorPosition.sub(Input.getCursorPosition());
-
-//        experimentVector.set(
-//                 Input.getCursorPosition().x / (Window.width / 2) - 1f,
-//                -Input.getCursorPosition().y / (Window.height / 2) + 1f,
-//                0f
-//        );
-
-
-
 
         ratio += 0.05f;
-
-//        cameraRotation.set(Vector3f.add(cameraPosition, new Vector3f((float) (Math.cos(ratio)), (float) (Math.sin(ratio)), 0f)));
-        Vector3f cameraFocus = Vector3f.add(cameraPosition, new Vector3f(0f, 0f, 1f));
-        view = Matrix4f.lookAt(cameraPosition, cameraFocus, Vector3f.up());
-
-//        cameraRotation.set(cameraPosition.x + (float) Math.sin(ratio) - 0.5f, cameraPosition.y, 0f);
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            cameraPosition.add(0f, 0f, 0.02f);
-        }
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            cameraPosition.add(0f, 0f, -0.02f);
-        }
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            cameraPosition.add(-0.02f, 0f, 0f);
-        }
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            cameraPosition.add(0.02f, 0f, 0f);
-        }
-//
-//        Vector2f cursorPosition = Input.getCursorPosition();
-//        view = Matrix4f.lookAt(cameraPosition, new Vector3f(cursorPosition.x, cursorPosition.y, 0f).div(Window.width), Vector3f.up());
-
-
-//        Matrix4f translation = Matrix4f.translation(transform.position);
-//        Matrix4f translatedMatrix = Matrix4f.multiply(Matrix4f.multiply(projection, view), translation);
 
         if (basicShader == null)
             basicShader = Shader.BACKGROUND;
 
 
-        Vector2f rotationVectorResult = Vector2f.sub(cursorPosition, Input.getCursorPosition());
         cursorPosition = Input.getCursorPosition();
 
-//        Matrix4f model = Matrix4f.translation(transform.position);
-        Matrix4f model = Matrix4f.translation(experimentVector, new Vector3f(Input.getCursorPosition().div(2), 0f), Vector3f.one().mul(0.7f));
-//        Matrix4f model = Matrix4f.translation(experimentVector, new Vector3f(0.0f, 0.0f, 0.0f), Vector3f.one());
+        Matrix4f model = Matrix4f.translation(transform.position)
+//                .mul(Matrix4f.rotation(1, transform.rotation))
+                .mul(Matrix4f.scale(transform.scale));
 
-//        model = Matrix4f.multiply(model, Matrix4f.rotateAroundOY(Input.getCursorPosition().x));
-//        model = Matrix4f.multiply(model, Matrix4f.rotateAroundOX(Input.getCursorPosition().y));
+        Logger.info("model matrix:" + TerminalUtils.formatOutputMatrix(model) + "\n");
+        Logger.info("view matrix:" + TerminalUtils.formatOutputMatrix(view) + "\n");
+        Logger.info("projection matrix:" + TerminalUtils.formatOutputMatrix(projection) + "\n");
 
-//        Matrix4f projection = Matrix4f.perspective(10, 0, 1, 1);
+
+//        model = Matrix4f.mul(model, Matrix4f.rotateAroundOY(Input.getCursorPosition().x));
+//        model = Matrix4f.mul(model, Matrix4f.rotateAroundOX(Input.getCursorPosition().y));
 
         basicShader.setUniform("u_color", color);
 
         basicShader.setUniform("u_projection", projection);
         basicShader.setUniform("u_view",       view);
         basicShader.setUniform("u_model",      model);
+
+//        basicShader.setUniform("u_projection", Matrix4f.mul(projection, view).mul(model));
 
         this.enableShaderAndDrawMesh(basicShader, mesh);
     }
@@ -146,10 +111,19 @@ public class Graphics {
         shader.enable();
 //        mesh.vertexArray.render(GL_TRIANGLE_STRIP);
 //        mesh.vertexArray.render(GL_LINE_STRIP);
-        mesh.vertexArray.render(GL_TRIANGLES);
+//        mesh.vertexArray.render(GL_TRIANGLES);
 //        mesh.vertexArray.render(GL_LINES);
+        mesh.vertexArray.render(GL_LINE_LOOP);
 //        mesh.vertexArray.render(GL_QUADS);
 //        mesh.vertexArray.render(GL_QUAD_STRIP);
         shader.disable();
+    }
+
+    public static void setProjection(Matrix4f projection) {
+        Graphics.projection = projection;
+    }
+
+    public static void setView(Matrix4f view) {
+        Graphics.view = view;
     }
 }

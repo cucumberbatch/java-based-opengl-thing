@@ -7,6 +7,7 @@ import ecs.utils.Logger;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowCloseCallbackI;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -37,6 +38,7 @@ public class Window {
     }
 
     public void init() {
+        Logger.info("Window initialization started");
         if (window != -1) return;
 
         GLFW.glfwSetErrorCallback((code, message) -> {
@@ -63,13 +65,14 @@ public class Window {
 
         // Setting up input callback handlers
         GLFW.glfwSetKeyCallback(window, new Input.KeyboardInput());
+        GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
         GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
 
         // Grab the cursor in window
         // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         // Let the cursor be free
-        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 
         // Get the thread stack and push a new frame
         try (MemoryStack stack = stackPush()) {
@@ -111,6 +114,8 @@ public class Window {
 
         GL30.glActiveTexture(GL30.GL_TEXTURE1);
         Shader.loadAll();
+
+        Logger.info("Window initialization ended");
     }
 
     public void destroy() {
