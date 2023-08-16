@@ -31,10 +31,10 @@ public class ComponentHandlerScanner {
         this.classLoader = ClassLoader.getSystemClassLoader();
     }
 
-    public List<Pair> getAnnotatedClassesInPackage(String packageName)
+    public List<Pair<?, ?>> getAnnotatedClassesInPackage(String packageName)
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
                    InstantiationException, IllegalAccessException, UnsupportedEncodingException {
-        List<Pair> classes = new ArrayList<>();
+        List<Pair<?, ?>> classes = new ArrayList<>();
         packageName = new String(packageName.getBytes(), StandardCharsets.UTF_8);
         URL packageUrl = classLoader.getResource(packageName);
 
@@ -54,7 +54,7 @@ public class ComponentHandlerScanner {
                             if (componentHandlerAnnotation != null) {
                                 Class<? extends Component> componentClass = componentHandlerAnnotation.value();
                                 System<?> system = systemClass.getDeclaredConstructor().newInstance();
-                                classes.add(new Pair(system, componentClass));
+                                classes.add(new Pair<>(system, componentClass));
                             }
                         }
                     }

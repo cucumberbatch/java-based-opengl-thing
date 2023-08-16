@@ -7,9 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Logger {
@@ -123,45 +121,55 @@ public class Logger {
         }
     }
 
-    public static void log(Level level, String message, Throwable e) {
+    private static StringBuilder unwrapNestedException(Throwable throwable, StackTraceElement[] previousStackTrace) {
+        if (Objects.isNull(throwable)) return new StringBuilder();
+        List<StackTraceElement> previousStackTraceList = Arrays.stream(previousStackTrace).collect(Collectors.toList());
+        String stackTraceFormat = "%s: %s%s\n" + (throwable.getCause() != null ? "Caused by: " : "");
+        String className = throwable.getClass().getName();
+        String message = throwable.getMessage();
+
+        String stackTrace = Arrays.stream(throwable.getStackTrace())
+                .filter(element -> !previousStackTraceList.contains(element))
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n    at ", "\n    at ", ""));
+
+        return new StringBuilder(String.format(stackTraceFormat, className, message, stackTrace))
+                .append(unwrapNestedException(throwable.getCause(), throwable.getStackTrace()));
+    }
+
+    public static void log(Level level, String message, Throwable throwable) {
         if (level.compareTo(ApplicationConfig.LOGGER_SEVERITY) < 0) return;
         StringBuilder string = new StringBuilder();
 
         try {
             string.append(String.format(
-                    "<cyan>%s</>  [%8s] %s: %s\n",
+                    "<cyan>%s</>  [%8s] %s: %s\n%s",
                     DATE_FORMAT.format(Date.from(Instant.now())),
                     Thread.currentThread().getName(),
                     level.formatLevel(),
-                    message
+                    message,
+                    unwrapNestedException(throwable, new StackTraceElement[]{})
             ));
-
-            if (!Objects.isNull(e)) {
-                warn("Not full stack trace visibility! If there is exception catching/rethrowing in trace then there can be not enough of error info!");
-                string.append(String.format(
-                        " [::] <yellow>%s</>\n in %s",
-                        e.getClass().getName(),
-                        Arrays.stream(e.getStackTrace())
-                                .map(StackTraceElement::toString)
-                                .collect(Collectors.joining("\n\t"))
-                ));
-            }
-
             writer.write(TerminalUtils.fAnsi(string.toString()));
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+    }
 
+    public static void log(Throwable throwable) {
+        log(Level.ERROR, "Unhandled exception!", throwable);
+    }
 
+    public static void log(String message, Throwable throwable) {
+        log(Level.ERROR, message, throwable);
     }
 
     public static void log(Level level, String message) {
         log(level, message, null);
     }
 
-    public static void log(Level level, Throwable e) {
-        log(level, "", e);
+    public static void log(Level level, Throwable throwable) {
+        log(level, "", throwable);
     }
 
     public static void trace(String message) {
@@ -184,11 +192,11 @@ public class Logger {
         log(Level.ERROR, message);
     }
 
-    public static void error(Exception e) {
+    public static void error(Throwable e) {
         log(Level.ERROR, e);
     }
 
-    public static void error(String message, Exception e) {
+    public static void error(String message, Throwable e) {
         log(Level.ERROR, message, e);
     }
 
@@ -200,7 +208,7 @@ public class Logger {
         log(Level.FATAL, e);
     }
 
-    public static void fatal(String message, Exception e) {
+    public static void fatal(String message, Throwable e) {
         log(Level.FATAL, message, e);
     }
 }

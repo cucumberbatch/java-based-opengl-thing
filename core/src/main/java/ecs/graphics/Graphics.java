@@ -49,9 +49,6 @@ public class Graphics {
 
 
     public void drawMesh(Mesh mesh, Vector4f color, Transform transform) {
-
-
-
         if (cursorPosition == null) {
             cursorPosition = Input.getCursorPosition();
             Logger.info("window height: " + Window.height);
@@ -61,16 +58,15 @@ public class Graphics {
         if (basicShader == null)
             basicShader = Shader.BACKGROUND;
 
-
         cursorPosition = Input.getCursorPosition();
 
         Matrix4f model = Matrix4f.translation(transform.position)
 //                .mul(Matrix4f.rotation(1, transform.rotation))
                 .mul(Matrix4f.scale(transform.scale));
 
-        Logger.info("model matrix:" + TerminalUtils.formatOutputMatrix(model) + "\n");
-        Logger.info("view matrix:" + TerminalUtils.formatOutputMatrix(view) + "\n");
-        Logger.info("projection matrix:" + TerminalUtils.formatOutputMatrix(projection) + "\n");
+        Logger.debug("model matrix:" + TerminalUtils.formatOutputMatrix(model) + "\n");
+        Logger.debug("view matrix:" + TerminalUtils.formatOutputMatrix(view) + "\n");
+        Logger.debug("projection matrix:" + TerminalUtils.formatOutputMatrix(projection) + "\n");
 
 
 //        model = Matrix4f.mul(model, Matrix4f.rotateAroundOY(Input.getCursorPosition().x));
