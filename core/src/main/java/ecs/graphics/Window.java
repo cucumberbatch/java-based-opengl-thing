@@ -4,10 +4,7 @@ import ecs.graphics.Shader;
 import ecs.systems.Input;
 
 import ecs.utils.Logger;
-import org.lwjgl.glfw.Callbacks;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowCloseCallbackI;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -68,11 +65,13 @@ public class Window {
         GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
         GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
 
-        // Grab the cursor in window
-        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-        // Let the cursor be free
-        GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+        //
+//        GLFW.glfwSetWindowRefreshCallback(window, new GLFWWindowRefreshCallback() {
+//            @Override
+//            public void invoke(long l) {
+//                Logger.info(String.format("Refreshed window[%s] value[%s]", window, l));
+//            }
+//        });
 
         // Get the thread stack and push a new frame
         try (MemoryStack stack = stackPush()) {

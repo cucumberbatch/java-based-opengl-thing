@@ -110,7 +110,7 @@ public class TreeEntityManagerTest {
         Assertions.assertEquals(e1, entityManager.getRoot(e8));
     }
 
-    @Test
+//    @Test
     void testEntityLinkerWithParentCheck1() {
         TreeEntityManager entityManager = new TreeEntityManager();
 

@@ -13,8 +13,7 @@ public class FrameTiming {
     private int  actualFrameRate;
 
     public FrameTiming() {
-        targetFrameRate = 60;
-        loopSlotInNano  = NANO_SECONDS_IN_SECOND / targetFrameRate;
+        setTargetFrameRate(60);
     }
 
     public void updateTiming() {
@@ -46,6 +45,7 @@ public class FrameTiming {
     public void setTargetFrameRate(int targetFrameRate) {
         if (targetFrameRate < 1) return;
         this.targetFrameRate = targetFrameRate;
+        this.loopSlotInNano = NANO_SECONDS_IN_SECOND / targetFrameRate;
     }
 
     public int getActualFrameRate() {

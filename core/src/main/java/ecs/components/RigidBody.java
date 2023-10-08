@@ -35,18 +35,6 @@ public class RigidBody extends AbstractComponent {
         frictionFactor = 0.0f;
     }
 
-    // TODO: 07.06.2021 implementation isn't done yet
-    @Override
-    public <E extends Component> E getReplica() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public RigidBody getInstance() {
-        return new RigidBody();
-    }
-
-
     @Override
     public String getName() {
         return this.getClass().getName();

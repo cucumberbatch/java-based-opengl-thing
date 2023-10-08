@@ -3,9 +3,10 @@ package ecs.components;
 import ecs.entities.Entity;
 import ecs.utils.Logger;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public abstract class AbstractComponent implements Component {
+public abstract class AbstractComponent implements Component, Serializable {
 
     public enum State {
         LATE_INIT_STATE(AbstractComponent.LATE_INIT_STATE),
@@ -19,7 +20,10 @@ public abstract class AbstractComponent implements Component {
         }
 
         public static State fromValue(byte value) {
-            return Arrays.stream(State.values()).filter(s -> s.value == value).findFirst().orElseThrow(IllegalArgumentException::new);
+            return Arrays.stream(State.values())
+                    .filter(s -> s.value == value)
+                    .findFirst()
+                    .orElseThrow(IllegalArgumentException::new);
         }
     }
 
@@ -48,19 +52,6 @@ public abstract class AbstractComponent implements Component {
         entity = null;
         transform = null;
     }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends Component> T getInstance() {
-        return (T) this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends Component> T getReplica() {
-        return (T) this;
-    }
-
 
     /*
      Getters and setters implementation by an abstract component class

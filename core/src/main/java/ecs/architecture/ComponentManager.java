@@ -4,6 +4,9 @@ import ecs.components.Component;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.managment.SystemManager;
+import ecs.utils.Logger;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class ComponentManager {
     private static ComponentManager instance;
@@ -32,10 +35,11 @@ public class ComponentManager {
 
     private <E extends Component> void setupTransforms(Entity entity, E component) {
         if (entity.transform == null) {
-            Transform transform = entity.getComponent(Transform.class);
-            if (transform == null && component instanceof Transform) {
+            if (component instanceof Transform) {
                 entity.transform = (Transform) component;
-            } else {
+            }
+            Transform transform = entity.getComponent(Transform.class);
+            if (transform != null) {
                 component.setTransform(transform);
             }
         } else {
@@ -44,10 +48,24 @@ public class ComponentManager {
     }
 
     public <E extends Component> void addComponent(Entity entity, E component) {
+        if (entity == null || component == null)
+            throw new IllegalArgumentException();
+
         generateComponentId(component);
         systemManager.addComponent(component);
         entity.addComponent(component);
         setupTransforms(entity, component);
+    }
+
+    public <E extends Component> void addComponent(Entity entity, Class<E> componentClass) {
+        E component;
+        try {
+            component = componentClass.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            Logger.error("Error while creating a component instance: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        this.addComponent(entity, component);
     }
 
     public <E extends Component> E getComponent(Entity entity, Class<E> componentClass) {
@@ -59,6 +77,6 @@ public class ComponentManager {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
         E component = entity.getComponent(componentClass);
-        return (E) systemManager.systemMap.get(componentClass).removeComponent(component.getId());
+        return (E) systemManager.systemMap.<E>get(componentClass).<E>removeComponent(component.getId());
     }
 }

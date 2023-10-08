@@ -21,6 +21,7 @@ import static org.lwjgl.opengl.GL30.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.opengl.GL30.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL32.GL_DEPTH_CLAMP;
 
 public class VertexArray {
 
@@ -70,7 +71,7 @@ public class VertexArray {
     }
 
     public void draw(int mode) {
-        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_CLAMP);
         glDrawElements(mode, count, GL_UNSIGNED_BYTE, 0);
     }
 

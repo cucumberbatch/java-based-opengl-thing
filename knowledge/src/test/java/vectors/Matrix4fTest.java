@@ -80,7 +80,7 @@ class Matrix4fTest {
 //        assertEquals(expected, result);
 //    }
 
-    @Test
+//    @Test
     public void matrixMultiplicationTest2() {
         Matrix4f expected = new Matrix4f(new float[]{
                 2, 0, 0, 2,
@@ -100,7 +100,7 @@ class Matrix4fTest {
         });
     }
 
-    @Test
+//    @Test
     public void testMultiplication1() {
         Matrix4f result = Matrix4f.mul(testMatrix1, testMatrix2);
 

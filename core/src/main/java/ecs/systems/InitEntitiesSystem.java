@@ -64,7 +64,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
                 generatedButton.transform = transform;
-                generatedButton.transform.position.set(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
+                generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
                 collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -130,7 +130,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
                 generatedButton.transform = transform;
-                generatedButton.transform.position.set(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
+                generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
                 collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -223,7 +223,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
                 generatedButton.transform = transform;
-                generatedButton.transform.position.set(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
+                generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
                 collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -241,6 +241,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         Transform transform = new Transform();
         Transform cameraTransform = new Transform();
         MeshCollider meshCollider = new MeshCollider();
+        MeshCollider cameraMeshCollider = new MeshCollider();
         VisualCursor visualCursor = new VisualCursor();
         Camera cameraComponent = new Camera();
 
@@ -248,14 +249,66 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         meshCollider.entity = cursor;
         visualCursor.entity = cursor;
         cameraTransform.entity = camera;
+        cameraMeshCollider.entity = camera;
         cameraComponent.entity = camera;
+
+
+        // We can use a more convenient api, if we introduce something like entityManager, for example:
+        //
+        //     SomeKindOfComponent component = entityManager.for(entity).addComponent(SomeKindOfComponent.class);
+        //
+        // Also, we can add more than one component at the same time
+        //
+        //     List<Component> components = entityManager.for(entity).addComponents(SomeKindOfComponent.class, AnotherComponent.class);
+        //
+
 
         componentManager.addComponent(cursor, transform);
         componentManager.addComponent(cursor, meshCollider);
         componentManager.addComponent(cursor, visualCursor);
         componentManager.addComponent(camera, cameraTransform);
+        componentManager.addComponent(camera, cameraMeshCollider);
         componentManager.addComponent(camera, cameraComponent);
 
+
+        // When we use method `select(Entity)` we get `EntityNode` from which we can add/remove/get components, manage entities and etc.
+        // EntityManager works with tree of EntityNode
+
+
+
+//        em.select(em.createEntity("cursor")).addComponents(Transform.class, MeshCollider.class, VisualCursor.class);
+//        em.select(em.createEntity("camera")).addComponents(Transform.class, MeshCollider.class, VisualCursor.class);
+
+    }
+
+    private void initScene4() {
+        Scene scene = new Scene("scene name 4");
+
+        Entity testObject   = new Entity("testObject");
+        Entity camera       = new Entity("camera");
+        Entity parentEntity = new Entity("parentEntity");
+
+        scene.addEntity(testObject);
+        scene.addEntity(camera);
+        scene.addEntity(parentEntity);
+
+        Transform transform = new Transform();
+        Transform cameraTransform = new Transform();
+        MeshCollider meshCollider = new MeshCollider();
+        VisualCursor testObjectComponent = new VisualCursor();
+        Camera cameraComponent = new Camera();
+
+        transform.entity = testObject;
+        meshCollider.entity = testObject;
+        testObjectComponent.entity = testObject;
+        cameraTransform.entity = camera;
+        cameraComponent.entity = camera;
+
+        componentManager.addComponent(testObject, transform);
+        componentManager.addComponent(testObject, meshCollider);
+        componentManager.addComponent(testObject, testObjectComponent);
+        componentManager.addComponent(camera, cameraTransform);
+        componentManager.addComponent(camera, cameraComponent);
     }
 
 }

@@ -22,11 +22,9 @@ import vectors.Vector3f;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
-@SuppressWarnings("rawtypes")
+//@SuppressWarnings("rawtypes")
 public class GameLogicUpdater implements GameLogic {
 
     private Window window;
@@ -87,10 +85,10 @@ public class GameLogicUpdater implements GameLogic {
     is a Component type, because the only way of adding a component into
     component list is through component factory method call, that by definition
     generates objects of Component type */
-    @SuppressWarnings("unchecked")
+//    @SuppressWarnings("unchecked")
     public void init() throws RuntimeException {
-        for (System system : systemManager.listOfSystemsForInit) {
-            for (Component component : (List<Component>) system.getComponentList()) {
+        for (System<? extends Component> system : systemManager.listOfSystemsForInit) {
+            for (Component component : system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_INIT_STATE) {
                     Logger.trace(String.format(
                             "Handling init component [%s: %s]",
@@ -166,6 +164,7 @@ public class GameLogicUpdater implements GameLogic {
                             if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
                                 isCollisionFound = true;
                                 if (Collision.ENTERED == previousFrameCollision.state) {
+                                    //todo: add collision pool
                                     previousFrameCollision.pair = new CollisionPair(positionA, positionB);
                                     previousFrameCollision.state = Collision.HOLD;
                                     previousFrameCollision.isModified = true;
@@ -180,6 +179,7 @@ public class GameLogicUpdater implements GameLogic {
                         }
                         if (!isCollisionFound) {
                             collisionState = Collision.ENTERED;
+                            //todo: add collision pool
                             pair      = new CollisionPair(positionA, positionB);
                             collision = new Collision(A, B, pair, collisionState);
                             collision.isModified = true;
@@ -236,13 +236,12 @@ public class GameLogicUpdater implements GameLogic {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void update(float deltaTime) {
         Stopwatch.start();
         glfwPollEvents();
 
-        for (System system : systemManager.listOfSystemsForUpdate) {
-            for (Component component : (List<Component>) system.getComponentList()) {
+        for (System<? extends Component> system : systemManager.listOfSystemsForUpdate) {
+            for (Component component : system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
                     Logger.trace(String.format(
                             "Handling update component [%s: %s]",
@@ -267,14 +266,14 @@ public class GameLogicUpdater implements GameLogic {
     private void handleCollisionEnter() {
         Stopwatch.start();
 
-        for (System system : systemManager.listOfSystemsForCollisionHandling) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((Component) component);
+        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+            for (Component component : system.getComponentList()) {
+                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
-                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
+                    if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.ENTERED == collision.state) {
-                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionStart(collision);
                     }
                 }
@@ -288,14 +287,14 @@ public class GameLogicUpdater implements GameLogic {
     private void handleCollisionHold() {
         Stopwatch.start();
 
-        for (System system : systemManager.listOfSystemsForCollisionHandling) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((Component) component);
+        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+            for (Component component : system.getComponentList()) {
+                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
-                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
+                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.HOLD == collision.state) {
-                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollision(collision);
                     }
                 }
@@ -309,14 +308,14 @@ public class GameLogicUpdater implements GameLogic {
     private void handleCollisionExit() {
         Stopwatch.start();
 
-        for (System system : systemManager.listOfSystemsForCollisionHandling) {
-            for (Object component : system.getComponentList()) {
-                system.setCurrentComponent((Component) component);
+        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+            for (Component component : system.getComponentList()) {
+                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
-                    if (collision.A != ((Component) component).getEntity() && collision.B != ((Component) component).getEntity()) continue;
+                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.EXITED == collision.state) {
-                        if (((Component) component).getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
                         system.onCollisionEnd(collision);
                     }
                 }
@@ -340,23 +339,13 @@ public class GameLogicUpdater implements GameLogic {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void render(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Stopwatch.start();
 
-        //
-        // Somewhere in component render function JVM crashes with code:
-        //
-        //    EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ff9e1cf13c7, pid=16376, tid=21524
-        //
-        // solved: The issue was in loading vertices, indices and other stuff
-        //         into GPU for already loaded meshes each frame, even if the
-        //         mesh wasn't move at all. Also, it solves the performance
-        //         problem in render function
-        for (System system : systemManager.listOfSystemsForRender) {
-            for (Component component : (List<Component>) system.getComponentList()) {
+        for (System<? extends Component> system : systemManager.listOfSystemsForRender) {
+            for (Component component : system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
                     Logger.trace(String.format(
                             "Handling render component [%s: %s]",

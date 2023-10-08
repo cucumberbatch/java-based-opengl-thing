@@ -60,9 +60,11 @@ public class Graphics {
 
         cursorPosition = Input.getCursorPosition();
 
-        Matrix4f model = Matrix4f.translation(transform.position)
-//                .mul(Matrix4f.rotation(1, transform.rotation))
-                .mul(Matrix4f.scale(transform.scale));
+        Transform worldTransform = TransformSystem.getWorldTransform(transform);
+
+        Matrix4f model = Matrix4f.translation(worldTransform.position)
+                .mul(Matrix4f.rotation(1, transform.rotation))
+                .mul(Matrix4f.scale(worldTransform.scale));
 
         Logger.debug("model matrix:" + TerminalUtils.formatOutputMatrix(model) + "\n");
         Logger.debug("view matrix:" + TerminalUtils.formatOutputMatrix(view) + "\n");
@@ -84,6 +86,7 @@ public class Graphics {
     }
 
     private void enableShaderAndDrawMesh(Shader shader, Mesh mesh) {
+
         shader.enable();
 //        mesh.vertexArray.render(GL_TRIANGLE_STRIP);
 //        mesh.vertexArray.render(GL_LINE_STRIP);

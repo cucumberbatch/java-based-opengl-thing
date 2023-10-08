@@ -19,7 +19,7 @@ public class Entity implements TreeNode, Collidable {
     public List<Entity> daughters = new LinkedList<>();
 
     public Transform transform;
-    public Map<Class<? extends Component>, Component> components = new HashMap();
+    public Map<Class<? extends Component>, Component> components = new HashMap<>();
 
     public Entity() {
         this.id = -1;

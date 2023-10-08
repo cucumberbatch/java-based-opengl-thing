@@ -39,8 +39,11 @@ public class SystemManager {
     private void initComponentSystemAssociation() {
         try {
             ComponentHandlerScanner scanner = new ComponentHandlerScanner();
-            scanner.getAnnotatedClassesInPackage("ecs/systems")
-                    .forEach(pair -> systemMap.put(pair.component, pair.system));
+            List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage("ecs/systems");
+
+            Logger.info("Found system classes: " + annotatedClassesInPackage.toString());
+
+            annotatedClassesInPackage.forEach(pair -> systemMap.put(pair.component, pair.system));
         } catch (Exception e) {
             Logger.error(e.getMessage());
             throw new RuntimeException(e);
@@ -65,6 +68,7 @@ public class SystemManager {
         this.systemMap.get(componentClass).addComponent(component);
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(long componentId) {
         for (System<? extends Component> system: systemMap.values()) {
             for (Component component: system.getComponentList()) {

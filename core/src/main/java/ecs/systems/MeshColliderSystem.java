@@ -1,6 +1,7 @@
 package ecs.systems;
 
 import ecs.components.Transform;
+import ecs.physics.collision.MeshTransformListener;
 import ecs.reflection.ComponentHandler;
 
 @ComponentHandler(MeshCollider.class)
@@ -11,7 +12,12 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider> {
 
     @Override
     public int getWorkflowMask() {
-        return /*UPDATE_MASK | */COLLISION_MASK;
+        return INIT_MASK | /*UPDATE_MASK | */COLLISION_MASK;
+    }
+
+    @Override
+    public void init() {
+        this.component.entity.transform.setTransformListener(new MeshTransformListener());
     }
 
     @Override

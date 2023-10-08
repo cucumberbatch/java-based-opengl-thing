@@ -113,8 +113,9 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 
                 case HOVER_CURSOR_STATE:
                     if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
-                        selectedEntity.parent.transform.position.x = cursor.topLeft.x;
-                        selectedEntity.parent.transform.position.y = cursor.topLeft.y;
+                        selectedEntity.parent.transform.moveTo(cursor.topLeft.x, cursor.topLeft.y, selectedEntity.parent.transform.position.z);
+//                        selectedEntity.parent.transform.position.x = cursor.topLeft.x;
+//                        selectedEntity.parent.transform.position.y = cursor.topLeft.y;
                     }
                     break;
             }
@@ -161,7 +162,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         isCursorMoved = !displacement.equals(Vector2f.zero());
 
         Transform transform = component.transform;
-        transform.position.set(
+        transform.moveTo(
                 (Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
                 (Input.getCursorPosition().y - Window.height / 2f) / Window.height,
                 0f

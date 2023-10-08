@@ -221,7 +221,12 @@ public final class Vector3f {
 
     @Override
     public String toString() {
-         return String.format("[%-7.3f %-7.3f %-7.3f]\tV3f: %s", x, y, z, System.identityHashCode(this));
+        return "Vector3f{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                "}";
+//         return String.format("[%-7.3f %-7.3f %-7.3f]\tV3f: %s", x, y, z, System.identityHashCode(this));
     }
 
     @Override

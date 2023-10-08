@@ -1,12 +1,8 @@
 package ecs.components;
 
 import ecs.entities.Entity;
-import ecs.utils.Instantiatable;
-import ecs.utils.Replicable;
-import ecs.utils.Turntable;
 
-public interface Component
-        extends Turntable, Instantiatable<Component>, Replicable<Component> {
+public interface Component {
 
     /* Get and set methods for Id of component */
     long getId();
@@ -35,5 +31,10 @@ public interface Component
 
     void setState(byte state);
 
+    boolean isActive();
+
+    void setActivity(boolean activity);
+
+    void switchActivity();
 }
  

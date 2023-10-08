@@ -121,34 +121,50 @@ public class Logger {
         }
     }
 
-    private static StringBuilder unwrapNestedException(Throwable throwable, StackTraceElement[] previousStackTrace) {
-        if (Objects.isNull(throwable)) return new StringBuilder();
+    private static StringBuilder unwrapNestedException(Throwable cause, StackTraceElement[] previousStackTrace) {
+        if (Objects.isNull(cause)) return new StringBuilder();
         List<StackTraceElement> previousStackTraceList = Arrays.stream(previousStackTrace).collect(Collectors.toList());
-        String stackTraceFormat = "%s: %s%s\n" + (throwable.getCause() != null ? "Caused by: " : "");
-        String className = throwable.getClass().getName();
-        String message = throwable.getMessage();
+        String stackTraceFormat = "%s: %s%s\n" + (cause.getCause() != null ? "Caused by: " : "");
+        String className = cause.getClass().getName();
+        String message = cause.getMessage();
 
-        String stackTrace = Arrays.stream(throwable.getStackTrace())
+        String stackTrace = Arrays.stream(cause.getStackTrace())
                 .filter(element -> !previousStackTraceList.contains(element))
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n    at ", "\n    at ", ""));
 
         return new StringBuilder(String.format(stackTraceFormat, className, message, stackTrace))
-                .append(unwrapNestedException(throwable.getCause(), throwable.getStackTrace()));
+                .append(unwrapNestedException(cause.getCause(), cause.getStackTrace()));
     }
 
-    public static void log(Level level, String message, Throwable throwable) {
+    public static void log(Level level, String message, Throwable cause) {
         if (level.compareTo(ApplicationConfig.LOGGER_SEVERITY) < 0) return;
         StringBuilder string = new StringBuilder();
+        StackTraceElement stackTraceElement = Arrays.stream(Thread.currentThread().getStackTrace())
+                .filter((element) -> {
+                    return !element.getClassName().contains("ecs.utils.Logger") &&
+                            !element.getClassName().contains("java.lang.Thread") &&
+                            !element.getClassName().contains("GeneratedEvaluationClass");
+                })
+                .findFirst()
+                .orElse(null);
+
+        String methodPath = stackTraceElement.getClassName().concat(".").concat(stackTraceElement.getMethodName().concat("()"));
+        int methodMaxLength = 24;
+        int currentMethodLength = methodPath.length();
+        int currentMethodStart = Math.max(0, Math.abs(methodMaxLength - currentMethodLength));
+
+        methodPath = "...".concat(methodPath.substring(currentMethodStart, currentMethodLength));
 
         try {
             string.append(String.format(
-                    "<cyan>%s</>  [%8s] %s: %s\n%s",
+                    "<cyan>%s</>  [%8s] %" + methodMaxLength + "s %s: %s\n%s",
                     DATE_FORMAT.format(Date.from(Instant.now())),
                     Thread.currentThread().getName(),
+                    methodPath,
                     level.formatLevel(),
                     message,
-                    unwrapNestedException(throwable, new StackTraceElement[]{})
+                    unwrapNestedException(cause, new StackTraceElement[]{})
             ));
             writer.write(TerminalUtils.fAnsi(string.toString()));
         } catch (IOException e) {
@@ -156,20 +172,20 @@ public class Logger {
         }
     }
 
-    public static void log(Throwable throwable) {
-        log(Level.ERROR, "Unhandled exception!", throwable);
+    public static void log(Throwable cause) {
+        log(Level.ERROR, "Unhandled exception!", cause);
     }
 
-    public static void log(String message, Throwable throwable) {
-        log(Level.ERROR, message, throwable);
+    public static void log(String message, Throwable cause) {
+        log(Level.ERROR, message, cause);
     }
 
     public static void log(Level level, String message) {
         log(level, message, null);
     }
 
-    public static void log(Level level, Throwable throwable) {
-        log(level, "", throwable);
+    public static void log(Level level, Throwable cause) {
+        log(level, "", cause);
     }
 
     public static void trace(String message) {
@@ -192,23 +208,23 @@ public class Logger {
         log(Level.ERROR, message);
     }
 
-    public static void error(Throwable e) {
-        log(Level.ERROR, e);
+    public static void error(Throwable cause) {
+        log(Level.ERROR, cause);
     }
 
-    public static void error(String message, Throwable e) {
-        log(Level.ERROR, message, e);
+    public static void error(String message, Throwable cause) {
+        log(Level.ERROR, message, cause);
     }
 
     public static void fatal(String message) {
         log(Level.FATAL, message);
     }
 
-    public static void fatal(Exception e) {
-        log(Level.FATAL, e);
+    public static void fatal(Throwable cause) {
+        log(Level.FATAL, cause);
     }
 
-    public static void fatal(String message, Throwable e) {
-        log(Level.FATAL, message, e);
+    public static void fatal(String message, Throwable cause) {
+        log(Level.FATAL, message, cause);
     }
 }

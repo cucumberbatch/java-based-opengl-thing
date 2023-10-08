@@ -8,6 +8,7 @@ import ecs.reflection.ComponentHandler;
 import ecs.utils.Logger;
 import matrices.Matrix4f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL30;
 import vectors.Vector2f;
 import vectors.Vector3f;
 import vectors.Vector4f;
@@ -18,8 +19,8 @@ public class CameraSystem extends AbstractSystem<Camera> {
 
     float near = 0.1f;
     float far = 100f;
-    float angle = 180f;
-    float ratio = 16f / 9f;
+    float angle = 90f;
+    float ratio = 1f / 1f;
 
     Vector3f cameraPosition = new Vector3f();
 
@@ -30,8 +31,8 @@ public class CameraSystem extends AbstractSystem<Camera> {
 //    public static Matrix4f projection = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
 //    public static Matrix4f projection = Matrix4f.perspective3(120, 1, -0.2f, 0.5f);
 
-    private static final Matrix4f PERSPECTIVE_MATRIX  = Matrix4f.perspective3(90, 1, -0.2f, 0.5f);
-    private static final Matrix4f ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
+    private static Matrix4f PERSPECTIVE_MATRIX;
+    private static Matrix4f ORTHOGRAPHIC_MATRIX;
 
     private static final int PERSPECTIVE_VIEW_STATE = 0;
     private static final int PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE = 1;
@@ -40,6 +41,7 @@ public class CameraSystem extends AbstractSystem<Camera> {
 
     private int projectionState = ORTHOGRAPHIC_VIEW_STATE;
     private float projectionProgress = 0;
+    private boolean callbackInitialized = false;
 
     @Override
     public int getWorkflowMask() {
@@ -49,6 +51,10 @@ public class CameraSystem extends AbstractSystem<Camera> {
     @Override
     public void init() throws RuntimeException {
         Logger.info(String.format("%s: started initialization..", this.getClass().getName()));
+
+        PERSPECTIVE_MATRIX  = Matrix4f.perspective3(angle, ratio, near, far);
+        ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
+
         component.eye.set(2f, 0f, -3f);
         component.up.set(Vector3f.up());
         component.at.set(new Vector3f(1.0f, 0.0f, -1.0f).add(component.eye));
@@ -118,16 +124,16 @@ public class CameraSystem extends AbstractSystem<Camera> {
         }
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            component.transform.position.add(deltaTime * speedFactor, 0, 0);
+            component.transform.moveRel(new Vector3f(deltaTime * speedFactor, 0, 0));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            component.transform.position.add(-deltaTime * speedFactor, 0, 0);
+            component.transform.moveRel(new Vector3f(-deltaTime * speedFactor, 0, 0));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            component.transform.position.add(0, deltaTime * speedFactor, 0);
+            component.transform.moveRel(new Vector3f(0, deltaTime * speedFactor, 0));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            component.transform.position.add(0, -deltaTime * speedFactor, 0);
+            component.transform.moveRel(new Vector3f(0, -deltaTime * speedFactor, 0));
         }
 
         component.viewMatrix = Matrix4f.lookAt(cameraPosition, point, Vector3f.up());
@@ -137,13 +143,27 @@ public class CameraSystem extends AbstractSystem<Camera> {
 
     @Override
     public void render(Graphics graphics) {
+        if (!callbackInitialized) {
+            GLFW.glfwSetWindowSizeCallback(graphics.window.getWindow(), (window, width, height) -> {
+                ratio = (float) width / height;
+                PERSPECTIVE_MATRIX  = Matrix4f.perspective3(angle, ratio, near, far);
+                ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-ratio, ratio, -1, 1, -1, 1);
+
+                if      (PERSPECTIVE_VIEW_STATE  == projectionState) Graphics.setProjection(PERSPECTIVE_MATRIX);
+                else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) Graphics.setProjection(ORTHOGRAPHIC_MATRIX);
+
+                GL30.glViewport(0, 0, width, height);
+                Logger.info(String.format("Aspect ratio: %f width: %s height: %s", ratio, width, height));
+            });
+        }
+        callbackInitialized = true;
+
         if (Input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
         }
 
         if (Input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
-            Logger.info("Left mouse button is pressed!");
         }
 
         graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);

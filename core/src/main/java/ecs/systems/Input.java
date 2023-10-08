@@ -1,12 +1,11 @@
 package ecs.systems;
 
+import ecs.utils.Logger;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import vectors.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
-// import java.util.ArrayList;
-// import java.util.List;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;

@@ -56,7 +56,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody> {
 
     private void updatePosition(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
         temp.set(that.velocity);
-        transform.position.add(temp.mul(deltaTime));
+        transform.moveRel(temp.mul(deltaTime));
     }
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
