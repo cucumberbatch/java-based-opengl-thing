@@ -67,7 +67,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
 
         MeshCollider mesh = component.entity.getComponent(MeshCollider.class);
-        mesh.mesh = imaginaryCursorShape;
+        mesh.body = imaginaryCursorShape;
 
         component.vertexBuffer = new VertexArray(
                 component.cursor.toVertices(),
@@ -180,7 +180,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     @Override
     public void onCollisionStart(Collision collision) {
         selectedEntity = (Entity) collision.A;
-        component.previouslySelectedButtonShape = selectedEntity.getComponent(MeshCollider.class).mesh;
+        component.previouslySelectedButtonShape = selectedEntity.getComponent(MeshCollider.class).body;
         component.isIntersects = true;
         cursorState = HOVER_TO_IDLE_CURSOR_STATE;
     }

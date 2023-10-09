@@ -32,14 +32,21 @@ public class VisualCursor extends AbstractComponent {
             1,  1
     };
 
+    //todo: a vertex buffer must be in a Mesh object of a MeshRenderer component
     public VertexArray vertexBuffer;
 
+    //todo: also a texture object must move into a MeshRenderer component
     public Texture     texture;
+
+    // A visual cursor, which can addict or "magnetize" to an object, that collides with it
     public Rectangle   cursor;
+
     public VertexArray background;
 //    public VertexArray buttonBackground;
 
     public Rectangle previouslySelectedButtonShape;
+
+    // Switching of this parameter is controlled by onCollision methods of VisualCursorSystem
     public boolean   isIntersects = false;
 
 }

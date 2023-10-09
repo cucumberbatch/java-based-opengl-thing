@@ -7,12 +7,24 @@ import ecs.graphics.Window;
 public class Rectangle implements Shape2d {
 
     public Vector2f topLeft;
+
+    // todo: i think, more convenient usage would be using height and width
+    //  instead of using bottom right corner point
     public Vector2f bottomRight;
 
 
     public Rectangle(Vector2f topLeft, Vector2f bottomRight) {
         this.topLeft     = topLeft;
         this.bottomRight = bottomRight;
+    }
+
+    public void moveTo(Vector2f position) {
+        float width = Math.abs(this.bottomRight.x - this.topLeft.x);
+        float height = Math.abs(this.topLeft.y - this.bottomRight.y);
+        this.topLeft.x = position.x - width / 2;
+        this.bottomRight.x = position.x + width / 2;
+        this.bottomRight.y = position.y - height / 2;
+        this.topLeft.y = position.y + height / 2;
     }
 
     public boolean isInside(Vector2f point) {

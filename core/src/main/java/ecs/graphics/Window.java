@@ -1,9 +1,12 @@
 package ecs.graphics;
 
 import ecs.graphics.Shader;
+import ecs.systems.CameraControlsSystem;
+import ecs.systems.CameraSystem;
 import ecs.systems.Input;
 
 import ecs.utils.Logger;
+import matrices.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -64,6 +67,8 @@ public class Window {
         GLFW.glfwSetKeyCallback(window, new Input.KeyboardInput());
         GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
         GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
+        GLFW.glfwSetWindowSizeCallback(window, (window, width, height) -> new CameraControlsSystem.WindowSizeCallback());
+
 
         //
 //        GLFW.glfwSetWindowRefreshCallback(window, new GLFWWindowRefreshCallback() {

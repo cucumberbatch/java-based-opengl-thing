@@ -8,6 +8,7 @@ import ecs.reflection.ComponentHandler;
 import ecs.utils.Logger;
 import matrices.Matrix4f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
 import org.lwjgl.opengl.GL30;
 import vectors.Vector2f;
 import vectors.Vector3f;
@@ -16,11 +17,6 @@ import vectors.Vector4f;
 
 @ComponentHandler(Camera.class)
 public class CameraSystem extends AbstractSystem<Camera> {
-
-    float near = 0.1f;
-    float far = 100f;
-    float angle = 90f;
-    float ratio = 1f / 1f;
 
     Vector3f cameraPosition = new Vector3f();
 
@@ -31,17 +27,11 @@ public class CameraSystem extends AbstractSystem<Camera> {
 //    public static Matrix4f projection = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
 //    public static Matrix4f projection = Matrix4f.perspective3(120, 1, -0.2f, 0.5f);
 
-    private static Matrix4f PERSPECTIVE_MATRIX;
-    private static Matrix4f ORTHOGRAPHIC_MATRIX;
+    public static Matrix4f PERSPECTIVE_MATRIX;
+    public static Matrix4f ORTHOGRAPHIC_MATRIX;
 
-    private static final int PERSPECTIVE_VIEW_STATE = 0;
-    private static final int PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE = 1;
-    private static final int ORTHOGRAPHIC_VIEW_STATE = 2;
-    private static final int ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE = 3;
 
-    private int projectionState = ORTHOGRAPHIC_VIEW_STATE;
-    private float projectionProgress = 0;
-    private boolean callbackInitialized = false;
+
 
     @Override
     public int getWorkflowMask() {
@@ -52,7 +42,7 @@ public class CameraSystem extends AbstractSystem<Camera> {
     public void init() throws RuntimeException {
         Logger.info(String.format("%s: started initialization..", this.getClass().getName()));
 
-        PERSPECTIVE_MATRIX  = Matrix4f.perspective3(angle, ratio, near, far);
+        PERSPECTIVE_MATRIX  = Matrix4f.perspective3(component.angle, component.ratio, component.near, component.far);
         ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-1, 1, -1, 1, -1, 1);
 
         component.eye.set(2f, 0f, -3f);
@@ -62,114 +52,8 @@ public class CameraSystem extends AbstractSystem<Camera> {
     }
 
     @Override
-    public void update(float deltaTime) {
-        updateCameraMovement(deltaTime);
-        updateCameraProjection();
-    }
-
-    private void updateCameraProjection() {
-        switch (projectionState) {
-            case PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE: {
-                projectionProgress += 0.05;
-                component.projectionMatrix = Matrix4f.lerp(PERSPECTIVE_MATRIX, ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
-                if (projectionProgress > 1) {
-                    projectionProgress = 0;
-                    projectionState = ORTHOGRAPHIC_VIEW_STATE;
-                }
-                Graphics.setProjection(component.projectionMatrix);
-                break;
-            }
-            case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE: {
-                projectionProgress += 0.05;
-                component.projectionMatrix = Matrix4f.lerp(ORTHOGRAPHIC_MATRIX, PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1))
-                );
-                if (projectionProgress > 1) {
-                    projectionProgress = 0;
-                    projectionState = PERSPECTIVE_VIEW_STATE;
-                }
-                Graphics.setProjection(component.projectionMatrix);
-                break;
-            }
-            case PERSPECTIVE_VIEW_STATE: {
-                if (Input.isPressed(GLFW.GLFW_KEY_1)) {
-                    projectionState = PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE;
-                }
-                break;
-            }
-            case ORTHOGRAPHIC_VIEW_STATE: {
-                if (Input.isPressed(GLFW.GLFW_KEY_1)) {
-                    projectionState = ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE;
-                }
-                break;
-            }
-        }
-    }
-
-    private void updateCameraMovement(float deltaTime) {
-        Vector2f cursorPosition = Input.getCursorPosition();
-
-        float verticalAngle   = -cursorPosition.y / (Window.width / 256f) - 180;
-        float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
-
-        float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.9f, 89.9f);
-
-        Vector3f point = Vector3f.forward().rotation(restrictedVerticalAngle, horizontalAngle, 0);
-
-        float speedFactor;
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-            speedFactor = 3f;
-        } else {
-            speedFactor = 1f;
-        }
-
-        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            component.transform.moveRel(new Vector3f(deltaTime * speedFactor, 0, 0));
-        }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            component.transform.moveRel(new Vector3f(-deltaTime * speedFactor, 0, 0));
-        }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            component.transform.moveRel(new Vector3f(0, deltaTime * speedFactor, 0));
-        }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            component.transform.moveRel(new Vector3f(0, -deltaTime * speedFactor, 0));
-        }
-
-        component.viewMatrix = Matrix4f.lookAt(cameraPosition, point, Vector3f.up());
-
-        Graphics.setView(component.viewMatrix);
-    }
-
-    @Override
     public void render(Graphics graphics) {
-        if (!callbackInitialized) {
-            GLFW.glfwSetWindowSizeCallback(graphics.window.getWindow(), (window, width, height) -> {
-                ratio = (float) width / height;
-                PERSPECTIVE_MATRIX  = Matrix4f.perspective3(angle, ratio, near, far);
-                ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-ratio, ratio, -1, 1, -1, 1);
-
-                if      (PERSPECTIVE_VIEW_STATE  == projectionState) Graphics.setProjection(PERSPECTIVE_MATRIX);
-                else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) Graphics.setProjection(ORTHOGRAPHIC_MATRIX);
-
-                GL30.glViewport(0, 0, width, height);
-                Logger.info(String.format("Aspect ratio: %f width: %s height: %s", ratio, width, height));
-            });
-        }
-        callbackInitialized = true;
-
-        if (Input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
-            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
-        }
-
-        if (Input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
-        }
-
         graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
     }
 
-    private float restrictAngle(float angle, float lowest, float highest) {
-        return Math.min(Math.max(angle, lowest), highest);
-    }
 }

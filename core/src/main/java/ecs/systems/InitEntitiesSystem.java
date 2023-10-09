@@ -66,8 +66,8 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 generatedButton.transform = transform;
                 generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
-                collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
-                collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
+                collider.body.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
+                collider.body.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
                 button.buttonShape.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -132,8 +132,8 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
                 generatedButton.transform = transform;
                 generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
-                collider.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
-                collider.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
+                collider.body.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
+                collider.body.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
                 button.buttonShape.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -244,6 +244,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         MeshCollider cameraMeshCollider = new MeshCollider();
         VisualCursor visualCursor = new VisualCursor();
         Camera cameraComponent = new Camera();
+        CameraControls cameraControls = new CameraControls();
 
         transform.entity = cursor;
         meshCollider.entity = cursor;
@@ -251,6 +252,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         cameraTransform.entity = camera;
         cameraMeshCollider.entity = camera;
         cameraComponent.entity = camera;
+        cameraControls.entity = camera;
 
 
         // We can use a more convenient api, if we introduce something like entityManager, for example:
@@ -269,6 +271,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities> {
         componentManager.addComponent(camera, cameraTransform);
         componentManager.addComponent(camera, cameraMeshCollider);
         componentManager.addComponent(camera, cameraComponent);
+        componentManager.addComponent(camera, cameraControls);
 
 
         // When we use method `select(Entity)` we get `EntityNode` from which we can add/remove/get components, manage entities and etc.
