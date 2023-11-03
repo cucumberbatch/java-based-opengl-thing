@@ -12,7 +12,7 @@ import ecs.systems.Input;
 import ecs.utils.Logger;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL15;
-import vectors.Vector2f;
+import org.joml.Vector2f;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;

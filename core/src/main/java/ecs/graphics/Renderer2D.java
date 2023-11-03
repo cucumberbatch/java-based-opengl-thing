@@ -11,4 +11,10 @@ public class Renderer2D {
         shader.disable();
         texture.unbind();
     }
+
+    public static void draw(VertexArray mesh, Shader shader) {
+        shader.enable();
+        mesh.render(GL_TRIANGLES);
+        shader.disable();
+    }
 }

@@ -3,18 +3,16 @@ package ecs.systems;
 import ecs.components.Transform;
 import ecs.physics.collision.MeshTransformListener;
 import ecs.reflection.ComponentHandler;
-import vectors.Vector2f;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.UpdateProcess;
+import org.joml.Vector2f;
 
 @ComponentHandler(MeshCollider.class)
-public class MeshColliderSystem extends AbstractSystem<MeshCollider> {
+public class MeshColliderSystem extends AbstractSystem<MeshCollider>
+        implements InitProcess, UpdateProcess {
 
     private static final int xOffsetLeft = 10;
     private static final int yOffsetUp = 10;
-
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | /*UPDATE_MASK | */COLLISION_MASK;
-    }
 
     @Override
     public void init() {

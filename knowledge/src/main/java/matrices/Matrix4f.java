@@ -323,9 +323,9 @@ public class Matrix4f {
     }
 
     public static Matrix4f lookAt2(Vector3f eye, Vector3f at, Vector3f up) {
-        Vector3f forward = Vector3f.sub(eye, at).normalized();
-        Vector3f left = Vector3f.cross(up, forward).normalized();
-        Vector3f top = Vector3f.cross(forward, left);
+        Vector3f forward = new Vector3f().sub(eye, at).normalized();
+        Vector3f left = new Vector3f().cross(up, forward).normalized();
+        Vector3f top = new Vector3f().cross(forward, left);
 
         Matrix4f result = Matrix4f.identity();
 
@@ -349,9 +349,9 @@ public class Matrix4f {
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f at, Vector3f up) {
-        Vector3f zAxis = Vector3f.sub(at, eye).normalized();
-        Vector3f xAxis = Vector3f.cross(up, zAxis).normalized();
-        Vector3f yAxis = Vector3f.cross(zAxis, xAxis);
+        Vector3f zAxis = new Vector3f().sub(at, eye).normalized();
+        Vector3f xAxis = new Vector3f().cross(up, zAxis).normalized();
+        Vector3f yAxis = new Vector3f().cross(zAxis, xAxis);
 
 
 //        return new Matrix4f(new float[]{
@@ -386,9 +386,9 @@ public class Matrix4f {
 //                xAxis.x, yAxis.x, zAxis.x, 0f,
 //                xAxis.y, yAxis.y, zAxis.y, 0f,
 //                xAxis.z, yAxis.z, zAxis.z, 0f,
-//                Vector3f.dot(xAxis, Vector3f.negate(eye)),
-//                Vector3f.dot(yAxis, Vector3f.negate(eye)),
-//                Vector3f.dot(zAxis, Vector3f.negate(eye)),
+//                new Vector3f().dot(xAxis, new Vector3f().negate(eye)),
+//                new Vector3f().dot(yAxis, new Vector3f().negate(eye)),
+//                new Vector3f().dot(zAxis, new Vector3f().negate(eye)),
 //                1f
 //        });
     }

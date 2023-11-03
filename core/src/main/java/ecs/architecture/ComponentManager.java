@@ -29,8 +29,8 @@ public class ComponentManager {
         this.systemManager = systemManager;
     }
 
-    private void generateComponentId(Component component) {
-        if (component.getId() == 0) component.setId(idCounter++);
+    private int nextId() {
+        return idCounter++;
     }
 
     private <E extends Component> void setupTransforms(Entity entity, E component) {
@@ -51,21 +51,32 @@ public class ComponentManager {
         if (entity == null || component == null)
             throw new IllegalArgumentException();
 
-        generateComponentId(component);
+        component.setId(nextId());
         systemManager.addComponent(component);
         entity.addComponent(component);
         setupTransforms(entity, component);
     }
 
-    public <E extends Component> void addComponent(Entity entity, Class<E> componentClass) {
+    public <E extends Component> E addComponent(Entity entity, Class<E> componentClass) {
+        if (entity == null || componentClass == null) {
+            throw new IllegalArgumentException("Entity or component class must not be null");
+        }
+
         E component;
+
         try {
             component = componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             Logger.error("Error while creating a component instance: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        this.addComponent(entity, component);
+
+        component.setId(nextId());
+        systemManager.addComponent(component);
+        entity.addComponent(component);
+        setupTransforms(entity, component);
+
+        return component;
     }
 
     public <E extends Component> E getComponent(Entity entity, Class<E> componentClass) {
@@ -77,6 +88,6 @@ public class ComponentManager {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
         E component = entity.getComponent(componentClass);
-        return (E) systemManager.systemMap.<E>get(componentClass).<E>removeComponent(component.getId());
+        return (E) systemManager.systemMap.get(componentClass).removeComponent(component.getId());
     }
 }

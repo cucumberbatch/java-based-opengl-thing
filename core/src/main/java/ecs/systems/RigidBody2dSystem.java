@@ -4,10 +4,12 @@ import ecs.components.RigidBody2d;
 import ecs.components.Transform;
 import ecs.physics.Physics;
 import ecs.reflection.ComponentHandler;
-import vectors.Vector2f;
+import ecs.systems.processes.UpdateProcess;
+import org.joml.Vector2f;
 
 @ComponentHandler(RigidBody2d.class)
-public class RigidBody2dSystem extends AbstractSystem<RigidBody2d> {
+public class RigidBody2dSystem extends AbstractSystem<RigidBody2d>
+        implements UpdateProcess {
 
     @Override
     public void update(float deltaTime) {

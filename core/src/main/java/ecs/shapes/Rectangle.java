@@ -1,6 +1,6 @@
 package ecs.shapes;
 
-import vectors.Vector2f;
+import org.joml.Vector2f;
 import ecs.graphics.Window;
 
 

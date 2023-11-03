@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,11 +58,11 @@ public class ComponentHandlerScanner {
         String packagePath = URLDecoder.decode(packageUrl.getPath(), "UTF-8");
         File packageDir = new File(packagePath);
         if (packageDir.isDirectory()) {
-            Logger.info("Checking package classes in path: " + packageDir);
+            Logger.trace("Checking package classes in path: " + packageDir);
             File[] files = packageDir.listFiles();
             for (File file : Objects.requireNonNull(files)) {
                 String className = file.getName();
-                Logger.info("Found file: " + className);
+                Logger.trace("Found file: " + className);
                 if (className.endsWith(".class")) {
                     className = packageName.replace("/", ".") + "." + className.substring(0, className.length() - 6);
                     Class<?> loadedClass = classLoader.loadClass(className);
@@ -69,11 +70,12 @@ public class ComponentHandlerScanner {
                         Class<? extends System> systemClass = loadedClass.asSubclass(System.class);
                         ComponentHandler componentHandlerAnnotation = loadedClass.getAnnotation(ComponentHandler.class);
                         if (Objects.isNull(componentHandlerAnnotation)) continue;
+                        Logger.trace("Found system: " + className);
                         Class<? extends Component> componentClass = componentHandlerAnnotation.value();
                         System<?> system = systemClass.getDeclaredConstructor().newInstance();
                         Pair<? extends System<?>, ? extends Component> componentSystemPair = new Pair<>(system, componentClass);
                         classes.add(componentSystemPair);
-                        Logger.info("Component system pair registered: " + componentSystemPair);
+                        Logger.trace("Component system pair registered: " + componentSystemPair);
                     }
                 }
             }

@@ -5,27 +5,31 @@ import ecs.exception.ComponentNotFoundException;
 import ecs.reflection.scanner.ComponentHandlerScanner;
 import ecs.systems.*;
 import ecs.systems.System;
+import ecs.systems.processes.CollisionHandlingProcess;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.RenderProcess;
+import ecs.systems.processes.UpdateProcess;
 import ecs.utils.Logger;
 
 import java.util.*;
-
-import static ecs.systems.AbstractSystem.*;
+import java.util.stream.Collectors;
 
 public class SystemManager {
     private static SystemManager instance;
 
     public final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
 
-    public final List<System<? extends Component>> listOfSystemsForInit              = new LinkedList<>();
-    public final List<System<? extends Component>> listOfSystemsForUpdate            = new LinkedList<>();
-    public final List<System<? extends Component>> listOfSystemsForRender            = new LinkedList<>();
+    public final List<InitProcess> listOfSystemsForInit              = new LinkedList<>();
+    public final List<UpdateProcess> listOfSystemsForUpdate            = new LinkedList<>();
+    public final List<RenderProcess> listOfSystemsForRender            = new LinkedList<>();
     public final List<System<? extends Component>> listOfSystemsForCollision         = new LinkedList<>();
-    public final List<System<? extends Component>> listOfSystemsForCollisionHandling = new LinkedList<>();
+    public final List<CollisionHandlingProcess> listOfSystemsForCollisionHandling = new LinkedList<>();
 
     public final List<Collision> collisions = new ArrayList<>();
 
     private SystemManager() {
-        initComponentSystemAssociation();
+        loadComponentSystemsFromPackage("ecs/systems");
+        //todo: implement lazy system initialization
         groupSystemsByProcesses();
     }
 
@@ -36,16 +40,20 @@ public class SystemManager {
         return instance;
     }
 
-    private void initComponentSystemAssociation() {
+    private void loadComponentSystemsFromPackage(String packagePath) {
         try {
+            Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
             ComponentHandlerScanner scanner = new ComponentHandlerScanner();
-            List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage("ecs/systems");
-
-            Logger.info("Found system classes: " + annotatedClassesInPackage.toString());
-
+            List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
             annotatedClassesInPackage.forEach(pair -> systemMap.put(pair.component, pair.system));
+
+            List<String> classNames = annotatedClassesInPackage.stream()
+                    .map(pair -> pair.system.getClass().getName())
+                    .collect(Collectors.toList());
+
+            Logger.info(String.format("Found and loaded %s system(s) classes: %s", classNames.size(), classNames));
         } catch (Exception e) {
-            Logger.error(e.getMessage());
+            Logger.error("Error while loading systems. Reason: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -55,17 +63,25 @@ public class SystemManager {
     }
 
     private void attachToSystemLists(System<? extends Component> system) {
-        int mask = system.getWorkflowMask();
-        if ((mask & INIT_MASK) > 0)               this.listOfSystemsForInit.add(system);
-        if ((mask & UPDATE_MASK) > 0)             this.listOfSystemsForUpdate.add(system);
-        if ((mask & RENDER_MASK) > 0)             this.listOfSystemsForRender.add(system);
-        if ((mask & COLLISION_MASK) > 0)          this.listOfSystemsForCollision.add(system);
-        if ((mask & COLLISION_HANDLING_MASK) > 0) this.listOfSystemsForCollisionHandling.add(system);
+        Class<? extends System> clazz = system.getClass();
+        if (InitProcess.class.isAssignableFrom(clazz))               this.listOfSystemsForInit.add((InitProcess) system);
+        if (UpdateProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForUpdate.add((UpdateProcess) system);
+        if (RenderProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForRender.add((RenderProcess) system);
+//        if (CollisionProcess.class.isAssignableFrom(clazz))          this.listOfSystemsForCollision.add(system);
+        if (CollisionHandlingProcess.class.isAssignableFrom(clazz))  this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess) system);
     }
 
     public void addComponent(Component component) {
+        changeStateIfHasNoInitProcess(component);
         Class<? extends Component> componentClass = component.getClass();
         this.systemMap.get(componentClass).addComponent(component);
+    }
+
+    private void changeStateIfHasNoInitProcess(Component component) {
+        Class<?> system = systemMap.get(component.getClass()).getClass();
+        if (!InitProcess.class.isAssignableFrom(system)) {
+            component.setState(AbstractComponent.READY_TO_OPERATE_STATE);
+        }
     }
 
     @SuppressWarnings("unchecked")

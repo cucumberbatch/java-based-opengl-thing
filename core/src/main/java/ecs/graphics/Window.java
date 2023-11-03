@@ -1,18 +1,19 @@
 package ecs.graphics;
 
 import ecs.graphics.Shader;
+import ecs.physics.collision.MeshTransformListener;
 import ecs.systems.CameraControlsSystem;
 import ecs.systems.CameraSystem;
 import ecs.systems.Input;
 
 import ecs.utils.Logger;
-import matrices.Matrix4f;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
-import vectors.Vector2f;
+import org.joml.Vector2f;
 
 import java.nio.IntBuffer;
 
@@ -123,6 +124,8 @@ public class Window {
     }
 
     public void destroy() {
+        Logger.info("Window destruction process started");
+
         if (window == -1) return;
 
         Callbacks.glfwFreeCallbacks(window);
@@ -130,6 +133,11 @@ public class Window {
 
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null).free();
+
+        // when we hit an exit button in application we need to stop all threads
+        MeshTransformListener.shutdownThreadExecution();
+
+        Logger.info("Window destruction process ended");
     }
 
     public static Vector2f translatePointToWindow(Vector2f point) {

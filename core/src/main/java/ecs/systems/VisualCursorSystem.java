@@ -1,19 +1,25 @@
 package ecs.systems;
 
+import ecs.components.MeshRenderer;
 import ecs.components.VisualCursor;
 import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.graphics.*;
 import ecs.reflection.ComponentHandler;
 import ecs.shapes.Rectangle;
+import ecs.systems.processes.CollisionHandlingProcess;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.RenderProcess;
+import ecs.systems.processes.UpdateProcess;
 import ecs.utils.Logger;
 import org.lwjgl.glfw.GLFW;
-import vectors.Vector4f;
-import vectors.Vector2f;
+import org.joml.Vector4f;
+import org.joml.Vector2f;
 
 // todo: cursor movement needs to be related on entity transform data, not local vectors
 @ComponentHandler(VisualCursor.class)
-public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
+public class VisualCursorSystem extends AbstractSystem<VisualCursor>
+        implements InitProcess, UpdateProcess, CollisionHandlingProcess, RenderProcess {
 
     public static final int IDLE_CURSOR_STATE          = 0;
     public static final int HOVER_CURSOR_STATE         = 1;
@@ -33,16 +39,16 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     public Vector2f cursorIdleTopLeft      = new Vector2f(-20f, -20f);
     public Vector2f cursorIdleBottomRight  = new Vector2f(+20f, +20f);
 
-    private Vector2f savedCursorPosition   = new Vector2f();
+//    private Vector2f savedCursorPosition   = new Vector2f();
+
     private boolean  isCursorMoved         = false;
 
     // cursor velocity for smoother movement, I guess
-    private Vector2f cursorVelocity        = new Vector2f(1, 1);
+//    private Vector2f cursorVelocity        = new Vector2f(1, 1);
+//    private Vector2f restoringForce        = new Vector2f(1, 1);
 
-    private Vector2f restoringForce        = new Vector2f(1, 1);
     private Vector2f displacement          = new Vector2f(1, 1);
     private float    springFactor          = 12.0f;
-
     private float    mass                  = 0.01f;
 
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
@@ -50,12 +56,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     private Rectangle imaginaryCursorShape = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
 
     private Entity selectedEntity = null;
-
-
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK | RENDER_MASK | COLLISION_HANDLING_MASK;
-    }
 
     @Override
     public void init() throws RuntimeException {
@@ -73,6 +73,16 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                 component.cursor.toVertices(),
                 component.indices,
                 component.uv);
+
+        Rectangle visualCursorShape = new Rectangle(
+                new Vector2f(cursorIdleTopLeft),
+                new Vector2f(cursorIdleBottomRight)
+        );
+
+        MeshRenderer renderer = componentManager.getComponent(component.entity, MeshRenderer.class);
+        renderer.texture = new Texture("core/assets/textures/screen-frame-1024.png");
+        renderer.mesh = new Mesh(visualCursorShape.toVertices(), component.indices, component.uv);
+        renderer.shader = Shader.GUI;
     }
 
     @Override
@@ -85,7 +95,9 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
 //        Shader.BACKGROUND.setUniform("u_tex",      Shader.BACKGROUND.getId());
 //        Shader.BACKGROUND.setUniform("u_model", Matrix4f.translation(component.transform.position));
 
+        // instead of cursor rectangle we must move whole entity using transform
         Rectangle cursor = component.cursor;
+
         Rectangle button = component.previouslySelectedButtonShape;
 
 
@@ -99,9 +111,9 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
-                        cursor.topLeft     = Vector2f.lerp(cursor.topLeft,     Vector2f.add(button.topLeft, Vector2f.zero()),   ratio);
-                        cursor.bottomRight = Vector2f.lerp(cursor.bottomRight, Vector2f.add(button.bottomRight, Vector2f.zero()), ratio);
-                        cursorColor        = Vector4f.lerp(cursorDefaultColor, cursorOnHoverColor, ratio);
+                        cursor.topLeft     = new Vector2f(cursor.topLeft).lerp(button.topLeft, ratio);
+                        cursor.bottomRight = new Vector2f(cursor.bottomRight).lerp(button.bottomRight, ratio);
+                        cursorColor        = new Vector4f(cursorDefaultColor).lerp(cursorOnHoverColor, ratio);
                     }
                     break;
 
@@ -112,16 +124,16 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                     break;
 
                 case HOVER_CURSOR_STATE:
-                    if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
-                        selectedEntity.parent.transform.moveTo(cursor.topLeft.x, cursor.topLeft.y, selectedEntity.parent.transform.position.z);
+//                    if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
+//                        selectedEntity.parent.transform.moveTo(cursor.topLeft.x, cursor.topLeft.y, selectedEntity.parent.transform.position.z);
 //                        selectedEntity.parent.transform.position.x = cursor.topLeft.x;
 //                        selectedEntity.parent.transform.position.y = cursor.topLeft.y;
-                    }
+//                    }
                     break;
             }
         } else {
             displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
-            isCursorMoved = !displacement.equals(Vector2f.zero());
+            isCursorMoved = !displacement.equals(new Vector2f().zero());
 
             Vector2f position = calculatePosition(
                     getRectangleCenter(cursor), previousPhysicalPosition,
@@ -141,9 +153,9 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
-                        cursor.topLeft     = Vector2f.lerp(button.topLeft,     new Vector2f(position).add(cursorIdleTopLeft),     ratio);
-                        cursor.bottomRight = Vector2f.lerp(button.bottomRight, new Vector2f(position).add(cursorIdleBottomRight), ratio);
-                        cursorColor        = Vector4f.lerp(cursorOnHoverColor, cursorDefaultColor, ratio);
+                        cursor.topLeft     = new Vector2f(button.topLeft).lerp(new Vector2f(position).add(cursorIdleTopLeft), ratio);
+                        cursor.bottomRight = new Vector2f(button.bottomRight).lerp(new Vector2f(position).add(cursorIdleBottomRight), ratio);
+                        cursorColor        = new Vector4f(cursorOnHoverColor).lerp(cursorDefaultColor, ratio);
                     }
                     break;
 
@@ -159,7 +171,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         }
 
         displacement  = getRectangleCenter(imaginaryCursorShape).sub(Input.getCursorPosition());
-        isCursorMoved = !displacement.equals(Vector2f.zero());
+        isCursorMoved = !displacement.equals(new Vector2f().zero());
 
         Transform transform = component.transform;
         transform.moveTo(
@@ -193,6 +205,9 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
         }
     }
 
+    @Override
+    public void onCollision(Collision collision) {}
+
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
         return center.mul(2f).sub(previousPhysicalPosition).sub(displacement.mul(springFactor * deltaTime * deltaTime / mass));
     }
@@ -203,7 +218,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor> {
     }
 
     private Vector2f getRectangleCenter(Rectangle rectangle) {
-        return new Vector2f(rectangle.topLeft).add(new Vector2f(rectangle.bottomRight).sub(rectangle.topLeft).div(2.0f));
+        return new Vector2f(rectangle.topLeft).add(new Vector2f(rectangle.bottomRight).sub(rectangle.topLeft).mul(1 / 2.0f));
     }
 
     @Override

@@ -5,16 +5,16 @@ import ecs.components.Transform;
 import ecs.systems.Input;
 import ecs.systems.TransformSystem;
 import ecs.utils.Logger;
-import ecs.utils.TerminalUtils;
-import matrices.Matrix4f;
-import org.lwjgl.glfw.GLFW;
-import vectors.Vector2f;
-import vectors.Vector3f;
-import vectors.Vector4f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class Graphics {
+    private static Graphics instance;
+
     public Window window;
 
     public Shader   lastRenderedShader;
@@ -23,10 +23,18 @@ public class Graphics {
 
     public Shader   basicShader;
 
-    public static Matrix4f projection = Matrix4f.identity();
-    public static Matrix4f view = Matrix4f.lookAt(Vector3f.backward(), Vector3f.forward(), Vector3f.up());
+    public Matrix4f projection = new Matrix4f().identity();
+    public Matrix4f view = new Matrix4f().lookAt(new Vector3f(0, 0, -1), new Vector3f(0, 0, 1), new Vector3f(0, 1, 0));
 
-    public Graphics(Window window) {
+    // implement dependency injection
+    public static Graphics getInstance(Window window) {
+        if (instance == null) {
+            instance = new Graphics(window);
+        }
+        return instance;
+    }
+
+    private Graphics(Window window) {
         this.basicShader = Shader.BACKGROUND;
         this.window = window;
     }
@@ -34,19 +42,27 @@ public class Graphics {
     public void render(MeshRenderer renderer) {
         Transform transform = renderer.transform;
         Transform worldTransform = TransformSystem.getWorldTransform(transform);
-        renderer.shader.setUniform("u_position", worldTransform.position);
+//        renderer.shader.setUniform("u_position", worldTransform.position);
         Renderer2D.draw(renderer.mesh.vertexArray, renderer.texture, renderer.shader);
+    }
+
+    public void draw(MeshRenderer renderer) {
+        renderer.shader.setUniform("u_color", new Vector3f(1, 1, 1));
+        Renderer2D.draw(renderer.mesh.vertexArray, renderer.shader);
     }
 
     public void drawMesh(Mesh mesh) {
         //todo
     }
 
-    private Vector3f cameraPosition = Vector3f.zero();
+    private Vector3f cameraPosition = new Vector3f().zero();
     private float ratio = 0f;
 
     private Vector2f cursorPosition = null;
 
+    public void draw(Mesh mesh, Shader shader, Vector4f color, Transform transform) {
+
+    }
 
     public void drawMesh(Mesh mesh, Vector4f color, Transform transform) {
         if (cursorPosition == null) {
@@ -62,14 +78,10 @@ public class Graphics {
 
         Transform worldTransform = TransformSystem.getWorldTransform(transform);
 
-        Matrix4f model = Matrix4f.translation(worldTransform.position)
-                .mul(Matrix4f.rotation(1, transform.rotation))
-                .mul(Matrix4f.scale(worldTransform.scale));
-
-        Logger.debug("model matrix:" + TerminalUtils.formatOutputMatrix(model) + "\n");
-        Logger.debug("view matrix:" + TerminalUtils.formatOutputMatrix(view) + "\n");
-        Logger.debug("projection matrix:" + TerminalUtils.formatOutputMatrix(projection) + "\n");
-
+        Matrix4f model = new Matrix4f()
+                .translate(worldTransform.position)
+                .rotate(1, transform.rotation)
+                .scale(worldTransform.scale);
 
 //        model = Matrix4f.mul(model, Matrix4f.rotateAroundOY(Input.getCursorPosition().x));
 //        model = Matrix4f.mul(model, Matrix4f.rotateAroundOX(Input.getCursorPosition().y));
@@ -96,13 +108,5 @@ public class Graphics {
 //        mesh.vertexArray.render(GL_QUADS);
 //        mesh.vertexArray.render(GL_QUAD_STRIP);
         shader.disable();
-    }
-
-    public static void setProjection(Matrix4f projection) {
-        Graphics.projection = projection;
-    }
-
-    public static void setView(Matrix4f view) {
-        Graphics.view = view;
     }
 }

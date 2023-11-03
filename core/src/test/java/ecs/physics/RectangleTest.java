@@ -3,7 +3,7 @@ package ecs.physics;
 import ecs.shapes.Rectangle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import vectors.Vector2f;
+import org.joml.Vector2f;
 
 class RectangleTest {
 

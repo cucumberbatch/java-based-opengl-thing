@@ -1,7 +1,7 @@
 package ecs.components;
 
-import matrices.Matrix4f;
-import vectors.Vector3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class Camera extends AbstractComponent {
     public Vector3f at      = new Vector3f();
@@ -15,6 +15,10 @@ public class Camera extends AbstractComponent {
 
     public Matrix4f viewMatrix       = new Matrix4f();
     public Matrix4f projectionMatrix = new Matrix4f();
+
+    public Vector3f getPosition() {
+        return new Vector3f(this.transform.position);
+    }
 
     @Override
     public String getName() {

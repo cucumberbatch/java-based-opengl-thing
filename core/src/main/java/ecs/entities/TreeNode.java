@@ -2,14 +2,17 @@ package ecs.entities;
 
 import java.util.List;
 
-public interface TreeNode {
+public interface TreeNode<E extends TreeNode<E>> {
     long getId();
     String getName();
-    TreeNode getParent();
-    List<? extends TreeNode> getDaughters();
+    E getParent();
+    List<E> getDaughters();
+    List<E> getSiblings();
 
     void setId(long id);
     void setName(String name);
-    void setParent(TreeNode parent);
-    void setDaughters(List<? extends TreeNode> daughters);
+    void setParent(E parent);
+    void setDaughters(List<E> daughters);
+
+    boolean isParentOf(E node);
 }

@@ -10,18 +10,11 @@ import ecs.exception.ComponentNotFoundException;
 import ecs.managment.memory.Pool;
 import ecs.managment.memory.IPool;
 import ecs.utils.Logger;
-import vectors.Vector3f;
+import org.joml.Vector3f;
 
 import java.util.*;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
-    public static final int INIT_MASK                = 1 << 0;
-    public static final int UPDATE_MASK              = 1 << 1;
-    public static final int RENDER_MASK              = 1 << 2;
-    public static final int COLLISION_MASK           = 1 << 3;
-    public static final int COLLISION_HANDLING_MASK  = 1 << 4;
-
-    private int workflowMask = INIT_MASK & UPDATE_MASK & RENDER_MASK;
 
     // map for storing componentId-to-component pair
     private Map<Long, E>  componentMap  = new HashMap<>();
@@ -42,20 +35,14 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
         return componentMap.values().iterator();
     }
 
-    // a very expensive method that creates linked list with copy of set of components
     @Override
     public List<E> getComponentList() {
-        return new LinkedList<>(componentMap.values());
+        return new ArrayList<>(componentMap.values());
     }
 
     @Override
     public E getComponent() {
         return component;
-    }
-
-    @Override
-    public int getWorkflowMask() {
-        return workflowMask;
     }
 
     @Override

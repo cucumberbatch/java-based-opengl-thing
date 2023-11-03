@@ -14,6 +14,7 @@ public class FrameTiming {
 
     public FrameTiming() {
         setTargetFrameRate(60);
+        previousNanoTime = getCurrentNanoTime();
     }
 
     public void updateTiming() {

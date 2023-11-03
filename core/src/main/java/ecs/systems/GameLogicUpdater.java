@@ -6,6 +6,7 @@ import ecs.SceneInitializer;
 import ecs.architecture.ComponentManager;
 import ecs.architecture.EntityManager;
 import ecs.components.AbstractComponent;
+import ecs.components.Camera;
 import ecs.components.Component;
 import ecs.components.Transform;
 import ecs.entities.Entity;
@@ -15,9 +16,13 @@ import ecs.graphics.Window;
 import ecs.managment.FrameTiming;
 import ecs.managment.SystemManager;
 import ecs.physics.Collidable;
+import ecs.systems.processes.CollisionHandlingProcess;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.RenderProcess;
+import ecs.systems.processes.UpdateProcess;
 import ecs.utils.Logger;
 import ecs.utils.Stopwatch;
-import vectors.Vector3f;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -32,9 +37,11 @@ public class GameLogicUpdater implements GameLogic {
     private Scene scene;
     private Graphics graphics;
 
+    private Camera camera;
+
     public GameLogicUpdater(Window window) {
         this.window = window;
-        this.graphics = new Graphics(window);
+        this.graphics = Graphics.getInstance(window);
     }
 
     public void setScene(Scene scene) {
@@ -47,6 +54,8 @@ public class GameLogicUpdater implements GameLogic {
 
     @Override
     public void run() {
+        Logger.info("Game loop started");
+
         FrameTiming timingContext = new FrameTiming();
 
         loadScene(scene);
@@ -67,6 +76,8 @@ public class GameLogicUpdater implements GameLogic {
                 Logger.error(e);
             }
         }
+
+        Logger.info("Game loop ended");
     }
 
     public void setDataManagers(EntityManager entityManager, ComponentManager componentManager, SystemManager systemManager) {
@@ -81,13 +92,15 @@ public class GameLogicUpdater implements GameLogic {
     }
 
     @Override
-    /* We are sure that each component object from system.getComponentList()
-    is a Component type, because the only way of adding a component into
-    component list is through component factory method call, that by definition
-    generates objects of Component type */
-//    @SuppressWarnings("unchecked")
     public void init() throws RuntimeException {
-        for (System<? extends Component> system : systemManager.listOfSystemsForInit) {
+        // todo: needs to check for adding new components in runtime and checks for running out of components
+        //  to initialize, so we can skip iteration moment in init() method call until the next component addition
+        //
+        //    if (systemManager.hasNoComponentsToInit()) return;
+        //
+
+        for (InitProcess process : systemManager.listOfSystemsForInit) {
+            System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_INIT_STATE) {
                     Logger.trace(String.format(
@@ -97,8 +110,13 @@ public class GameLogicUpdater implements GameLogic {
                     );
                     try {
                         system.setCurrentComponent(component);
-                        system.init();
+                        process.init();
                         component.setState(AbstractComponent.READY_TO_OPERATE_STATE);
+
+                        if (component instanceof Camera) {
+                            this.camera = (Camera) component;
+                        }
+
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
                         component.setState(AbstractComponent.LATE_INIT_STATE);
@@ -115,12 +133,13 @@ public class GameLogicUpdater implements GameLogic {
         Input.updateInput();
     }
 
+    //todo: performance
     @Override
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
-        Stopwatch.start();
-
         if (systemManager.listOfSystemsForCollision.isEmpty()) return;
+
+        Stopwatch.start();
 
         List<MeshCollider> componentList;
         CollisionPair pair;
@@ -140,8 +159,6 @@ public class GameLogicUpdater implements GameLogic {
         int rindex;
         int cindex;
 
-        ComponentManager componentManager = ComponentManager.getInstance();
-
         collisionsListSize = systemManager.collisions.size();
 
         for (System<? extends Component> system: systemManager.listOfSystemsForCollision) {
@@ -156,8 +173,8 @@ public class GameLogicUpdater implements GameLogic {
                     if (that.isStatic && other.isStatic) continue;
                     if (that.body == null || other.body == null) continue;
                     if (that.body.isIntersects(other.body)) {
-                        positionA = componentManager.getComponent(A, Transform.class).position;
-                        positionB = componentManager.getComponent(B, Transform.class).position;
+                        positionA = A.transform.position;
+                        positionB = B.transform.position;
                         isCollisionFound = false;
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = systemManager.collisions.get(cindex);
@@ -235,12 +252,14 @@ public class GameLogicUpdater implements GameLogic {
                (previousFrameCollision.A == B && previousFrameCollision.B == A);
     }
 
+    //todo: performance
     @Override
     public void update(float deltaTime) {
         Stopwatch.start();
         glfwPollEvents();
 
-        for (System<? extends Component> system : systemManager.listOfSystemsForUpdate) {
+        for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
+            System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
                     Logger.trace(String.format(
@@ -250,7 +269,7 @@ public class GameLogicUpdater implements GameLogic {
                     );
                     try {
                         system.setCurrentComponent(component);
-                        system.update(deltaTime);
+                        process.update(deltaTime);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
                         component.setState(AbstractComponent.READY_TO_INIT_STATE);
@@ -262,11 +281,12 @@ public class GameLogicUpdater implements GameLogic {
         Stopwatch.stop("Update systems handling ended!");
     }
 
-    // @Performance
+    //todo: performance
     private void handleCollisionEnter() {
         Stopwatch.start();
 
-        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+            System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
@@ -274,7 +294,7 @@ public class GameLogicUpdater implements GameLogic {
                     if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.ENTERED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        system.onCollisionStart(collision);
+                        process.onCollisionStart(collision);
                     }
                 }
             }
@@ -283,11 +303,12 @@ public class GameLogicUpdater implements GameLogic {
         Stopwatch.stop("Collision enter handling ended!");
     }
 
-    // @Performance
+    //todo: performance
     private void handleCollisionHold() {
         Stopwatch.start();
 
-        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+            System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
@@ -295,7 +316,7 @@ public class GameLogicUpdater implements GameLogic {
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.HOLD == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        system.onCollision(collision);
+                        process.onCollision(collision);
                     }
                 }
             }
@@ -304,11 +325,12 @@ public class GameLogicUpdater implements GameLogic {
         Stopwatch.stop("Collision hold handling ended!");
     }
 
-    // @Performance
+    //todo: performance
     private void handleCollisionExit() {
         Stopwatch.start();
 
-        for (System<? extends Component> system : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+            System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
@@ -316,7 +338,7 @@ public class GameLogicUpdater implements GameLogic {
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.EXITED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        system.onCollisionEnd(collision);
+                        process.onCollisionEnd(collision);
                     }
                 }
             }
@@ -344,8 +366,11 @@ public class GameLogicUpdater implements GameLogic {
 
         Stopwatch.start();
 
-        for (System<? extends Component> system : systemManager.listOfSystemsForRender) {
-            for (Component component : system.getComponentList()) {
+        for (RenderProcess process : systemManager.listOfSystemsForRender) {
+            System<? extends Component> system = (System<? extends Component>) process;
+            List<? extends Component> components = system.getComponentList();
+            sortComponentsByDistanceToCamera(components);
+            for (Component component : components) {
                 if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
                     Logger.trace(String.format(
                             "Handling render component [%s: %s]",
@@ -354,7 +379,7 @@ public class GameLogicUpdater implements GameLogic {
                     );
                     try {
                         system.setCurrentComponent(component);
-                        system.render(graphics);
+                        process.render(graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
                         component.setState(AbstractComponent.READY_TO_INIT_STATE);
@@ -368,6 +393,17 @@ public class GameLogicUpdater implements GameLogic {
         Stopwatch.start();
         glfwSwapBuffers(window.getWindow());
         Stopwatch.stop("Graphics buffer swap ended!");
+    }
+
+    private void sortComponentsByDistanceToCamera(List<? extends Component> components) {
+        components.sort((o1, o2) -> {
+            if (Objects.isNull(camera)) return 0;
+
+            Vector3f cameraPosition = camera.getPosition();
+            float o1Distance = o1.getTransform().position.distance(cameraPosition);
+            float o2Distance = o2.getTransform().position.distance(cameraPosition);
+            return (int) (o2Distance - o1Distance);
+        } );
     }
 
 }

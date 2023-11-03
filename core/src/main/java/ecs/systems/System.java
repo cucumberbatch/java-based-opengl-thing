@@ -7,11 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 
 // todo: automate "component-to-system" association with annotation processors and reflections
-public interface System<E extends Component> extends ISystem {
+public interface System<E extends Component> {
     Iterator<E> getComponentIterator();
     List<E> getComponentList();
     E getComponent();
-    int getWorkflowMask();
     void setCurrentComponent(Component component);
     void addComponent(Component component);
     E getComponent(long componentId);

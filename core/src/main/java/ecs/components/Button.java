@@ -3,8 +3,8 @@ package ecs.components;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 import ecs.shapes.Rectangle;
-import vectors.Vector2f;
-import vectors.Vector4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 public class Button extends AbstractComponent {
 
@@ -32,7 +32,7 @@ public class Button extends AbstractComponent {
     public Vector4f buttonOnHoverColor = new Vector4f(0.87f, 0.87f, 1.00f, 1.0f);
     public Vector4f buttonColor        = new Vector4f(buttonDefaultColor);
 
-    public Rectangle buttonShape       = new Rectangle(Vector2f.zero(), Vector2f.zero());;
+    public Rectangle buttonShape       = new Rectangle(new Vector2f().zero(), new Vector2f().zero());;
     public Texture   buttonTexture;
 
     public float transitionTimeLimit       = 1.2f;

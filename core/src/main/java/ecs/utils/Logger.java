@@ -104,7 +104,11 @@ public class Logger {
         writer = logWriter;
 
         // Appears in start of application
-        // directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
+//         directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
+    }
+
+    public static void printOnStartInfo() {
+        directPrint(ApplicationConfig.LOGGER_HEADER_TEXT);
     }
 
     public static LogWriter writer = new Logger.ConsoleLogWriter(); // console output by default

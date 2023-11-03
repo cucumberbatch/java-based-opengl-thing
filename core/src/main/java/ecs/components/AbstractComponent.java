@@ -120,7 +120,7 @@ public abstract class AbstractComponent implements Component, Serializable {
     @Override
     public void setState(byte state) {
         if (this.state == state) return;
-        Logger.info(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s", getId(), getClass().getSimpleName(), State.fromValue(this.state), State.fromValue(state)));
+        Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s", getId(), getClass().getSimpleName(), State.fromValue(this.state), State.fromValue(state)));
         this.state = state;
     }
 

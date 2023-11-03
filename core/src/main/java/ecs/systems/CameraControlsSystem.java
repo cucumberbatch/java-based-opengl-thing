@@ -2,19 +2,25 @@ package ecs.systems;
 
 import ecs.components.Camera;
 import ecs.components.CameraControls;
+import ecs.config.EngineConfig;
 import ecs.graphics.Graphics;
 import ecs.graphics.Window;
 import ecs.reflection.ComponentHandler;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.RenderProcess;
+import ecs.systems.processes.UpdateProcess;
 import ecs.utils.Logger;
-import matrices.Matrix4f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
 import org.lwjgl.opengl.GL30;
-import vectors.Vector2f;
-import vectors.Vector3f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 @ComponentHandler(CameraControls.class)
-public class CameraControlsSystem extends AbstractSystem<CameraControls> {
+public class CameraControlsSystem extends AbstractSystem<CameraControls>
+        implements InitProcess, UpdateProcess {
 
     private static final int PERSPECTIVE_VIEW_STATE = 0;
     private static final int PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE = 1;
@@ -26,13 +32,12 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
 
     private static Camera camera;
 
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK | RENDER_MASK;
-    }
+    private Graphics graphics;
 
     @Override
     public void init() {
+        Window window = EngineConfig.instance.window;
+        graphics = Graphics.getInstance(window);
         camera = component.entity.getComponent(Camera.class);
     }
 
@@ -40,10 +45,6 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
     public void update(float deltaTime) {
         updateCameraMovement(deltaTime);
         updateCameraProjection();
-    }
-
-    @Override
-    public void render(Graphics graphics) {
         updateScreenCapture(graphics);
     }
 
@@ -61,23 +62,22 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
         switch (projectionState) {
             case PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE: {
                 projectionProgress += 0.05;
-                camera.projectionMatrix = Matrix4f.lerp(CameraSystem.PERSPECTIVE_MATRIX, CameraSystem.ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
+                camera.projectionMatrix = new Matrix4f(CameraSystem.PERSPECTIVE_MATRIX).lerp(CameraSystem.ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
                 if (projectionProgress > 1) {
                     projectionProgress = 0;
                     projectionState = ORTHOGRAPHIC_VIEW_STATE;
                 }
-                Graphics.setProjection(camera.projectionMatrix);
+                graphics.projection = camera.projectionMatrix;
                 break;
             }
             case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE: {
                 projectionProgress += 0.05;
-                camera.projectionMatrix = Matrix4f.lerp(CameraSystem.ORTHOGRAPHIC_MATRIX, CameraSystem.PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1))
-                );
+                camera.projectionMatrix = new Matrix4f(CameraSystem.ORTHOGRAPHIC_MATRIX).lerp(CameraSystem.PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
                 if (projectionProgress > 1) {
                     projectionProgress = 0;
                     projectionState = PERSPECTIVE_VIEW_STATE;
                 }
-                Graphics.setProjection(camera.projectionMatrix);
+                graphics.projection = camera.projectionMatrix;
                 break;
             }
             case PERSPECTIVE_VIEW_STATE: {
@@ -98,12 +98,14 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
     private void updateCameraMovement(float deltaTime) {
         Vector2f cursorPosition = Input.getCursorPosition();
 
-        float verticalAngle   = -cursorPosition.y / (Window.width / 256f) - 180;
+        float verticalAngle   = cursorPosition.y / (Window.width / 256f) - 180;
         float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
         float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.9f, 89.9f);
 
-        Vector3f point = Vector3f.forward().rotation(restrictedVerticalAngle, horizontalAngle, 0);
+        Vector3f point = new Vector3f(0, 0, 1)
+                .rotateX((float) Math.toRadians(restrictedVerticalAngle))
+                .rotateY((float) Math.toRadians(horizontalAngle));
 
         float speedFactor;
 
@@ -114,23 +116,24 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
         }
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            component.transform.moveRel(new Vector3f(deltaTime * speedFactor, 0, 0));
+            component.transform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            component.transform.moveRel(new Vector3f(-deltaTime * speedFactor, 0, 0));
+            component.transform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            component.transform.moveRel(new Vector3f(0, deltaTime * speedFactor, 0));
+            component.transform.moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            component.transform.moveRel(new Vector3f(0, -deltaTime * speedFactor, 0));
+            component.transform.moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix = Matrix4f.lookAt(new Vector3f(), point, Vector3f.up());
-
-        Graphics.setView(camera.viewMatrix);
+        camera.viewMatrix = new Matrix4f()
+                .identity()
+                .lookAt(component.transform.position, new Vector3f(component.transform.position).add(point), new Vector3f(0, 1, 0));
+        graphics.view = camera.viewMatrix;
     }
 
     private float restrictAngle(float angle, float lowest, float highest) {
@@ -142,11 +145,14 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> {
         @Override
         public void invoke(long window, int width, int height) {
             camera.ratio = (float) width / height;
-            CameraSystem.PERSPECTIVE_MATRIX  = Matrix4f.perspective3(camera.angle, camera.ratio, camera.near, camera.far);
-            CameraSystem.ORTHOGRAPHIC_MATRIX = Matrix4f.orthographic3(-camera.ratio, camera.ratio, -1, 1, -1, 1);
+            CameraSystem.PERSPECTIVE_MATRIX  = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
+            CameraSystem.ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1, 1, -1, 1);
 
-            if      (PERSPECTIVE_VIEW_STATE  == projectionState) Graphics.setProjection(CameraSystem.PERSPECTIVE_MATRIX);
-            else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) Graphics.setProjection(CameraSystem.ORTHOGRAPHIC_MATRIX);
+            Window windowObject = EngineConfig.instance.window;
+            Graphics graphics = Graphics.getInstance(windowObject);
+
+            if      (PERSPECTIVE_VIEW_STATE  == projectionState) graphics.projection = CameraSystem.PERSPECTIVE_MATRIX;
+            else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;
 
             GL30.glViewport(0, 0, width, height);
             Logger.info(String.format("Aspect ratio: %f width: %s height: %s", camera.ratio, width, height));

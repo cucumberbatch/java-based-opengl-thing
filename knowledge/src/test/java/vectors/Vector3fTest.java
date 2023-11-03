@@ -9,8 +9,8 @@ public class Vector3fTest {
 
     @Test
     void testRotationVector1() {
-        Vector3f origin = Vector3f.forward();
-        Vector3f up     = Vector3f.up();
+        Vector3f origin = new Vector3f().forward();
+        Vector3f up     = new Vector3f().up();
 
         Vector3f result = new Vector3f(origin).rotation(-90, 0, 0);
         assertEquals(up, result);
@@ -18,8 +18,8 @@ public class Vector3fTest {
 
     @Test
     void testRotationVector2() {
-        Vector3f origin = Vector3f.forward();
-        Vector3f right  = Vector3f.right();
+        Vector3f origin = new Vector3f().forward();
+        Vector3f right  = new Vector3f().right();
 
         Vector3f result = new Vector3f(origin).rotation(0, 90, 0);
         assertEquals(right, result);
@@ -27,8 +27,8 @@ public class Vector3fTest {
 
     @Test
     void testRotationVector3() {
-        Vector3f origin   = Vector3f.forward();
-        Vector3f backward = Vector3f.backward();
+        Vector3f origin   = new Vector3f().forward();
+        Vector3f backward = new Vector3f().backward();
 
         Vector3f result = new Vector3f(origin).rotation(0, 180, 0);
         assertEquals(backward, result);
@@ -36,8 +36,8 @@ public class Vector3fTest {
 
     @Test
     void testRotationVector4() {
-        Vector3f origin   = Vector3f.forward();
-        Vector3f backward = Vector3f.backward();
+        Vector3f origin   = new Vector3f().forward();
+        Vector3f backward = new Vector3f().backward();
 
         Vector3f result = new Vector3f(origin)
                 .rotation(90, 0, 0)
@@ -49,8 +49,8 @@ public class Vector3fTest {
 
     @Test
     void testRotationVector5() {
-        Vector3f origin   = Vector3f.forward();
-        Vector3f backward = Vector3f.backward();
+        Vector3f origin   = new Vector3f().forward();
+        Vector3f backward = new Vector3f().backward();
 
         Vector3f result = new Vector3f(origin)
                 .rotation(90, 0, 0)
@@ -66,7 +66,7 @@ public class Vector3fTest {
         Vector3f up      = new Vector3f(0f, 1f, 0f);
         Vector3f forward = new Vector3f(0f, 0f, 1f);
 
-        Vector3f crossProduct = Vector3f.cross(up, forward);
+        Vector3f crossProduct = new Vector3f().cross(up, forward);
         assertEquals(right, crossProduct);
     }
 
@@ -76,7 +76,7 @@ public class Vector3fTest {
         Vector3f v2 = new Vector3f(5f, -1f, 2f);
         Vector3f v3 = new Vector3f(-2f, -4f, 3f);
 
-        Vector3f crossProduct = Vector3f.cross(v1, v2);
+        Vector3f crossProduct = new Vector3f().cross(v1, v2);
         assertEquals(v3, crossProduct);
     }
 
@@ -86,7 +86,7 @@ public class Vector3fTest {
         Vector3f v2 = new Vector3f(1f, 1f, 1f);
         Vector3f v3 = new Vector3f(0f, 0f, 0f);
 
-        Vector3f crossProduct = Vector3f.cross(v1, v2);
+        Vector3f crossProduct = new Vector3f().cross(v1, v2);
         assertEquals(v3, crossProduct);
         assertNotSame(v1, crossProduct);
     }
@@ -97,7 +97,7 @@ public class Vector3fTest {
         Vector3f v2 = new Vector3f(-1f, 0f, -1f);
         Vector3f v3 = new Vector3f(-1f, 0f, 1f);
 
-        Vector3f crossProduct = Vector3f.cross(v1, v2);
+        Vector3f crossProduct = new Vector3f().cross(v1, v2);
         assertEquals(v3, crossProduct);
     }
 
@@ -107,7 +107,7 @@ public class Vector3fTest {
         Vector3f v2 = new Vector3f(4f, -9f, 13f);
         Vector3f v3 = new Vector3f(53f, -1f, -17f);
 
-        Vector3f crossProduct = Vector3f.cross(v1, v2);
+        Vector3f crossProduct = new Vector3f().cross(v1, v2);
         assertEquals(v3, crossProduct);
     }
 

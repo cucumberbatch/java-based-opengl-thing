@@ -4,10 +4,12 @@ import ecs.components.RigidBody;
 import ecs.components.Transform;
 import ecs.physics.Physics;
 import ecs.reflection.ComponentHandler;
-import vectors.Vector3f;
+import ecs.systems.processes.UpdateProcess;
+import org.joml.Vector3f;
 
 @ComponentHandler(RigidBody.class)
-public class RigidBodySystem extends AbstractSystem<RigidBody> {
+public class RigidBodySystem extends AbstractSystem<RigidBody>
+        implements UpdateProcess {
 
     @Override
     public void update(float deltaTime) {

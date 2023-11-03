@@ -2,7 +2,7 @@ package ecs.systems;
 
 import ecs.utils.Logger;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import vectors.Vector2f;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 

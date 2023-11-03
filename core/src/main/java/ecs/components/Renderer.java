@@ -1,5 +1,6 @@
 package ecs.components;
 
+import ecs.graphics.Mesh;
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
 
@@ -79,6 +80,7 @@ public class Renderer extends AbstractComponent {
             1,  1
     };
 
+    public Mesh mesh;
     public VertexArray background;
     public Texture     texture;
 

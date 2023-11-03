@@ -5,13 +5,12 @@ import ecs.utils.TerminalUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Date;
 
 public class ApplicationConfig {
 
-    private static final String APPLICATION_VERSION = "0.0.001";
-    public static final String LOGGER_HEADER_TEXT = TerminalUtils.fAnsi("<blue>{ debug build }</>\n");
+    private static final String APPLICATION_VERSION = ApplicationProperties.getProperty("application.version");
+    public static final String LOGGER_HEADER_TEXT = TerminalUtils.fAnsi("<blue>{ debug build ver:" + APPLICATION_VERSION + " }</>\n");
             /*"<Blue>" +
 
             "\n" +
@@ -29,8 +28,11 @@ public class ApplicationConfig {
     private ApplicationConfig() {}
 
     // Logger
-    public static final Logger.Level LOGGER_SEVERITY = Logger.Level.INFO;
+    public static final Logger.Level LOGGER_SEVERITY =
+            Logger.Level.valueOf(ApplicationProperties.getProperty("logger.severity"));
+
     public static final String LOGGER_TIME_INFO_PATTERN = "HH:mm:ss.SSS";
+
     public static final String LOG_FILE_PATH = String.format(
             "C:\\Users\\Владислав\\Desktop\\java\\%s.log",
             new SimpleDateFormat("yyyyMMdd'_'HHmmss").format(Date.from(Instant.now())));

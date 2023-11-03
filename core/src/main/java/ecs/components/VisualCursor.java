@@ -2,7 +2,7 @@ package ecs.components;
 
 import ecs.graphics.Texture;
 import ecs.graphics.VertexArray;
-import vectors.Vector2f;
+import org.joml.Vector2f;
 import ecs.shapes.Rectangle;
 
 

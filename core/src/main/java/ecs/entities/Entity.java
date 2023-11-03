@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity implements TreeNode, Collidable {
+public class Entity implements TreeNode<Entity>, Collidable {
     public long     id;
     public String   name;
     public Entity   parent;
@@ -55,13 +55,25 @@ public class Entity implements TreeNode, Collidable {
     }
 
     @Override
-    public TreeNode getParent() {
+    public Entity getParent() {
         return parent;
     }
 
     @Override
-    public List<? extends TreeNode> getDaughters() {
+    public List<Entity> getDaughters() {
         return daughters;
+    }
+
+    @Override
+    public List<Entity> getSiblings() {
+        if (this.parent == null) {
+            return new LinkedList<>();
+        }
+
+        LinkedList<Entity> siblings = new LinkedList<>(this.parent.daughters);
+        siblings.removeIf(this::equals);
+
+        return siblings;
     }
 
     @Override
@@ -75,12 +87,27 @@ public class Entity implements TreeNode, Collidable {
     }
 
     @Override
-    public void setParent(TreeNode parent) {
-        this.parent = (Entity) parent;
+    public void setParent(Entity parent) {
+        if (this.parent != null) {
+            this.parent.daughters.remove(this);
+        }
+        if (this.daughters.contains(parent)) {
+            this.daughters.remove(parent);
+            parent.parent = null;
+        }
+        if (this.parent != parent) {
+            parent.daughters.add(this);
+        }
+        this.parent = parent;
     }
 
     @Override
-    public void setDaughters(List<? extends TreeNode> daughters) {
+    public void setDaughters(List<Entity> daughters) {
         this.daughters = (List<Entity>) daughters;
+    }
+
+    @Override
+    public boolean isParentOf(Entity entity) {
+        return this.daughters.contains(entity);
     }
 }

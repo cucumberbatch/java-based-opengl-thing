@@ -2,7 +2,7 @@ package ecs.systems;
 
 import ecs.components.Transform;
 import ecs.reflection.ComponentHandler;
-import vectors.Vector3f;
+import org.joml.Vector3f;
 
 @ComponentHandler(Transform.class)
 public class TransformSystem extends AbstractSystem<Transform> {

@@ -1,7 +1,7 @@
 package ecs.components;
 
 import ecs.physics.collision.TransformListener;
-import vectors.Vector3f;
+import org.joml.Vector3f;
 
 /**
  * The main component of each game object that tells
@@ -16,7 +16,7 @@ public class Transform extends AbstractComponent {
 
     public Vector3f position = new Vector3f();
     public Vector3f rotation = new Vector3f();
-    public Vector3f scale    = Vector3f.one();
+    public Vector3f scale    = new Vector3f(1, 1, 1);
 
 
     public void moveTo(Vector3f position) {
@@ -46,11 +46,6 @@ public class Transform extends AbstractComponent {
     @Override
     public void reset() {
         super.reset();
-        Vector3f.reset(
-                position,
-                rotation,
-                scale
-        );
     }
 
     @Override

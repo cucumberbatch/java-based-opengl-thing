@@ -20,6 +20,12 @@ public class Vector2f {
         this.y = other.y;
     }
 
+    public Vector2f set(float value) {
+        this.x = value;
+        this.y = value;
+        return this;
+    }
+
     public Vector2f set(float x, float y) {
         this.x = x;
         this.y = y;
@@ -32,6 +38,12 @@ public class Vector2f {
         return this;
     }
 
+    public Vector2f add(float value) {
+        this.x += value;
+        this.y += value;
+        return this;
+    }
+
     public Vector2f add(float x, float y) {
         this.x += x;
         this.y += y;
@@ -41,6 +53,12 @@ public class Vector2f {
     public Vector2f add(Vector2f other) {
         this.x += other.x;
         this.y += other.y;
+        return this;
+    }
+
+    public Vector2f sub(float value) {
+        this.x -= value;
+        this.y -= value;
         return this;
     }
 

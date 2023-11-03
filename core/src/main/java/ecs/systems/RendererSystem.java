@@ -1,23 +1,23 @@
 package ecs.systems;
 
+import ecs.components.MeshRenderer;
 import ecs.components.Renderer;
 import ecs.graphics.*;
 import ecs.reflection.ComponentHandler;
+import ecs.systems.processes.InitProcess;
+import ecs.systems.processes.RenderProcess;
+import ecs.systems.processes.UpdateProcess;
+import org.joml.Vector3f;
 
 @ComponentHandler(Renderer.class)
-public class RendererSystem extends AbstractSystem<Renderer> {
-
-    @Override
-    public int getWorkflowMask() {
-        return INIT_MASK | UPDATE_MASK | RENDER_MASK;
-    }
+public class RendererSystem extends AbstractSystem<Renderer>
+        implements InitProcess, UpdateProcess, RenderProcess {
 
     @Override
     public void init() throws RuntimeException {
         Renderer renderer = getComponent();
         renderer.background = new VertexArray(renderer.vertices, renderer.indices, renderer.uv);
-//        renderer.texture    = new Texture("core/assets/textures/bg.jpeg");
-
+        renderer.texture    = new Texture("core/assets/textures/bg.jpeg");
     }
 
     @Override
@@ -26,10 +26,10 @@ public class RendererSystem extends AbstractSystem<Renderer> {
 
     @Override
     public void render(Graphics graphics) {
-        Shader.TEST.setUniform("u_texture", component.texture.getId());
+//        Shader.TEST.setUniform("u_texture", component.texture.getId());
 
 //        Shader.TEST.setUniform("uColor", 1f, 1f, 1f, 1f);
-        Shader.TEST.setUniform("u_position", component.transform.position);
+//        Shader.TEST.setUniform("u_position", component.transform.position);
 
 //        component.transform.position.add(0.01f, 0.01f, 0.01f);
 

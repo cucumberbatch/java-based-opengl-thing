@@ -1,6 +1,6 @@
 package ecs.systems;
 
-import vectors.Vector3f;
+import org.joml.Vector3f;
 
 public class CollisionPair {
     public Vector3f A;
@@ -12,7 +12,7 @@ public class CollisionPair {
         this.A = new Vector3f(A);
         this.B = new Vector3f(B);
         Vector3f direction = new Vector3f(A.x - B.x, A.y - B.y, A.z - B.z);
-        this.normal = Vector3f.normalized(direction);
+        this.normal = new Vector3f().normalize(direction);
         this.depth  = direction.length();
     }
 }

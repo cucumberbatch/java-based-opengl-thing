@@ -2,13 +2,15 @@ package ecs.graphics;
 
 import ecs.utils.BufferUtils;
 import ecs.utils.Logger;
-import matrices.Matrix4f;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
-import vectors.Vector2f;
-import vectors.Vector3f;
-import vectors.Vector4f;
+import org.lwjgl.system.MemoryStack;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import ecs.utils.ShaderUtils;
 
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,7 +107,11 @@ public class Shader {
 
     public void setUniform(String name, Matrix4f matrix4f) {
         if (!enabled) enable();
-        GL20.glUniformMatrix4fv(getUniformLocation(name), false, BufferUtils.createFloatBuffer(matrix4f.elements));
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer fb = stack.mallocFloat(16);
+            matrix4f.get(fb);
+            GL20.glUniformMatrix4fv(getUniformLocation(name), false, fb);
+        }
     }
 
     public void enable() {

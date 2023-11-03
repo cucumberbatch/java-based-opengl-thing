@@ -18,29 +18,27 @@ import ecs.utils.Logger;
 //  - editor mode (Vim like behaviour)
 //    - developer console
 //    - editor visual cursor, that can select and manipulate objects in scene
-public class Engine extends Thread {
+public class Engine {
     public static Engine     engine;
     public final  Window     window;
     public final  GameLogic  gameLoop;
 
     public EngineConfig config;
 
+    public Engine(Window window) {
+        this();
+    }
+
     public Engine() {
-        this(new EngineConfig());
-    }
-
-    public Engine(EngineConfig engineConfig) {
-        this(engineConfig.window, engineConfig.gameLogic);
-        this.config = engineConfig;
-    }
-
-    public Engine(Window window, GameLogic logic) {
         Logger.info("Initializing engine..");
 
-        this.window = window;
-        gameLoop = logic;
-        setDataManagers(gameLoop);
+        window = new Window("windowTitle", 512, 512, false);
+        gameLoop = new GameLogicUpdater(window);
         engine = this;
+
+        setDataManagers(gameLoop);
+
+        Logger.info("Engine initialization succeeded");
     }
 
     private void setDataManagers(GameLogic gameLogic) {
@@ -56,9 +54,12 @@ public class Engine extends Thread {
         this.gameLoop.setScene(scene);
     }
 
-    @Override
     public void run() {
-        if (window == null) return;
+        if (window == null) {
+            Logger.error("Window is not set-up. Cannot run engine");
+            return;
+        }
+
         window.init();
         gameLoop.run();
         window.destroy();

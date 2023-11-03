@@ -1,8 +1,8 @@
 package ecs.utils;
 
 import ecs.entities.Entity;
-import matrices.Matrix4f;
-import vectors.Vector3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -193,41 +193,6 @@ public class TerminalUtils {
 //        return vector.toString();
     }
 
-    public static String formatOutputMatrix(Matrix4f matrix) {
-/*
-        String matrixOutputFormatString = "[$%10.3f, $%10.3f, $%10.3f, $%10.3f]\n[$%10.3f, $%10.3f, $%10.3f, $%10.3f]\n[$%10.3f, $%10.3f, $%10.3f, $%10.3f]\n[$%10.3f, $%10.3f, $%10.3f, $%10.3f]\n";
-
-        return String.format(matrixOutputFormatString, matrix.elements matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7], matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15]);
-
-    }
-*/
-
-        String start    = "║ ";
-//        String end      = ANSI_RESET.concat("\t]");
-//        String newLine  = ANSI_RESET.concat("\n");
-//        String splitter = ANSI_RESET.concat(",\t");
-        String end      = " ║";
-        String newLine  = "\n";
-        String splitter = ", ";
-        StringBuffer formattedString = new StringBuffer("\n");
-
-
-        for (int i = 0; i < 4; i++) {
-            formattedString.append(start);
-            for (int j = 0; j < 4; j++) {
-                formattedString.append(decimalFormat.format(matrix.elements[i + j * 4]));
-                if (j < 3) {
-                    formattedString.append(splitter);
-                }
-            }
-            formattedString.append(end);
-            if (i < 3) {
-                formattedString.append(newLine);
-            }
-        }
-        return formattedString.toString();
-    }
-
     public static String replaceWithIndents(String string, int indentLevel) {
         String indent = "  - ";
         StringBuffer accumulator = new StringBuffer();
@@ -239,10 +204,6 @@ public class TerminalUtils {
 
         return string.replace("\n", accumulator);
     }
-
-//    public static String formatOutputComponent(ECSComponent component) {
-//
-//    }
 
     public static String formatOutputEntity(Entity entity, int level) {
 //        String indent   = " -  ";
