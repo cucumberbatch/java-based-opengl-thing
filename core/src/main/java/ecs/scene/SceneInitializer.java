@@ -1,7 +1,5 @@
-package ecs;
+package ecs.scene;
 
-import ecs.components.Component;
-import ecs.entities.Entity;
 import ecs.systems.GameLogicUpdater;
 
 public class SceneInitializer {

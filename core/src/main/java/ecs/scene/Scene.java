@@ -1,4 +1,4 @@
-package ecs;
+package ecs.scene;
 
 import ecs.entities.Entity;
 

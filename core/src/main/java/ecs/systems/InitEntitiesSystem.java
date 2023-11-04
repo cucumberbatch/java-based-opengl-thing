@@ -1,8 +1,7 @@
 package ecs.systems;
 
-import ecs.Scene;
+import ecs.scene.Scene;
 import ecs.architecture.ComponentManager;
-import ecs.architecture.TreeEntityManager;
 import ecs.architecture.entity.ImprovedEntityManager;
 import ecs.components.*;
 import ecs.config.EngineConfig;
@@ -13,16 +12,11 @@ import ecs.graphics.Shader;
 import ecs.graphics.Texture;
 import ecs.reflection.ComponentHandler;
 import ecs.systems.processes.InitProcess;
-import ecs.utils.Logger;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
-import java.util.logging.Level;
 
 @ComponentHandler(InitEntities.class)
 public class InitEntitiesSystem extends AbstractSystem<InitEntities>

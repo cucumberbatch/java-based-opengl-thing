@@ -101,7 +101,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         float verticalAngle   = cursorPosition.y / (Window.width / 256f) - 180;
         float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
-        float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.9f, 89.9f);
+        float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.986f, 89.986f);
 
         Vector3f point = new Vector3f(0, 0, 1)
                 .rotateX((float) Math.toRadians(restrictedVerticalAngle))

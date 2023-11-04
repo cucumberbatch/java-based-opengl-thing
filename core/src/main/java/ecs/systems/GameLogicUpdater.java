@@ -1,14 +1,12 @@
 package ecs.systems;
 
-import ecs.GameLogic;
-import ecs.Scene;
-import ecs.SceneInitializer;
+import ecs.scene.Scene;
+import ecs.scene.SceneInitializer;
 import ecs.architecture.ComponentManager;
 import ecs.architecture.EntityManager;
 import ecs.components.AbstractComponent;
 import ecs.components.Camera;
 import ecs.components.Component;
-import ecs.components.Transform;
 import ecs.entities.Entity;
 import ecs.exception.ComponentNotFoundException;
 import ecs.graphics.Graphics;

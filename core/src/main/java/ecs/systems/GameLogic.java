@@ -1,5 +1,6 @@
-package ecs;
+package ecs.systems;
 
+import ecs.scene.Scene;
 import ecs.graphics.Window;
 import ecs.systems.processes.ISystem;
 

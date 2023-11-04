@@ -1,7 +1,7 @@
 package ecs.managment;
 
-import ecs.GameLogic;
-import ecs.Scene;
+import ecs.systems.GameLogic;
+import ecs.scene.Scene;
 import ecs.graphics.Window;
 import ecs.graphics.Renderer2D;
 import ecs.graphics.Shader;

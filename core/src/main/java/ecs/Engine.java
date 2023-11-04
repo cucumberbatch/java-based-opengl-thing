@@ -6,6 +6,8 @@ import ecs.architecture.TreeEntityManager;
 import ecs.config.EngineConfig;
 import ecs.graphics.Window;
 import ecs.managment.SystemManager;
+import ecs.scene.Scene;
+import ecs.systems.GameLogic;
 import ecs.systems.GameLogicUpdater;
 import ecs.utils.Logger;
 
@@ -21,7 +23,7 @@ import ecs.utils.Logger;
 public class Engine {
     public static Engine     engine;
     public final  Window     window;
-    public final  GameLogic  gameLoop;
+    public final GameLogic gameLoop;
 
     public EngineConfig config;
 
