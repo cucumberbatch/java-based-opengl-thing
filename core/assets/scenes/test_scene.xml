@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<scene name="simple scene">
+	<entities>
+		<entity id='1' name='button'>
+			<components>
+				<component type='TRANSFORM'>
+					<position>
+						<x>20</x>
+						<y>20</y>
+						<z>0</z>
+					</position>
+					<rotation>
+						<x>0</x>
+						<y>0</y>
+						<z>0</z>
+					</rotation>
+					<scale>
+						<x>0</x>
+						<y>0</y>
+						<z>0</z>
+					</scale>
+				</component>
+				<component type='MESH_COLLIDER'>
+					<mesh>
+						<topLeft>
+							<x>-20</x>
+							<y>-20</y>
+						</topLeft>
+						<bottomRight>
+							<x>20</x>
+							<y>20</y>
+						</bottomRight>
+					</mesh>
+				</component>
+			</components>
+		</entity>	
+		<entity id='2' name='cursor'>
+			<components>
+				<component type='TRANSFORM'>
+					<position>
+						<x>50</x>
+						<y>50</y>
+						<z>0</z>
+					</position>
+					<rotation>
+						<x>0</x>
+						<y>0</y>
+						<z>0</z>
+					</rotation>
+					<scale>
+						<x>0</x>
+						<y>0</y>
+						<z>0</z>
+					</scale>
+				</component>
+				<component type='MESH_COLLIDER'>
+					<mesh>
+						<topLeft>
+							<x>40</x>
+							<y>40</y>
+						</topLeft>
+						<bottomRight>
+							<x>60</x>
+							<y>60</y>
+						</bottomRight>
+					</mesh>
+				</component>
+				<component type='PLANE'></component>
+			</components>
+		</entity>
+	</entities>
+</scene>
