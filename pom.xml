@@ -5,30 +5,36 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <name>North Engine</name>
+    <description>A simple Java OpenGL game engine which using ECS pattern</description>
+
     <groupId>org.alter.north</groupId>
-    <artifactId>java-based-opengl-thing</artifactId>
+    <artifactId>north</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
 
     <modules>
         <module>core</module>
     </modules>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.version>3.8.1</maven.compiler.version>
         <maven.jar.version>3.1.0</maven.jar.version>
+        <joml.version>1.9.9</joml.version>
+        <lwjgl.version>3.2.3</lwjgl.version>
+        <lwjgl.natives>natives-windows</lwjgl.natives>
         <junit-jupiter.version>5.8.0</junit-jupiter.version>
         <junit.surefire.version>2.19.1</junit.surefire.version>
         <junit.surefire-provider.version>1.1.0</junit.surefire-provider.version>
 	</properties>
 
-
     <build>
         <resources>
             <resource>
-                <directory>core/assets</directory>
+                <directory>core/src/main/resources</directory>
                 <includes>
                     <include>**/*.xml</include>
                     <include>**/*.frag</include>
@@ -65,58 +71,84 @@
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
-
-<!--            build project with all dependencies-->
-<!--
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ecs.MainThread</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
--->
-
-<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.version}</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>ecs.MainThread</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
--->
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-assimp</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-glfw</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-openal</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-opengl</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-stb</artifactId>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-assimp</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-glfw</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-openal</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-opengl</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-stb</artifactId>
+                <classifier>${lwjgl.natives}</classifier>
+                <version>${lwjgl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joml</groupId>
+                <artifactId>joml</artifactId>
+                <version>${joml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
+        </dependencies>
+    </dependencyManagement>
 </project>
