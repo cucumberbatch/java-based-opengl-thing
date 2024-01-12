@@ -27,9 +27,11 @@ public interface Component {
 
     void setTransform(Transform transform);
 
-    byte getState();
+    ComponentState getState();
 
-    void setState(byte state);
+    void setState(ComponentState state);
+
+    boolean inState(ComponentState state);
 
     boolean isActive();
 

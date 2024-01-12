@@ -8,7 +8,7 @@ public interface GameLogic extends Runnable, ISystem {
     void init() throws RuntimeException;
     void updateInput();
     void registerCollisions();
-    void update(float deltaTime);
+    void update(final float deltaTime);
     void handleCollisions();
     void render(Window window);
 

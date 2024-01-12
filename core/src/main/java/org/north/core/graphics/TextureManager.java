@@ -2,7 +2,6 @@ package org.north.core.graphics;
 
 import org.north.core.utils.BufferUtils;
 import org.north.core.utils.Logger;
-import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -15,7 +14,7 @@ import java.util.Map;
 import static org.lwjgl.opengl.GL11.*;
 
 public class TextureManager {
-    private static Map<String, Texture> preloadedTexturesMap = new HashMap<>();
+    private static final Map<String, Texture> preloadedTexturesMap = new HashMap<>();
 
     public static Texture tryToLoadTexture(String textureFilePath) {
         if (preloadedTexturesMap.containsKey(textureFilePath)) {
@@ -54,21 +53,23 @@ public class TextureManager {
             return null;
         }
 
-        int[] data = new int[width * height];
-        for (int i = 0; i < width * height; i++) {
+        int totalPixelCount = width * height;
+        int[] data = new int[totalPixelCount];
+        for (int i = 0; i < totalPixelCount; i++) {
+
             int a = (pixels[i] & 0xff000000) >> 24;
             int r = (pixels[i] & 0xff0000) >> 16;
             int g = (pixels[i] & 0xff00) >> 8;
             int b = (pixels[i] & 0xff);
 
-            data[i] = a << 24 | b << 16 | g << 8 | r;
+            data[totalPixelCount - i - 1] = a << 24 | b << 16 | g << 8 | r;
         }
 
         id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(data));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(data));
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return new Texture(width, height, id);

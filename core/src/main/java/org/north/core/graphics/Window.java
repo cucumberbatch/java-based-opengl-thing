@@ -103,7 +103,7 @@ public class Window {
         GL.createCapabilities();
 
 
-//        GL30.glClearColor(0.16f, 0.16f, 0.16f, 1.0f);
+//        GL30.glClearColor(0f, 0f, 0f, 1f);
         GL30.glClearColor(1f, 1f, 1f, 1f);
 
         GL30.glClearDepth(1f);

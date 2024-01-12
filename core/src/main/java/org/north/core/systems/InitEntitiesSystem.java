@@ -24,12 +24,121 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     @Override
     public void init() throws RuntimeException {
 //        initSandbox();
-        initCubeAndCamera();
+//        initCubeAndCamera();
+//        initSpaceshipOnScreen();
+        initSprites();
+    }
+
+    private void initSpaceshipOnScreen() {
+        Transform transform;
+        MeshRenderer renderer;
+
+        // TV Screen object
+        Entity tvScreen = em.create("tvScreen");
+        transform = em.take(tvScreen).add(Transform.class);
+        renderer = em.take(tvScreen).add(MeshRenderer.class);
+
+        transform.position = new Vector3f(0, 0, 0f);
+        transform.scale = new Vector3f(2, 2, 2);
+        transform.rotation = new Vector3f(1, 1, 1);
+
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+
+        // Player spaceship in the middle of the screen
+        Entity player = em.create("player");
+        transform = em.take(player).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 1f);
+        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = em.take(player).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+
+        // Background texture behind tv screen, player and other gameplay objects
+        Entity background = em.create("background");
+        transform = em.take(background).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 2f);
+        transform.scale = new Vector3f(2, 2, 2);
+
+        renderer = em.take(background).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
+
+        // Camera
+        Entity camera = em.create("camera");
+        transform = em.take(camera).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, -1f);
+
+        em.take(camera).add(Camera.class);
+    }
+
+    private void initSprites() {
+        Transform transform;
+        MeshRenderer renderer;
+
+        // TV Screen object
+        Entity tvScreen = em.create("tvScreen");
+        transform = em.take(tvScreen).add(Transform.class);
+        renderer = em.take(tvScreen).add(MeshRenderer.class);
+
+        transform.position = new Vector3f(0, 0, 0f);
+        transform.scale = new Vector3f(2, 2, 2);
+        transform.rotation = new Vector3f(1, 1, 1);
+
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+
+        // Player spaceship in the middle of the screen
+        Entity player = em.create("player");
+        transform = em.take(player).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 1f);
+        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = em.take(player).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+
+        em.take(player).add(CloudEmitter.class);
+
+
+        /*
+
+        // Spaceship gas clouds
+        Entity cloud = em.create("cloud");
+        transform = em.take(cloud).add(Transform.class);
+        transform.position = new Vector3f(0f, -0.25f, 1f);
+        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = em.take(cloud).add(MeshRenderer.class);
+        renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+
+        GasCloud animation = em.take(cloud).add(GasCloud.class);
+
+         */
+
+        // Background texture behind tv screen, player and other gameplay objects
+        Entity background = em.create("background");
+        transform = em.take(background).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 2f);
+        transform.scale = new Vector3f(2, 2, 2);
+
+        renderer = em.take(background).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
+
+        // Camera
+        Entity camera = em.create("camera");
+        transform = em.take(camera).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, -1f);
+
+        em.take(camera).add(Camera.class);
     }
 
     private void initSandbox() {
         em.take(em.create("sandBox"))
-                .add(Transform.class, Sandbox.class);
+                .add(Transform.class, GasCloud.class);
     }
 
     private void initCubeAndCamera() {
@@ -50,7 +159,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.color = new Vector4f(1, 1, 1, 1);
         renderer.shader = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/Capture001.png");
+//        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
 
@@ -64,9 +173,9 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.mesh = PredefinedMeshes.QUAD;
         renderer.color = new Vector4f(1, 1, 1, 1);
         renderer.shader = new TextureShader();
-//        renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
-        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/Capture001.png");
+//        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+//        renderer.texture = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
 

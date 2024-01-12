@@ -5,7 +5,7 @@ import org.north.core.graphics.OldShader;
 import org.north.core.graphics.Texture;
 import org.joml.Vector4f;
 
-public class Sandbox extends AbstractComponent {
+public class GasCloud extends AbstractComponent {
 
     public Mesh mesh;
     public OldShader shader;

@@ -4,32 +4,8 @@ import org.north.core.entities.Entity;
 import org.north.core.utils.Logger;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
-public abstract class AbstractComponent implements Component, Serializable {
-
-    public enum State {
-        LATE_INIT_STATE(AbstractComponent.LATE_INIT_STATE),
-        READY_TO_INIT_STATE(AbstractComponent.READY_TO_INIT_STATE),
-        READY_TO_OPERATE_STATE(AbstractComponent.READY_TO_OPERATE_STATE);
-
-        private byte value;
-
-        State(byte value) {
-            this.value = value;
-        }
-
-        public static State fromValue(byte value) {
-            return Arrays.stream(State.values())
-                    .filter(s -> s.value == value)
-                    .findFirst()
-                    .orElseThrow(IllegalArgumentException::new);
-        }
-    }
-
-    public static final byte LATE_INIT_STATE        = 0; // a state when needs to wait for other systems initializations
-    public static final byte READY_TO_INIT_STATE    = 1; // a state when constructor is already been executed
-    public static final byte READY_TO_OPERATE_STATE = 2; // a state when init method was called for each component
+public abstract class AbstractComponent implements Component, Serializable, Cloneable {
 
     public long id;
     public String name;
@@ -44,7 +20,7 @@ public abstract class AbstractComponent implements Component, Serializable {
     public boolean isActive = true;
 
     /* State of component lifecycle */
-    private byte state = READY_TO_INIT_STATE;
+    private ComponentState state = ComponentState.READY_TO_INIT_STATE;
 
 
     @Override
@@ -113,15 +89,38 @@ public abstract class AbstractComponent implements Component, Serializable {
     }
 
     @Override
-    public byte getState() {
+    public ComponentState getState() {
         return state;
     }
 
     @Override
-    public void setState(byte state) {
+    public void setState(ComponentState state) {
+        if (state == null) throw new NullPointerException("Component state cannot be null!");
         if (this.state == state) return;
-        Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s", getId(), getClass().getSimpleName(), State.fromValue(this.state), State.fromValue(state)));
+        Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
+                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
         this.state = state;
+    }
+
+    @Override
+    public boolean inState(ComponentState state) {
+        return this.state.equals(state);
+    }
+
+    @Override
+    public AbstractComponent clone() {
+        try {
+            AbstractComponent clone = (AbstractComponent) super.clone();
+            clone.id = this.id;
+            clone.name = this.name;
+            clone.entity = this.entity;
+            clone.transform = this.transform;
+            clone.isActive = this.isActive;
+            clone.state = this.state;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
 }

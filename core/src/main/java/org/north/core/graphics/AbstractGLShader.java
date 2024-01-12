@@ -54,7 +54,7 @@ public abstract class AbstractGLShader implements Shader {
 
     @Override
     public void prepareShader(Graphics graphics, MeshRenderer renderer) {
-        activeTextureCount = GL20.GL_TEXTURE1;
+        activeTextureCount = GL20.GL_TEXTURE0;
         updateUniforms(graphics, renderer);
     }
 
@@ -121,7 +121,7 @@ public abstract class AbstractGLShader implements Shader {
         texture.bind();
         GL20.glActiveTexture(activeTextureCount);
         GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
-        GL20.glUniform1i(getUniformLocation(name), texture.getId());
+        GL20.glUniform1i(getUniformLocation(name), activeTextureCount);
         Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
                 texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
         activeTextureCount++;

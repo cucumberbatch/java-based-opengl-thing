@@ -3,7 +3,9 @@ package org.north.core.systems;
 import org.north.core.components.MeshRenderer;
 import org.north.core.graphics.*;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
+import org.north.core.systems.processes.UpdateProcess;
 
 @ComponentHandler(MeshRenderer.class)
 public class MeshRendererSystem extends AbstractSystem<MeshRenderer> implements RenderProcess {

@@ -1,6 +1,7 @@
 package org.north.core.managment;
 
 import org.north.core.components.Component;
+import org.north.core.components.ComponentState;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.systems.System;
@@ -9,7 +10,6 @@ import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
 import org.north.core.systems.processes.UpdateProcess;
 import org.north.core.utils.Logger;
-import org.north.core.components.AbstractComponent;
 import org.north.core.systems.Collision;
 
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class SystemManager {
     private void changeStateIfHasNoInitProcess(Component component) {
         Class<?> system = systemMap.get(component.getClass()).getClass();
         if (!InitProcess.class.isAssignableFrom(system)) {
-            component.setState(AbstractComponent.READY_TO_OPERATE_STATE);
+            component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
     }
 

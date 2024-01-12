@@ -10,7 +10,7 @@ import org.joml.Vector3f;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent {
+public class Transform extends AbstractComponent implements Cloneable {
     private TransformListener transformListener = (e, p1, p2) -> {};
 
     public Transform parent;
@@ -65,5 +65,16 @@ public class Transform extends AbstractComponent {
     @Override
     public String getName() {
         return this.getClass().getName();
+    }
+
+    @Override
+    public Transform clone() {
+        Transform clone = (Transform) super.clone();
+        clone.transform = this.transform;
+        clone.parent = this.parent;
+        clone.position = new Vector3f(this.position);
+        clone.rotation = new Vector3f(this.rotation);
+        clone.scale = new Vector3f(this.scale);
+        return clone;
     }
 }

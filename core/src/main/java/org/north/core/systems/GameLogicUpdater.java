@@ -1,11 +1,12 @@
 package org.north.core.systems;
 
+import org.lwjgl.glfw.GLFW;
+import org.north.core.components.ComponentState;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.scene.Scene;
 import org.north.core.scene.SceneInitializer;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
-import org.north.core.components.AbstractComponent;
 import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.entities.Entity;
@@ -24,6 +25,7 @@ import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -37,6 +39,8 @@ public class GameLogicUpdater implements GameLogic {
     private Graphics graphics;
 
     private Camera camera;
+
+    private boolean isUpdatePaused = false;
 
     public GameLogicUpdater(Window window) {
         this.window = window;
@@ -55,17 +59,18 @@ public class GameLogicUpdater implements GameLogic {
     public void run() {
         Logger.info("Game loop started");
 
-        FrameTiming timingContext = new FrameTiming();
+        final FrameTiming timingContext = new FrameTiming();
 
         loadScene(scene);
 
         while (window.shouldNotClose()) {
             try {
                 timingContext.updateTiming();
+                final float elapsedTime = timingContext.getElapsedTime();
 
                 updateInput();
                 init();
-                update(timingContext.getElapsedTime());
+                update(elapsedTime);
                 registerCollisions();
                 handleCollisions();
                 render(window);
@@ -102,7 +107,7 @@ public class GameLogicUpdater implements GameLogic {
         for (InitProcess process : systemManager.listOfSystemsForInit) {
             System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
-                if (component.getState() == AbstractComponent.READY_TO_INIT_STATE) {
+                if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
                     Logger.trace(String.format(
                             "Handling init component [%s: %s]",
                             system.getClass().getName(),
@@ -111,7 +116,7 @@ public class GameLogicUpdater implements GameLogic {
                     try {
                         system.setCurrentComponent(component);
                         process.init();
-                        component.setState(AbstractComponent.READY_TO_OPERATE_STATE);
+                        component.setState(ComponentState.READY_TO_OPERATE_STATE);
 
                         if (component instanceof Camera) {
                             this.camera = (Camera) component;
@@ -119,10 +124,10 @@ public class GameLogicUpdater implements GameLogic {
 
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
-                        component.setState(AbstractComponent.LATE_INIT_STATE);
+                        component.setState(ComponentState.LATE_INIT_STATE);
                     }
-                } else if (component.getState() == AbstractComponent.LATE_INIT_STATE) {
-                    component.setState(AbstractComponent.READY_TO_INIT_STATE);
+                } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
+                    component.setState(ComponentState.READY_TO_INIT_STATE);
                 }
             }
         }
@@ -131,6 +136,11 @@ public class GameLogicUpdater implements GameLogic {
     @Override
     public void updateInput() {
         Input.updateInput();
+
+        if (Input.isHeldDown(GLFW.GLFW_KEY_P)) {
+            isUpdatePaused = !isUpdatePaused;
+            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
+        }
     }
 
     //todo: performance
@@ -254,14 +264,15 @@ public class GameLogicUpdater implements GameLogic {
 
     //todo: performance
     @Override
-    public void update(float deltaTime) {
+    public void update(final float deltaTime) {
         Stopwatch.start();
         glfwPollEvents();
 
         for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
+            if (isUpdatePaused && !CameraControlsSystem.class.isAssignableFrom(process.getClass())) continue;
             System<? extends Component> system = (System<? extends Component>) process;
             for (Component component : system.getComponentList()) {
-                if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
+                if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     Logger.trace(String.format(
                             "Handling update component [%s: %s]",
                             system.getClass().getName(),
@@ -272,7 +283,7 @@ public class GameLogicUpdater implements GameLogic {
                         process.update(deltaTime);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
-                        component.setState(AbstractComponent.READY_TO_INIT_STATE);
+                        component.setState(ComponentState.READY_TO_INIT_STATE);
                     }
                 }
             }
@@ -370,8 +381,11 @@ public class GameLogicUpdater implements GameLogic {
             System<? extends Component> system = (System<? extends Component>) process;
             List<? extends Component> components = system.getComponentList();
             sortComponentsByDistanceToCamera(components);
+            if (MeshRendererSystem.class.isAssignableFrom(system.getClass())) {
+                Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
+            }
             for (Component component : components) {
-                if (component.getState() == AbstractComponent.READY_TO_OPERATE_STATE) {
+                if (component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     Logger.trace(String.format(
                             "Handling render component [%s: %s]",
                             system.getClass().getName(),
@@ -382,7 +396,7 @@ public class GameLogicUpdater implements GameLogic {
                         process.render(graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
-                        component.setState(AbstractComponent.READY_TO_INIT_STATE);
+                        component.setState(ComponentState.READY_TO_INIT_STATE);
                     } catch (ShaderUniformNotFoundException e) {
                         Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
                                 e.getUniformName(), e.getShaderName()));
@@ -400,13 +414,13 @@ public class GameLogicUpdater implements GameLogic {
     }
 
     private void sortComponentsByDistanceToCamera(List<? extends Component> components) {
-        components.sort((o1, o2) -> {
-            if (Objects.isNull(camera)) return 0;
+        if (Objects.isNull(camera)) return;
 
+        components.sort((o1, o2) -> {
             Vector3f cameraPosition = camera.getPosition();
             float o1Distance = o1.getTransform().position.distance(cameraPosition);
             float o2Distance = o2.getTransform().position.distance(cameraPosition);
-            return (int) (o2Distance - o1Distance);
+            return (int) ((o2Distance - o1Distance) * 100f);
         } );
     }
 

@@ -29,7 +29,7 @@ public interface ISystem {
      * @param deltaTime is a time interval between present and previous frames
      * @author cucumberbatch
      */
-    default void update(float deltaTime) {}
+    default void update(final float deltaTime) {}
 
     /**
      * An interface method that renders component content
