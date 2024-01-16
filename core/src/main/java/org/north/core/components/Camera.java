@@ -27,17 +27,10 @@ public class Camera extends AbstractComponent {
 
     @Override
     public String toString() {
-        return  /*String.format(
-            " v \n%s\n%s\n%s\n%s\n%s\n",
-            at, up, eye,
-            TerminalUtils.formatOutputMatrix(lookAtMatrix),
-            TerminalUtils.formatOutputMatrix(viewMatrix)
-        );*/
-        
-                "\nat:   "       + at  +
-                "\nup:   "       + up  +
-                "\neye:  "       + eye +
-                "\nview: "       + viewMatrix +
+        return "\nat:   " + at +
+                "\nup:   " + up +
+                "\neye:  " + eye +
+                "\nview: " + viewMatrix +
                 "\nprojection: " + projectionMatrix;
 
     }

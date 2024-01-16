@@ -2,6 +2,7 @@ package org.north.core.systems;
 
 import org.north.core.components.Camera;
 import org.north.core.components.CameraControls;
+import org.north.core.components.Transform;
 import org.north.core.config.EngineConfig;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
@@ -26,6 +27,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private static final int PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE = 1;
     private static final int ORTHOGRAPHIC_VIEW_STATE = 2;
     private static final int ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE = 3;
+
+    private static final float MAX_CAMERA_ANGLE = 89.986f;
 
     private static int projectionState = ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE;
     private static Camera camera;
@@ -60,7 +63,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private void updateCameraProjection() {
         switch (projectionState) {
             case PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE: {
-                projectionProgress += 0.05;
+                projectionProgress += 0.05f;
                 camera.projectionMatrix = new Matrix4f(CameraSystem.PERSPECTIVE_MATRIX).lerp(CameraSystem.ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
                 if (projectionProgress > 1) {
                     projectionProgress = 0;
@@ -70,7 +73,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
                 break;
             }
             case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE: {
-                projectionProgress += 0.05;
+                projectionProgress += 0.05f;
                 camera.projectionMatrix = new Matrix4f(CameraSystem.ORTHOGRAPHIC_MATRIX).lerp(CameraSystem.PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
                 if (projectionProgress > 1) {
                     projectionProgress = 0;
@@ -100,9 +103,11 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
         float verticalAngle = cursorPosition.y / (Window.width / 256f) - 180;
         float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
-        float restrictedVerticalAngle = restrictAngle(verticalAngle, -89.986f, 89.986f);
+        float restrictedVerticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
-        Vector3f point = new Vector3f(0, 0, 1).rotateX((float) Math.toRadians(restrictedVerticalAngle)).rotateY((float) Math.toRadians(horizontalAngle));
+        Vector3f point = new Vector3f(0, 0, 1)
+                .rotateX((float) Math.toRadians(restrictedVerticalAngle))
+                .rotateY((float) Math.toRadians(horizontalAngle));
 
         float speedFactor;
 
@@ -112,39 +117,41 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
             speedFactor = 1f;
         }
 
+        Transform componentTransform = component.getTransform();
+
         // up-down movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_Q)) {
-            component.getTransform().moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_E)) {
-            component.getTransform().moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
 
         // left-right movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            component.getTransform().moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            component.getTransform().moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
 
         // forward-backward movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            component.getTransform().moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            component.getTransform().moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.getTransform().position);
+            componentTransform.moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
+            cameraTrace.add(componentTransform.position);
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix = new Matrix4f().identity().lookAt(component.getTransform().position, new Vector3f(component.getTransform().position).add(point), new Vector3f(0, 1, 0));
+        camera.viewMatrix = new Matrix4f().identity().lookAt(componentTransform.position, new Vector3f(componentTransform.position).add(point), new Vector3f(0, 1, 0));
         graphics.view = camera.viewMatrix;
     }
 
