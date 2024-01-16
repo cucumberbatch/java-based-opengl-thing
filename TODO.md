@@ -16,10 +16,13 @@
   - [ ] Chop world scene into squares/partitions and store them in tree (QuadTree/Octree)
 - [ ] Graphics API
   - [x] Pass into `render()` system method an abstract `Graphics` object instead of `Window`
+  - [ ] Solve a multiple textures problem 
+    - When we try to render multiple objects with different textures or single object with several
+      texture (multiplication/addition modes) then we see only one texture 
   - [ ] Implement OpenGL graphics engine API
-  - [ ] Implement OpenGL ES graphics engine API
-  - [ ] Implement Swing/AWT CPU graphics engine API
-- [ ] Implement networking API
+  - [ ] Implement OpenGL ES graphics engine API (Android API)
+  - [ ] Implement Swing/AWT CPU graphics engine API (I think we don't need this)
+- [ ] Network
   - [ ] TCP/UDP sockets API for fast game data transferring
   - [ ] Serialization/deserialization of game data for network transferring
 - [ ] Sounds
@@ -31,3 +34,7 @@
     - [ ] Android
 - [ ] Optimization
   - [ ] Improve system handling performance (expensive iterations on systems/components in map)
+- [ ] Logger
+  - [ ] Reimplement logger based on standard Java logger interface
+  - [ ] Print log info into `PrintWriter` (not `System.out`)
+  - [ ] Use `printStackTrace` for printing exception stack traces
