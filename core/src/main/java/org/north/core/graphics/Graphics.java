@@ -10,10 +10,6 @@ public class Graphics {
 
     public Shader   previouslyRenderedShader = null;
     public Texture  previouslyRenderedTexture = null;
-    public Mesh     lastRenderedMesh;
-    public Material lastRenderedMaterial;
-
-    public OldShader basicShader;
 
     public Matrix4f projection = new Matrix4f().identity();
     public Matrix4f view = new Matrix4f().lookAt(new Vector3f(0, 0, -1), new Vector3f(0, 0, 1), new Vector3f(0, 1, 0));
@@ -27,7 +23,6 @@ public class Graphics {
     }
 
     private Graphics(Window window) {
-        this.basicShader = OldShader.BACKGROUND;
         this.window = window;
     }
 
