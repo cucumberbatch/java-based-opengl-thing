@@ -172,7 +172,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         displacement  = getRectangleCenter(imaginaryCursorShape).sub(Input.getCursorPosition());
         isCursorMoved = !displacement.equals(new Vector2f().zero());
 
-        Transform transform = component.transform;
+        Transform transform = component.getTransform();
         transform.moveTo(
                 (Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
                 (Input.getCursorPosition().y - Window.height / 2f) / Window.height,

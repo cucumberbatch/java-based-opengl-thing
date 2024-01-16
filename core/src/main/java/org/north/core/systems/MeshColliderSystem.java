@@ -21,7 +21,7 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     @Override
     public void update(float deltaTime) {
-        Transform transform = component.transform;
+        Transform transform = component.getTransform();
         Vector2f position = new Vector2f(transform.position.x, transform.position.y);
         component.body.moveTo(position);
 //        component.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.y - yOffsetUp);

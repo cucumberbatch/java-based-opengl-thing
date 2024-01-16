@@ -114,37 +114,37 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
 
         // up-down movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_Q)) {
-            component.transform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_E)) {
-            component.transform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
 
         // left-right movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            component.transform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            component.transform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
 
         // forward-backward movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            component.transform.moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            component.transform.moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
-            cameraTrace.add(component.transform.position);
+            component.getTransform().moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
+            cameraTrace.add(component.getTransform().position);
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix = new Matrix4f().identity().lookAt(component.transform.position, new Vector3f(component.transform.position).add(point), new Vector3f(0, 1, 0));
+        camera.viewMatrix = new Matrix4f().identity().lookAt(component.getTransform().position, new Vector3f(component.getTransform().position).add(point), new Vector3f(0, 1, 0));
         graphics.view = camera.viewMatrix;
     }
 

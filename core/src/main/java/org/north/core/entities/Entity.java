@@ -31,9 +31,16 @@ public class Entity implements TreeNode<Entity>, Collidable {
         this.name = name;
     }
 
+    private void linkTransformIfNeeded(Component component) {
+        if (this.transform == null && component instanceof Transform) {
+            this.transform = (Transform) component;
+        }
+    }
+
     public void addComponent(Component component) {
         components.put(component.getClass(), component);
         component.setEntity(this);
+        linkTransformIfNeeded(component);
     }
 
     public <E extends Component> E getComponent(Class<E> clazz) {

@@ -13,9 +13,6 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     /* Entity which this component is belongs to */
     public Entity entity;
 
-    /* Reference to the transform component of its entity */
-    public Transform transform;
-
     /* Activity state of component */
     public boolean isActive = true;
 
@@ -26,7 +23,6 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     @Override
     public void reset() {
         entity = null;
-        transform = null;
     }
 
     /*
@@ -64,14 +60,8 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
 
     @Override
     public Transform getTransform() {
-        return transform;
+        return entity.transform;
     }
-
-    @Override
-    public void setTransform(Transform transform) {
-        this.transform = transform;
-    }
-
 
     @Override
     public boolean isActive() {
@@ -114,7 +104,6 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
             clone.id = this.id;
             clone.name = this.name;
             clone.entity = this.entity;
-            clone.transform = this.transform;
             clone.isActive = this.isActive;
             clone.state = this.state;
             return clone;

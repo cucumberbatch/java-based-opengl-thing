@@ -33,28 +33,13 @@ public class ComponentManager {
         return idCounter++;
     }
 
-    private <E extends Component> void setupTransforms(Entity entity, E component) {
-        if (entity.transform == null) {
-            if (component instanceof Transform) {
-                entity.transform = (Transform) component;
-            }
-            Transform transform = entity.getComponent(Transform.class);
-            if (transform != null) {
-                component.setTransform(transform);
-            }
-        } else {
-            component.setTransform(entity.transform);
-        }
-    }
-
     public <E extends Component> void addComponent(Entity entity, E component) {
         if (entity == null || component == null)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Entity or component class must not be null");
 
         component.setId(nextId());
         systemManager.addComponent(component);
         entity.addComponent(component);
-        setupTransforms(entity, component);
     }
 
     public <E extends Component> E addComponent(Entity entity, Class<E> componentClass) {
@@ -74,7 +59,6 @@ public class ComponentManager {
         component.setId(nextId());
         systemManager.addComponent(component);
         entity.addComponent(component);
-        setupTransforms(entity, component);
 
         return component;
     }

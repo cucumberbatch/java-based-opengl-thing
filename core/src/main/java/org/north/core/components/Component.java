@@ -22,10 +22,7 @@ public interface Component {
 
     void setEntity(Entity entity);
 
-    /* Get and set methods for the transform component */
     Transform getTransform();
-
-    void setTransform(Transform transform);
 
     ComponentState getState();
 

@@ -17,7 +17,7 @@ public class Camera extends AbstractComponent {
     public Matrix4f projectionMatrix = new Matrix4f();
 
     public Vector3f getPosition() {
-        return new Vector3f(this.transform.position);
+        return new Vector3f(this.getTransform().position);
     }
 
     @Override

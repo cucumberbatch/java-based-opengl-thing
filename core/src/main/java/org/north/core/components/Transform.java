@@ -70,7 +70,6 @@ public class Transform extends AbstractComponent implements Cloneable {
     @Override
     public Transform clone() {
         Transform clone = (Transform) super.clone();
-        clone.transform = this.transform;
         clone.parent = this.parent;
         clone.position = new Vector3f(this.position);
         clone.rotation = new Vector3f(this.rotation);
