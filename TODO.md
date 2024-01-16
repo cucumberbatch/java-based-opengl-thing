@@ -16,10 +16,10 @@
   - [ ] Chop world scene into squares/partitions and store them in tree (QuadTree/Octree)
 - [ ] Graphics API
   - [x] Pass into `render()` system method an abstract `Graphics` object instead of `Window`
-  - [ ] Solve a multiple textures problem 
-    - When we try to render multiple objects with different textures or single object with several
-      texture (multiplication/addition modes) then we see only one texture 
   - [ ] Implement OpenGL graphics engine API
+    - [ ] Solve a multiple textures problem
+      - When we try to render multiple objects with different textures or single object with several
+        texture (multiplication/addition modes) then we see only one texture
   - [ ] Implement OpenGL ES graphics engine API (Android API)
   - [ ] Implement Swing/AWT CPU graphics engine API (I think we don't need this)
 - [ ] Network
@@ -31,10 +31,13 @@
 - [ ] Cross-platform-ness
   - [ ] Create Maven profiles
     - [ ] Windows
+    - [ ] Linux
     - [ ] Android
 - [ ] Optimization
+  - [ ] A very memory expensive logger!!! Needs to rework or even replace with log4j2 + slf4j
   - [ ] Improve system handling performance (expensive iterations on systems/components in map)
 - [ ] Logger
+  - [ ] A very memory expensive logger!!! See the checkbox above in the 'Optimization' section
   - [ ] Reimplement logger based on standard Java logger interface
   - [ ] Print log info into `PrintWriter` (not `System.out`)
   - [ ] Use `printStackTrace` for printing exception stack traces

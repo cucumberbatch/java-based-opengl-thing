@@ -1,5 +1,6 @@
 package org.north.core.systems;
 
+import org.lwjgl.opengl.GL30;
 import org.north.core.components.Button;
 import org.north.core.components.VisualCursor;
 import org.north.core.entities.Entity;
@@ -27,7 +28,7 @@ public class ButtonSystem extends AbstractSystem<Button>
 
     @Override
     public void init() throws RuntimeException {
-        component.buttonTexture = new Texture("core/assets/textures/screen-frame-1024.png");
+        component.buttonTexture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         component.buttonOnHoverColor = new Vector4f(
                 new Random().nextFloat(),
                 new Random().nextFloat(),
@@ -40,6 +41,7 @@ public class ButtonSystem extends AbstractSystem<Button>
                 component.indices,
                 component.uv);
 
+        GL30.glClearColor(0f, 0f, 0f, 1f);
     }
 
     @Override
