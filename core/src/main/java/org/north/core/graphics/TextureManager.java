@@ -26,14 +26,12 @@ public class TextureManager {
     }
 
     private static Texture load(String path) {
-        int[] pixels = null;
-        FileInputStream stream;
-        int width = 0;
-        int height = 0;
+        int[] pixels;
+        int width;
+        int height;
         int id;
 
-        try {
-            stream = new FileInputStream(path);
+        try (FileInputStream stream = new FileInputStream(path)) {
             BufferedImage image = ImageIO.read(stream);
             width = image.getWidth();
             height = image.getHeight();
@@ -54,22 +52,19 @@ public class TextureManager {
         }
 
         int totalPixelCount = width * height;
-        int[] data = new int[totalPixelCount];
-        for (int i = 0; i < totalPixelCount; i++) {
 
-            int a = (pixels[i] & 0xff000000) >> 24;
-            int r = (pixels[i] & 0xff0000) >> 16;
-            int g = (pixels[i] & 0xff00) >> 8;
-            int b = (pixels[i] & 0xff);
-
-            data[totalPixelCount - i - 1] = a << 24 | b << 16 | g << 8 | r;
+        for (int i = 0; i < totalPixelCount / 2; i++) {
+            int reversedIndex = totalPixelCount - i - 1;
+            int temp = pixels[reversedIndex];
+            pixels[reversedIndex] = pixels[i];
+            pixels[i] = temp;
         }
 
         id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(data));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(pixels));
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return new Texture(width, height, id);

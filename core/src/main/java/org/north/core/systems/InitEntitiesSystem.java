@@ -23,10 +23,11 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
     @Override
     public void init() throws RuntimeException {
-//        initSandbox();
 //        initCubeAndCamera();
 //        initSpaceshipOnScreen();
         initSprites();
+//        initScene4();
+//        initSingleButtonScene();
     }
 
     private void initSpaceshipOnScreen() {
@@ -136,11 +137,6 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         em.take(camera).add(Camera.class);
     }
 
-    private void initSandbox() {
-        em.take(em.create("sandBox"))
-                .add(Transform.class, GasCloud.class);
-    }
-
     private void initCubeAndCamera() {
         List<Component> components;
         Transform transform;
@@ -196,36 +192,32 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     }
 
     private void initSingleButtonScene() {
-        Scene scene = new Scene();
+        Entity eCamera = em.create("camera");
+        Entity eButton = em.create("button");
 
-        Entity button = new Entity("button");
+        List<Component> components;
+        Transform transform;
+        Button button;
+        MeshRenderer renderer;
+        Camera camera;
 
-        scene.addEntity(button);
+        components = em.take(eButton)
+                .add(Transform.class, Button.class, MeshRenderer.class);
 
-        Transform transformComponent = new Transform();
-        Button buttonComponent = new Button();
-        MeshRenderer rendererComponent = new MeshRenderer();
+        transform = ((Transform) components.get(0));
+        transform.moveTo(0, 0, 1);
 
-        int height = EngineConfig.instance.windowHeight;
-        int width = EngineConfig.instance.windowWidth;
+        renderer = ((MeshRenderer) components.get(2));
+        renderer.mesh = new Mesh();
+        renderer.shader = new SimpleColorShader();
+        renderer.color = new Vector4f(0.4f, 0.7f, 0.3f, 1f);
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
-        transformComponent.position.set(1, 0, 1);
+        transform = em.take(eCamera).add(Transform.class);
+        camera = em.take(eCamera).add(Camera.class);
 
-        rendererComponent.mesh = new Mesh();
-//        rendererComponent.shader = OldShader.SIMPLE_COLOR_SHADER;
-        rendererComponent.texture = new Texture("core/assets/textures/screen-frame-1024.png");
-
-        button.addComponent(transformComponent);
-        button.addComponent(buttonComponent);
-        button.addComponent(rendererComponent);
-
-        transformComponent.entity = button;
-        buttonComponent.entity = button;
-        rendererComponent.entity = button;
-
-        componentManager.addComponent(button, transformComponent);
-        componentManager.addComponent(button, buttonComponent);
-        componentManager.addComponent(button, rendererComponent);
+        transform.moveTo(0, 0, 0);
+        camera.projectionMatrix = CameraSystem.PERSPECTIVE_MATRIX;
     }
 
     private void initScene1() {

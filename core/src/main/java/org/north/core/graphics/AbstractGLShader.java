@@ -5,13 +5,12 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.system.MemoryStack;
 import org.north.core.components.MeshRenderer;
 import org.north.core.exception.ShaderUniformNotFoundException;
+import org.north.core.utils.BufferUtils;
 import org.north.core.utils.Logger;
 import org.north.core.utils.ResourceManager;
 
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,11 +127,7 @@ public abstract class AbstractGLShader implements Shader {
     }
 
     protected void setUniform(String name, Matrix4f matrix4f) throws ShaderUniformNotFoundException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer fb = stack.mallocFloat(16);
-            matrix4f.get(fb);
-            GL20.glUniformMatrix4fv(getUniformLocation(name), false, fb);
-        }
+        GL20.glUniformMatrix4fv(getUniformLocation(name), false, BufferUtils.createFloatBuffer(matrix4f));
     }
 
 }
