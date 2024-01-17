@@ -3,8 +3,12 @@ package org.north.core.managment;
 import org.north.core.components.Component;
 import org.north.core.components.ComponentState;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.reflection.initializer.ClassInitializer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.systems.System;
+import org.north.core.systems.command.AddComponentDeferredCommand;
+import org.north.core.systems.command.DeferredCommand;
+import org.north.core.systems.command.RemoveComponentDeferredCommand;
 import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
@@ -22,8 +26,6 @@ import java.util.stream.Collectors;
 public class SystemManager {
     private static SystemManager instance;
 
-    public final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
-
     public final List<InitProcess> listOfSystemsForInit              = new LinkedList<>();
     public final List<UpdateProcess> listOfSystemsForUpdate            = new LinkedList<>();
     public final List<RenderProcess> listOfSystemsForRender            = new LinkedList<>();
@@ -32,10 +34,14 @@ public class SystemManager {
 
     public final List<Collision> collisions = new ArrayList<>();
 
+    private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
+    private final Map<Class<? extends Component>, Class<? extends System<?>>> lazyInitializationSystemMap = new HashMap<>();
+    private final List<DeferredCommand> deferredCommands = new LinkedList<>();
+    private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
+    private final ClassInitializer initializer = new ClassInitializer();
+
     private SystemManager() {
         loadComponentSystemsFromPackage("org/north/core/systems");
-        //todo: implement lazy system initialization
-        groupSystemsByProcesses();
     }
 
     public static SystemManager getInstance() {
@@ -48,15 +54,14 @@ public class SystemManager {
     private void loadComponentSystemsFromPackage(String packagePath) {
         try {
             Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
-            ComponentHandlerScanner scanner = new ComponentHandlerScanner();
             List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
-            annotatedClassesInPackage.forEach(pair -> systemMap.put(pair.component, pair.system));
+            annotatedClassesInPackage.forEach(pair -> lazyInitializationSystemMap.put(pair.component, pair.system));
 
             List<String> classNames = annotatedClassesInPackage.stream()
-                    .map(pair -> pair.system.getClass().getName())
+                    .map(pair -> pair.system.getName())
                     .collect(Collectors.toList());
 
-            Logger.info(String.format("Found and loaded %s system(s) classes: %s", classNames.size(), classNames));
+            Logger.info(String.format("Found %s system(s) classes: %s", classNames.size(), classNames));
         } catch (Exception e) {
             Logger.error("Error while loading systems. Reason: " + e.getMessage());
             throw new RuntimeException(e);
@@ -76,17 +81,32 @@ public class SystemManager {
         if (CollisionHandlingProcess.class.isAssignableFrom(clazz))  this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess) system);
     }
 
-    public void addComponent(Component component) {
-        changeStateIfHasNoInitProcess(component);
-        Class<? extends Component> componentClass = component.getClass();
-        this.systemMap.get(componentClass).addComponent(component);
+    public System<? extends Component> getSystem(Class<? extends Component> componentClass) {
+        return systemMap.get(componentClass);
     }
 
-    private void changeStateIfHasNoInitProcess(Component component) {
+    public void addComponent(Component component) {
+        Class<? extends Component> componentClass = component.getClass();
+
+        // initialize system if it is not
+        if (systemMap.get(componentClass) == null) {
+            try {
+                System<?> system = initializer.initSystem(lazyInitializationSystemMap.get(componentClass));
+                systemMap.put(componentClass, system);
+                attachToSystemLists(system);
+                Logger.info(String.format("System %s initialized", system.getClass().getName()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // change state if it has no init process
         Class<?> system = systemMap.get(component.getClass()).getClass();
         if (!InitProcess.class.isAssignableFrom(system)) {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
+
+        systemMap.get(componentClass).addComponent(component);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,6 +119,29 @@ public class SystemManager {
             }
         }
         throw new ComponentNotFoundException(componentId);
+    }
+
+    public void addDeferredCommand(DeferredCommand command) {
+        deferredCommands.add(command);
+    }
+
+    public void applyDeferredCommands() {
+        for (DeferredCommand command: deferredCommands) {
+            switch (command.getType()) {
+                case ADD_COMPONENT: {
+                    AddComponentDeferredCommand addComponentCommand = (AddComponentDeferredCommand) command;
+                    addComponent(addComponentCommand.component);
+                    break;
+                }
+                case REMOVE_COMPONENT: {
+                    RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
+                    // not implemented !
+                    break;
+                }
+                default: break;
+            }
+        }
+        deferredCommands.clear();
     }
 
 }

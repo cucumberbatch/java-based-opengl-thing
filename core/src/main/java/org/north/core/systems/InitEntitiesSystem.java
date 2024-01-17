@@ -247,27 +247,20 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 Entity generatedButton = new Entity("g_button_" + h + "_" + w);
                 scene.addEntity(generatedButton);
 
-                Transform    transform = new Transform();
-                MeshCollider collider  = new MeshCollider();
-                Button       button    = new Button();
-                MeshRenderer renderer  = new MeshRenderer();
+                List<Component> componentList = em.take(generatedButton)
+                        .add(Transform.class, MeshCollider.class, Button.class, MeshRenderer.class);
 
-                componentManager.addComponent(generatedButton, transform);
-                componentManager.addComponent(generatedButton, collider);
-                componentManager.addComponent(generatedButton, button);
-                componentManager.addComponent(generatedButton, renderer);
+                Transform transform = (Transform) componentList.get(0);
+                MeshCollider collider = (MeshCollider) componentList.get(1);
+                Button button = (Button) componentList.get(2);
+                MeshRenderer renderer = (MeshRenderer) componentList.get(3);
 
-                transform.entity = generatedButton;
-                collider.entity  = generatedButton;
-                renderer.entity  = generatedButton;
-                generatedButton.transform = transform;
-                generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
-
-//                renderer.shader = OldShader.SIMPLE_COLOR_SHADER;
+//                renderer.shader = new SimpleColorShader();
 
 //                collider.body.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
 //                collider.body.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
+                transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
                 button.buttonShape.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
@@ -276,22 +269,13 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
             }
         }
 
+        List<Component> componentList = em.take(cursor)
+                .add(Transform.class, MeshCollider.class, VisualCursor.class, MeshRenderer.class);
 
-        Transform transform = new Transform();
-        MeshCollider meshCollider = new MeshCollider();
-        VisualCursor visualCursor = new VisualCursor();
-        MeshRenderer renderer = new MeshRenderer();
-
-        transform.entity = cursor;
-        meshCollider.entity = cursor;
-        visualCursor.entity = cursor;
-        renderer.entity = cursor;
-
-        componentManager.addComponent(cursor, transform);
-        componentManager.addComponent(cursor, meshCollider);
-        componentManager.addComponent(cursor, visualCursor);
-        componentManager.addComponent(cursor, renderer);
-
+        Transform transform = (Transform) componentList.get(0);
+        MeshCollider meshCollider = (MeshCollider) componentList.get(1);
+        VisualCursor visualCursor = (VisualCursor) componentList.get(2);
+        MeshRenderer renderer = (MeshRenderer) componentList.get(3);
     }
 
     private void initScene1BrokenCursor() {
@@ -321,13 +305,12 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 Entity generatedButton = new Entity("g_button_" + h + "_" + w);
                 scene.addEntity(generatedButton);
 
-                Transform    transform = new Transform();
-                MeshCollider collider  = new MeshCollider();
-                Button       button    = new Button();
+                List<Component> componentList = em.take(generatedButton)
+                        .add(Transform.class, MeshCollider.class, Button.class);
 
-                componentManager.addComponent(generatedButton, transform);
-                componentManager.addComponent(generatedButton, collider);
-                componentManager.addComponent(generatedButton, button);
+                Transform transform = (Transform) componentList.get(0);
+                MeshCollider collider = (MeshCollider) componentList.get(1);
+                Button button = (Button) componentList.get(2);
 
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
@@ -345,18 +328,12 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
             }
         }
 
+        List<Component> componentList = em.take(cursor)
+                .add(Transform.class, MeshCollider.class, VisualCursor.class);
 
-        Transform transform = new Transform();
-        MeshCollider meshCollider = new MeshCollider();
-        VisualCursor visualCursor = new VisualCursor();
-
-        transform.entity = cursor;
-        meshCollider.entity = cursor;
-        visualCursor.entity = cursor;
-
-        componentManager.addComponent(cursor, transform);
-        componentManager.addComponent(cursor, meshCollider);
-        componentManager.addComponent(cursor, visualCursor);
+        Transform transform = (Transform) componentList.get(0);
+        MeshCollider collider = (MeshCollider) componentList.get(1);
+        VisualCursor visualCursor = (VisualCursor) componentList.get(2);
 
     }
 
@@ -364,13 +341,14 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         Entity rendererEntity = new Entity("screen");
 //        Entity cursor         = new Entity("cursor");
 
-        Transform transform = new Transform();
-        Renderer  renderer  = new Renderer();
+        List<Component> componentList = em.take(rendererEntity)
+                .add(Transform.class, Renderer.class);
+
+        Transform transform = (Transform) componentList.get(0);
+        Renderer  renderer  = (Renderer) componentList.get(1);
 
         renderer.texture    = new Texture("core/assets/textures/screen-frame-1024.png");
 
-        componentManager.addComponent(rendererEntity, transform);
-        componentManager.addComponent(rendererEntity, renderer);
 
 //        transform = new Transform();
 //        MeshCollider meshCollider = new MeshCollider();
@@ -398,11 +376,9 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         cameraTransform.entity = camera;
         cameraComponent.entity = camera;
 
-        componentManager.addComponent(testObject, transform);
-        componentManager.addComponent(testObject, meshCollider);
-        componentManager.addComponent(testObject, testObjectComponent);
-        componentManager.addComponent(camera, cameraTransform);
-        componentManager.addComponent(camera, cameraComponent);
+        em.take(testObject).add(Transform.class, MeshCollider.class, VisualCursor.class);
+        em.take(camera).add(Transform.class, Camera.class);
+
 
 //        em.take(em.create("testObject"))
 //                .add(Transform.class, MeshCollider.class, )

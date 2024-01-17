@@ -74,6 +74,7 @@ public class GameLogicUpdater implements GameLogic {
                 registerCollisions();
                 handleCollisions();
                 render(window);
+                applyDeferredCommands();
 
                 timingContext.sync();
             } catch (RuntimeException e) {
@@ -411,6 +412,11 @@ public class GameLogicUpdater implements GameLogic {
         Stopwatch.start();
         glfwSwapBuffers(window.getWindow());
         Stopwatch.stop("Graphics buffer swap ended!");
+    }
+
+
+    private void applyDeferredCommands() {
+        systemManager.applyDeferredCommands();
     }
 
     private void sortComponentsByDistanceToCamera(List<? extends Component> components) {

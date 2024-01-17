@@ -4,6 +4,8 @@ import org.north.core.components.Component;
 import org.north.core.components.Transform;
 import org.north.core.entities.Entity;
 import org.north.core.managment.SystemManager;
+import org.north.core.systems.command.AddComponentDeferredCommand;
+import org.north.core.systems.command.RemoveComponentDeferredCommand;
 import org.north.core.utils.Logger;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,15 +35,6 @@ public class ComponentManager {
         return idCounter++;
     }
 
-    public <E extends Component> void addComponent(Entity entity, E component) {
-        if (entity == null || component == null)
-            throw new IllegalArgumentException("Entity or component class must not be null");
-
-        component.setId(nextId());
-        systemManager.addComponent(component);
-        entity.addComponent(component);
-    }
-
     public <E extends Component> E addComponent(Entity entity, Class<E> componentClass) {
         if (entity == null || componentClass == null) {
             throw new IllegalArgumentException("Entity or component class must not be null");
@@ -50,6 +43,7 @@ public class ComponentManager {
         E component;
 
         try {
+            //note: at this moment any component needs to have a constructor without any params
             component = componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             Logger.error("Error while creating a component instance: " + e.getMessage());
@@ -57,7 +51,7 @@ public class ComponentManager {
         }
 
         component.setId(nextId());
-        systemManager.addComponent(component);
+        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
         entity.addComponent(component);
 
         return component;
@@ -71,7 +65,9 @@ public class ComponentManager {
         if (componentClass.isAssignableFrom(Transform.class)) {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
+
         E component = entity.getComponent(componentClass);
-        return (E) systemManager.systemMap.get(componentClass).removeComponent(component.getId());
+        systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
+        return component;
     }
 }
