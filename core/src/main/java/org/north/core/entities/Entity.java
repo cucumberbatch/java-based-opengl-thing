@@ -22,8 +22,7 @@ public class Entity implements TreeNode<Entity>, Collidable {
     public Map<Class<? extends Component>, Component> components = new HashMap<>();
 
     public Entity() {
-        this.id = -1;
-        this.name = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString());
     }
 
     public Entity(String name) {
@@ -31,22 +30,22 @@ public class Entity implements TreeNode<Entity>, Collidable {
         this.name = name;
     }
 
-    private void linkTransformIfNeeded(Component component) {
+    public void addComponent(Component component) {
+        components.put(component.getClass(), component);
+        component.setEntity(this);
+
+        // link transform if necessary
         if (this.transform == null && component instanceof Transform) {
             this.transform = (Transform) component;
         }
     }
 
-    public void addComponent(Component component) {
-        components.put(component.getClass(), component);
-        component.setEntity(this);
-        linkTransformIfNeeded(component);
-    }
-
+    @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(Class<E> clazz) {
         return (E) components.get(clazz);
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends Component> E removeComponent(Class<E> clazz) {
         return (E) components.remove(clazz);
     }
@@ -110,7 +109,7 @@ public class Entity implements TreeNode<Entity>, Collidable {
 
     @Override
     public void setDaughters(List<Entity> daughters) {
-        this.daughters = (List<Entity>) daughters;
+        this.daughters = daughters;
     }
 
     @Override

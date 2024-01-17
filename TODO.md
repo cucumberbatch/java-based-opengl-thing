@@ -21,7 +21,7 @@
       - When we try to render multiple objects with different textures or single object with several
         texture (multiplication/addition modes) then we see only one texture
   - [ ] Implement OpenGL ES graphics engine API (Android API)
-  - [ ] Implement Swing/AWT CPU graphics engine API (I think we don't need this)
+  - [ ] **(optional)** Implement Swing/AWT CPU graphics engine API (I think we don't need this)
 - [ ] Network
   - [ ] TCP/UDP sockets API for fast game data transferring
   - [ ] Serialization/deserialization of game data for network transferring

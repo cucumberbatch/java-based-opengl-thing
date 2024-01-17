@@ -6,8 +6,6 @@ import org.north.core.systems.System;
 import org.north.core.utils.Logger;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +15,11 @@ import java.util.Objects;
 
 public class ComponentHandlerScanner {
 
-    public static class Pair<S extends System<? extends Component>, C extends Component> {
-        public S system;
+    public static class Pair<S extends System<C>, C extends Component> {
+        public Class<S> system;
         public Class<C> component;
 
-        public Pair(S system, Class<C> component) {
+        public Pair(Class<S> system, Class<C> component) {
             this.system = system;
             this.component = component;
         }
@@ -29,22 +27,19 @@ public class ComponentHandlerScanner {
         @Override
         public String toString() {
             return "Pair{" +
-                    "system=" + system.getClass().getName() +
+                    "system=" + system.getName() +
                     ", component=" + component.getName() +
                     '}';
         }
     }
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
     public ComponentHandlerScanner() {
         this.classLoader = this.getClass().getClassLoader();
     }
 
-    @SuppressWarnings("rawtypes")
-    public List<Pair<?, ?>> getAnnotatedClassesInPackage(String packageName)
-            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
-                   InstantiationException, IllegalAccessException, UnsupportedEncodingException {
+    public List<Pair<?, ?>> getAnnotatedClassesInPackage(String packageName) throws ClassNotFoundException {
         List<Pair<?, ?>> classes = new ArrayList<>();
         packageName = new String(packageName.getBytes(), StandardCharsets.UTF_8);
         URL packageUrl = classLoader.getResource(packageName);
@@ -66,13 +61,14 @@ public class ComponentHandlerScanner {
                     className = packageName.replace("/", ".") + "." + className.substring(0, className.length() - 6);
                     Class<?> loadedClass = classLoader.loadClass(className);
                     if (System.class.isAssignableFrom(loadedClass)) {
-                        Class<? extends System> systemClass = loadedClass.asSubclass(System.class);
+                        @SuppressWarnings("rawtypes") Class<? extends System> systemClass = loadedClass.asSubclass(System.class);
+
                         ComponentHandler componentHandlerAnnotation = loadedClass.getAnnotation(ComponentHandler.class);
                         if (Objects.isNull(componentHandlerAnnotation)) continue;
-                        Logger.trace("Found system: " + className);
                         Class<? extends Component> componentClass = componentHandlerAnnotation.value();
-                        System<?> system = systemClass.getDeclaredConstructor().newInstance();
-                        Pair<? extends System<?>, ? extends Component> componentSystemPair = new Pair<>(system, componentClass);
+
+                        @SuppressWarnings("rawtypes") Pair componentSystemPair = new Pair<>(systemClass, componentClass);
+
                         classes.add(componentSystemPair);
                         Logger.trace("Component system pair registered: " + componentSystemPair);
                     }

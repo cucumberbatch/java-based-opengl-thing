@@ -33,6 +33,6 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
         acc += deltaTime * 8f;
 
         em.take(component.entity).get(Transform.class)
-                .moveRel(0f, -0.025f, 0f);
+                .moveRel(0f, -deltaTime, 0f);
     }
 }
