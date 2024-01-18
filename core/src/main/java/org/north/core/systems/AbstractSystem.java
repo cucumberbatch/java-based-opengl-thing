@@ -3,6 +3,7 @@ package org.north.core.systems;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
 import org.north.core.architecture.TreeEntityManager;
+import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
@@ -27,6 +28,10 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     public AbstractSystem() {
         this.componentManager = ComponentManager.getInstance();
         this.entityManager = TreeEntityManager.getInstance();
+    }
+
+    public void setCameraComponent(Camera camera) {
+        componentManager.setCameraComponent(camera);
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.north.core.scene;
 import org.north.core.systems.GameLogicUpdater;
 
 public class SceneInitializer {
-    private Scene scene;
+    private final Scene scene;
 
     public SceneInitializer(Scene scene) {
         this.scene = scene;

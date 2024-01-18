@@ -1,5 +1,6 @@
 package org.north.core.architecture;
 
+import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
 import org.north.core.entities.Entity;
@@ -24,6 +25,10 @@ public class ComponentManager {
             instance = new ComponentManager();
         }
         return instance;
+    }
+
+    public void setCameraComponent(Camera camera) {
+        systemManager.setCameraComponent(camera);
     }
 
     public void setDataManagers(EntityManager entityManager, SystemManager systemManager) {

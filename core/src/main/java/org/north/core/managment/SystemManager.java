@@ -1,5 +1,7 @@
 package org.north.core.managment;
 
+import org.joml.Vector3f;
+import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.components.ComponentState;
 import org.north.core.exception.ComponentNotFoundException;
@@ -16,15 +18,19 @@ import org.north.core.systems.processes.UpdateProcess;
 import org.north.core.utils.Logger;
 import org.north.core.systems.Collision;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager {
     private static SystemManager instance;
+
+    private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
+    private final Map<Class<? extends Component>, Class<? extends System<?>>> lazyInitializationSystemMap = new HashMap<>();
+    private final List<DeferredCommand> deferredCommands = new LinkedList<>();
+    private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
+    private final ClassInitializer initializer = new ClassInitializer();
+
+    private Camera camera;
 
     public final List<InitProcess> listOfSystemsForInit              = new LinkedList<>();
     public final List<UpdateProcess> listOfSystemsForUpdate            = new LinkedList<>();
@@ -34,11 +40,6 @@ public class SystemManager {
 
     public final List<Collision> collisions = new ArrayList<>();
 
-    private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
-    private final Map<Class<? extends Component>, Class<? extends System<?>>> lazyInitializationSystemMap = new HashMap<>();
-    private final List<DeferredCommand> deferredCommands = new LinkedList<>();
-    private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
-    private final ClassInitializer initializer = new ClassInitializer();
 
     private SystemManager() {
         loadComponentSystemsFromPackage("org/north/core/systems");
@@ -81,6 +82,10 @@ public class SystemManager {
         if (CollisionHandlingProcess.class.isAssignableFrom(clazz))  this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess) system);
     }
 
+    public void setCameraComponent(Camera camera) {
+        this.camera = camera;
+    }
+
     public System<? extends Component> getSystem(Class<? extends Component> componentClass) {
         return systemMap.get(componentClass);
     }
@@ -119,6 +124,17 @@ public class SystemManager {
             }
         }
         throw new ComponentNotFoundException(componentId);
+    }
+
+    public void sortComponentsByDistanceToCamera(List<? extends Component> components) {
+        if (camera == null) return;
+
+        components.sort((o1, o2) -> {
+            Vector3f cameraPosition = camera.getPosition();
+            float o1Distance = o1.getTransform().position.distance(cameraPosition);
+            float o2Distance = o2.getTransform().position.distance(cameraPosition);
+            return (int) ((o2Distance - o1Distance) * 100f);
+        } );
     }
 
     public void addDeferredCommand(DeferredCommand command) {

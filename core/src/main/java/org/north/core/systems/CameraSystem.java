@@ -25,6 +25,8 @@ public class CameraSystem extends AbstractSystem<Camera>
         component.up.set(new Vector3f(0, 1, 0));
         component.at.set(new Vector3f(1.0f, 0.0f, -1.0f).add(component.eye));
         component.projectionMatrix = PERSPECTIVE_MATRIX;
+
+        super.setCameraComponent(component);
     }
 
     @Override

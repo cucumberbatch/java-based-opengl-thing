@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-//@SuppressWarnings("rawtypes")
 public class GameLogicUpdater implements GameLogic {
 
     private Window window;
@@ -38,9 +37,12 @@ public class GameLogicUpdater implements GameLogic {
     private Scene scene;
     private Graphics graphics;
 
-    private Camera camera;
-
     private boolean isUpdatePaused = false;
+
+    public EntityManager    entityManager;
+    public ComponentManager componentManager;
+    public SystemManager systemManager;
+
 
     public GameLogicUpdater(Window window) {
         this.window = window;
@@ -50,10 +52,6 @@ public class GameLogicUpdater implements GameLogic {
     public void setScene(Scene scene) {
         this.scene = scene;
     }
-
-    public EntityManager    entityManager;
-    public ComponentManager componentManager;
-    public SystemManager systemManager;
 
     @Override
     public void run() {
@@ -68,13 +66,13 @@ public class GameLogicUpdater implements GameLogic {
                 timingContext.updateTiming();
                 final float elapsedTime = timingContext.getElapsedTime();
 
+                applyDeferredCommands();
                 updateInput();
                 init();
                 update(elapsedTime);
                 registerCollisions();
                 handleCollisions();
                 render(window);
-                applyDeferredCommands();
 
                 timingContext.sync();
             } catch (RuntimeException e) {
@@ -118,11 +116,6 @@ public class GameLogicUpdater implements GameLogic {
                         system.setCurrentComponent(component);
                         process.init();
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
-
-                        if (component instanceof Camera) {
-                            this.camera = (Camera) component;
-                        }
-
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         Logger.error(e);
                         component.setState(ComponentState.LATE_INIT_STATE);
@@ -381,7 +374,7 @@ public class GameLogicUpdater implements GameLogic {
         for (RenderProcess process : systemManager.listOfSystemsForRender) {
             System<? extends Component> system = (System<? extends Component>) process;
             List<? extends Component> components = system.getComponentList();
-            sortComponentsByDistanceToCamera(components);
+            systemManager.sortComponentsByDistanceToCamera(components);
             if (MeshRendererSystem.class.isAssignableFrom(system.getClass())) {
                 Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
             }
@@ -417,17 +410,6 @@ public class GameLogicUpdater implements GameLogic {
 
     private void applyDeferredCommands() {
         systemManager.applyDeferredCommands();
-    }
-
-    private void sortComponentsByDistanceToCamera(List<? extends Component> components) {
-        if (Objects.isNull(camera)) return;
-
-        components.sort((o1, o2) -> {
-            Vector3f cameraPosition = camera.getPosition();
-            float o1Distance = o1.getTransform().position.distance(cameraPosition);
-            float o2Distance = o2.getTransform().position.distance(cameraPosition);
-            return (int) ((o2Distance - o1Distance) * 100f);
-        } );
     }
 
 }
