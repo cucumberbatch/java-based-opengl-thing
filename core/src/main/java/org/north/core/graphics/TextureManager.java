@@ -17,10 +17,11 @@ public class TextureManager {
     private static final Map<String, Texture> preloadedTexturesMap = new HashMap<>();
 
     public static Texture tryToLoadTexture(String textureFilePath) {
-        if (preloadedTexturesMap.containsKey(textureFilePath)) {
-            return preloadedTexturesMap.get(textureFilePath);
+        Texture texture = preloadedTexturesMap.get(textureFilePath);
+        if (texture != null) {
+            return texture;
         }
-        Texture texture = load(textureFilePath);
+        texture = load(textureFilePath);
         preloadedTexturesMap.put(textureFilePath, texture);
         return texture;
     }

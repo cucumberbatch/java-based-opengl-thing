@@ -25,7 +25,7 @@ public class SystemManager {
     private static SystemManager instance;
 
     private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
-    private final Map<Class<? extends Component>, Class<? extends System<?>>> lazyInitializationSystemMap = new HashMap<>();
+    private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations = new HashMap<>();
     private final List<DeferredCommand> deferredCommands = new LinkedList<>();
     private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
     private final ClassInitializer initializer = new ClassInitializer();
@@ -56,7 +56,7 @@ public class SystemManager {
         try {
             Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
             List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
-            annotatedClassesInPackage.forEach(pair -> lazyInitializationSystemMap.put(pair.component, pair.system));
+            annotatedClassesInPackage.forEach(pair -> componentToSystemAssociations.put(pair.component, pair.system));
 
             List<String> classNames = annotatedClassesInPackage.stream()
                     .map(pair -> pair.system.getName())
@@ -96,7 +96,7 @@ public class SystemManager {
         // initialize system if it is not
         if (systemMap.get(componentClass) == null) {
             try {
-                System<?> system = initializer.initSystem(lazyInitializationSystemMap.get(componentClass));
+                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 systemMap.put(componentClass, system);
                 attachToSystemLists(system);
                 Logger.info(String.format("System %s initialized", system.getClass().getName()));
@@ -117,13 +117,19 @@ public class SystemManager {
     @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(long componentId) {
         for (System<? extends Component> system: systemMap.values()) {
-            for (Component component: system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 if (component.getId() == componentId) {
                     return (E) component;
                 }
             }
         }
         throw new ComponentNotFoundException(componentId);
+    }
+
+    public <E extends Component> E removeComponent(Class<E> componentClass) {
+        return null;//systemMap.get(componentClass).removeComponent(componentClass);
     }
 
     public void sortComponentsByDistanceToCamera(List<? extends Component> components) {

@@ -1,6 +1,10 @@
 package org.north.core.scene;
 
+import org.north.core.components.Transform;
 import org.north.core.systems.GameLogicUpdater;
+import org.north.core.utils.Logger;
+
+import java.io.*;
 
 public class SceneInitializer {
     private final Scene scene;
@@ -12,5 +16,20 @@ public class SceneInitializer {
     public void initSceneInUpdater(GameLogicUpdater updater) {
         scene.entities.forEach(entity -> entity.components.values()
                 .forEach(component -> updater.componentManager.addComponent(entity, component.getClass())));
+    }
+
+    public Transform readSceneFromFile(String filePath) {
+        Transform transform;
+        File file = new File(filePath);
+
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+            transform = (Transform) inputStream.readObject();
+            Logger.info("Read object: " + transform.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return transform;
     }
 }

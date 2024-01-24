@@ -11,10 +11,8 @@ public class TreeEntityManagerTest {
     void test2EntityHierarchy1() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
-
-        entityManager.linkWithParent(e1, e2);
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
 
         Assertions.assertTrue(e1.daughters.contains(e2));
         Assertions.assertEquals(e2.parent, e1);
@@ -24,10 +22,9 @@ public class TreeEntityManagerTest {
     void test2EntityHierarchy2() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
 
-        entityManager.linkWithParent(e1, e2);
         entityManager.linkWithParent(e2, e1);
 
         Assertions.assertTrue(e2.daughters.contains(e1));
@@ -38,10 +35,8 @@ public class TreeEntityManagerTest {
     void testEntityLinkerWithRoot1() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
-
-        entityManager.linkWithParent(e1, e2);
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
 
         Assertions.assertEquals(e1, entityManager.getRoot(e2));
     }
@@ -50,10 +45,9 @@ public class TreeEntityManagerTest {
     void testEntityLinkerWithRoot2() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
 
-        entityManager.linkWithParent(e1, e2);
         entityManager.linkWithParent(e2, e1);
 
         Assertions.assertEquals(e2, entityManager.getRoot(e2));
@@ -63,14 +57,11 @@ public class TreeEntityManagerTest {
     void testEntityLinkerWithRoot3() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
-        Entity e3 = entityManager.createEntity();
-        Entity e4 = entityManager.createEntity();
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
+        Entity e3 = entityManager.createEntity(e1);
+        Entity e4 = entityManager.createEntity(e2);
 
-        entityManager.linkWithParent(e1, e2);
-        entityManager.linkWithParent(e1, e3);
-        entityManager.linkWithParent(e2, e4);
         entityManager.linkWithParent(e4, e2);
 
         Assertions.assertEquals(e1, entityManager.getRoot(e1));
@@ -83,22 +74,14 @@ public class TreeEntityManagerTest {
     void testEntityLinkerWithRoot4() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
-        Entity e3 = entityManager.createEntity();
-        Entity e4 = entityManager.createEntity();
-        Entity e5 = entityManager.createEntity();
-        Entity e6 = entityManager.createEntity();
-        Entity e7 = entityManager.createEntity();
-        Entity e8 = entityManager.createEntity();
-
-        entityManager.linkWithParent(e1, e2);
-        entityManager.linkWithParent(e1, e3);
-        entityManager.linkWithParent(e2, e4);
-        entityManager.linkWithParent(e2, e5);
-        entityManager.linkWithParent(e2, e6);
-        entityManager.linkWithParent(e6, e7);
-        entityManager.linkWithParent(e7, e8);
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
+        Entity e3 = entityManager.createEntity(e1);
+        Entity e4 = entityManager.createEntity(e2);
+        Entity e5 = entityManager.createEntity(e2);
+        Entity e6 = entityManager.createEntity(e2);
+        Entity e7 = entityManager.createEntity(e6);
+        Entity e8 = entityManager.createEntity(e7);
 
         Assertions.assertEquals(e1, entityManager.getRoot(e1));
         Assertions.assertEquals(e1, entityManager.getRoot(e2));
@@ -114,14 +97,10 @@ public class TreeEntityManagerTest {
     void testEntityLinkerWithParentCheck1() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
-        Entity e1 = entityManager.createEntity();
-        Entity e2 = entityManager.createEntity();
-        Entity e3 = entityManager.createEntity();
-        Entity e4 = entityManager.createEntity();
-
-        entityManager.linkWithParent(e1, e2);
-        entityManager.linkWithParent(e1, e3);
-        entityManager.linkWithParent(e2, e4);
+        Entity e1 = entityManager.createEntity(null);
+        Entity e2 = entityManager.createEntity(e1);
+        Entity e3 = entityManager.createEntity(e1);
+        Entity e4 = entityManager.createEntity(e2);
 
         Assertions.assertTrue(entityManager.isParent(e2, e1));
         Assertions.assertFalse(entityManager.isParent(e1, e2));

@@ -10,7 +10,8 @@ public class TreeEntityManager implements EntityManager {
     private static TreeEntityManager instance;
 
     private Entity root;
-    private long idSequence = 1;
+
+    transient private long idSequence = 1;
 
     private long generateId() {
         return idSequence++;
@@ -24,9 +25,24 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity createEntity() {
+    public Entity createEntity(Entity parent) {
         Entity entity = new Entity();
         entity.id = generateId();
+        if (this.root == null) {
+            this.root = entity;
+        }
+        linkWithParent(parent, entity);
+        return entity;
+    }
+
+    @Override
+    public Entity createEntity(Entity parent, String name) {
+        Entity entity = new Entity(name);
+        entity.id = generateId();
+        if (this.root == null) {
+            this.root = entity;
+        }
+        linkWithParent(parent, entity);
         return entity;
     }
 
@@ -58,17 +74,20 @@ public class TreeEntityManager implements EntityManager {
         if (entity.parent != parent) {
             parent.daughters.add(entity);
         }
+        if (this.root == null) {
+            this.root = parent;
+        }
         entity.parent = parent;
     }
 
     @Override
-    public Entity getById(Entity parent, long id) {
-        return getByIdFromParent(this.getRoot(parent), id);
+    public Entity getById(long id) {
+        return getByIdFromParent(this.root, id);
     }
 
     @Override
-    public Entity getByName(Entity parent, String name) {
-        return getByNameFromParent(this.getRoot(parent), name);
+    public Entity getByName(String name) {
+        return getByNameFromParent(this.root, name);
     }
 
     @Override

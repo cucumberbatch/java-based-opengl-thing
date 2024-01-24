@@ -35,6 +35,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private final Queue<Vector3f> cameraTrace = new ArrayDeque<>();
     private float projectionProgress = 0;
     private Graphics graphics;
+    private float cameraMovementSpeed;
+
 
     @Override
     public void init() {
@@ -98,6 +100,9 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     }
 
     private void updateCameraMovement(float deltaTime) {
+        Vector3f temp = vector3IPool.get();
+        Vector3f temp2 = vector3IPool.get();
+
         Vector2f cursorPosition = Input.getCursorPosition();
 
         float verticalAngle = cursorPosition.y / (Window.width / 256f) - 180;
@@ -105,54 +110,56 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
 
         float restrictedVerticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
-        Vector3f point = new Vector3f(0, 0, 1)
+        Vector3f point = temp.set(0f, 0f, 1f)
                 .rotateX((float) Math.toRadians(restrictedVerticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        float speedFactor;
-
         if (Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-            speedFactor = 3f;
+            cameraMovementSpeed = cameraMovementSpeed + deltaTime * 1.3f;
         } else {
-            speedFactor = 1f;
+            cameraMovementSpeed = 1f;
         }
 
         Transform componentTransform = component.getTransform();
 
         // up-down movement
+        // note: incorrect
         if (Input.isHeldDown(GLFW.GLFW_KEY_Q)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_E)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
 
         // left-right movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
 
         // forward-backward movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
+            componentTransform.moveRel(temp2.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
             cameraTrace.add(componentTransform.position);
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix = new Matrix4f().identity().lookAt(componentTransform.position, new Vector3f(componentTransform.position).add(point), new Vector3f(0, 1, 0));
+        camera.viewMatrix.identity().lookAt(componentTransform.position, point.add(componentTransform.position), temp2.set(0f, 1f, 0f));
         graphics.view = camera.viewMatrix;
+
+        vector3IPool.put(temp2);
+        vector3IPool.put(temp);
     }
 
     private float restrictAngle(float angle, float lowest, float highest) {

@@ -1,5 +1,6 @@
 package org.north.core.graphics;
 
+import org.joml.Matrix4f;
 import org.north.core.components.MeshRenderer;
 
 public class AtlasTextureAnimationShader extends AbstractGLShader {
@@ -9,6 +10,8 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
     public final int spriteHeight;
 
     public int spriteIndex;
+
+    private final Matrix4f temp = new Matrix4f();
 
     public AtlasTextureAnimationShader(int spriteCount, int spriteWidth, int spriteHeight) {
         String vertexShaderPath = "atlas_texture_animation_shader.vert";
@@ -31,6 +34,6 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
         setUniform("u_color", renderer.color);
         setUniform("u_projection", graphics.projection);
         setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getLocalModelMatrix());
+        setUniform("u_model", renderer.getTransform().getLocalModelMatrix(temp));
     }
 }

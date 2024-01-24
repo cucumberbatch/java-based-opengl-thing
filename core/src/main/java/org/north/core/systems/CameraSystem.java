@@ -22,8 +22,8 @@ public class CameraSystem extends AbstractSystem<Camera>
         ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-1, 1, -1, 1, -1, 1);
 
         component.eye.set(0f, -1f, 0f);
-        component.up.set(new Vector3f(0, 1, 0));
-        component.at.set(new Vector3f(1.0f, 0.0f, -1.0f).add(component.eye));
+        component.up.set(0f, 1f, 0f);
+        component.at.set(1.0f, 0.0f, -1.0f).add(component.eye);
         component.projectionMatrix = PERSPECTIVE_MATRIX;
 
         super.setCameraComponent(component);

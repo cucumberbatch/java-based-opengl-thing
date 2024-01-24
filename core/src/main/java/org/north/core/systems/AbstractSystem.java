@@ -17,9 +17,9 @@ import java.util.*;
 public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     // map for storing componentId-to-component pair
-    private Map<Long, E>  componentMap  = new HashMap<>();
+    private final Map<Long, E> componentMap = new HashMap<>();
 
-    protected IPool<Vector3f> vector3IPool = new Pool<>(1000, Vector3f::new);
+    protected IPool<Vector3f> vector3IPool = new Pool<>(1, Vector3f::new);
 
     public ComponentManager componentManager;
     public EntityManager entityManager;
@@ -50,6 +50,20 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
+    public E getComponent(long componentId) {
+        E component = componentMap.get(componentId);
+        if (component == null) {
+            throw new ComponentNotFoundException(componentId);
+        }
+        return component;
+    }
+
+    @Override
+    public <C extends Component> C getComponent(Class<C> componentClass) {
+        return component.getEntity().getComponent(componentClass);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void setCurrentComponent(Component component) {
         this.component = (E) component;
@@ -68,17 +82,14 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public E getComponent(long componentId) {
-        E component = componentMap.get(componentId);
-        if (component == null) {
-            throw new ComponentNotFoundException(componentId);
-        }
-        return component;
-    }
-
-    @Override
     public E removeComponent(long componentId) {
         return componentMap.remove(componentId);
     }
+
+    @Override
+    public E removeComponent(Class<E> componentClass) {
+        return null;//componentMap.
+    }
+
 
 }

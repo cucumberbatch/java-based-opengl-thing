@@ -85,4 +85,12 @@ public class Input {
     public static Vector2f getCursorPosition() {
         return new Vector2f(cursorPosition);
     }
+
+    public static float getCursorX() {
+        return cursorPosition.x;
+    }
+
+    public static float getCursorY() {
+        return cursorPosition.y;
+    }
 }

@@ -59,6 +59,7 @@ public class GameLogicUpdater implements GameLogic {
 
         final FrameTiming timingContext = new FrameTiming();
 
+        // todo: load scene from file (game data deserialization)
         loadScene(scene);
 
         while (window.shouldNotClose()) {
@@ -93,6 +94,7 @@ public class GameLogicUpdater implements GameLogic {
     private void loadScene(Scene scene) {
         sceneInitializer = new SceneInitializer(scene);
         sceneInitializer.initSceneInUpdater(this);
+//        sceneInitializer.readSceneFromFile("transform_temp");
     }
 
     @Override
@@ -105,7 +107,9 @@ public class GameLogicUpdater implements GameLogic {
 
         for (InitProcess process : systemManager.listOfSystemsForInit) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
                     Logger.trace(String.format(
                             "Handling init component [%s: %s]",
@@ -265,7 +269,9 @@ public class GameLogicUpdater implements GameLogic {
         for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
             if (isUpdatePaused && !CameraControlsSystem.class.isAssignableFrom(process.getClass())) continue;
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     Logger.trace(String.format(
                             "Handling update component [%s: %s]",
@@ -292,7 +298,9 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
@@ -314,7 +322,9 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
@@ -336,7 +346,9 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));

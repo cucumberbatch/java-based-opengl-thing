@@ -1,8 +1,11 @@
 package org.north.core.graphics;
 
+import org.joml.Matrix4f;
 import org.north.core.components.MeshRenderer;
 
 public class TextureShader extends AbstractGLShader {
+
+    private final Matrix4f temp = new Matrix4f();
 
     public TextureShader() {
         String vertexShaderPath = "texture_shader.vert";
@@ -16,6 +19,6 @@ public class TextureShader extends AbstractGLShader {
         setUniform("u_color", renderer.color);
         setUniform("u_projection", graphics.projection);
         setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getLocalModelMatrix());
+        setUniform("u_model", renderer.getTransform().getLocalModelMatrix(temp));
     }
 }

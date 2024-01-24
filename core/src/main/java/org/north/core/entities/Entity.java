@@ -16,10 +16,10 @@ public class Entity implements TreeNode<Entity>, Collidable {
     public long     id;
     public String   name;
     public Entity   parent;
-    public List<Entity> daughters = new LinkedList<>();
+    public List<Entity> daughters;
 
     public Transform transform;
-    public Map<Class<? extends Component>, Component> components = new HashMap<>();
+    public Map<Class<? extends Component>, Component> components;
 
     public Entity() {
         this(UUID.randomUUID().toString());
@@ -28,6 +28,8 @@ public class Entity implements TreeNode<Entity>, Collidable {
     public Entity(String name) {
         this.id = -1;
         this.name = name;
+        this.daughters = new LinkedList<>();
+        this.components = new HashMap<>();
     }
 
     public void addComponent(Component component) {
@@ -72,12 +74,15 @@ public class Entity implements TreeNode<Entity>, Collidable {
 
     @Override
     public List<Entity> getSiblings() {
-        if (this.parent == null) {
-            return new LinkedList<>();
-        }
+        LinkedList<Entity> siblings = new LinkedList<>();
 
-        LinkedList<Entity> siblings = new LinkedList<>(this.parent.daughters);
-        siblings.removeIf(this::equals);
+        if (this.parent != null) {
+            for (Entity sibling : this.parent.daughters) {
+                if (sibling != this) {
+                    siblings.add(sibling);
+                }
+            }
+        }
 
         return siblings;
     }

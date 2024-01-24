@@ -6,13 +6,14 @@ import org.north.core.components.Component;
 import java.util.List;
 
 public interface EntityManager {
-    Entity createEntity();
+    Entity createEntity(Entity parent);
+    Entity createEntity(Entity parent, String name);
 
     void linkWithParent(Entity parent, Entity entity);
 
-    Entity getById(Entity parent, long id);
-    Entity getByName(Entity parent, String name);
+    Entity getById(long id);
     Entity getByIdFromParent(Entity parent, long id);
+    Entity getByName(String name);
     Entity getByNameFromParent(Entity parent, String name);
     Entity getRoot(Entity currentEntity);
     List<Entity> getSiblings(Entity currentEntity);

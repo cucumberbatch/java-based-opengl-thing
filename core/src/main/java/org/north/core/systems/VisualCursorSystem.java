@@ -18,7 +18,7 @@ import org.joml.Vector2f;
 // todo: cursor movement needs to be related on entity transform data, not local vectors
 @ComponentHandler(VisualCursor.class)
 public class VisualCursorSystem extends AbstractSystem<VisualCursor>
-        implements InitProcess, UpdateProcess, CollisionHandlingProcess, RenderProcess {
+        implements InitProcess, UpdateProcess, CollisionHandlingProcess {
 
     public static final int IDLE_CURSOR_STATE          = 0;
     public static final int HOVER_CURSOR_STATE         = 1;
@@ -61,7 +61,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
         VisualCursor cursorComponent = this.getComponent();
         cursorComponent.cursor  = new Rectangle(new Vector2f(0, 0).add(cursorIdleTopLeft), new Vector2f(0, 0).add(cursorIdleBottomRight));
-        cursorComponent.texture = new Texture("core/assets/textures/screen-frame-1024.png");
+        cursorComponent.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
 
@@ -78,9 +78,10 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                 new Vector2f(cursorIdleBottomRight)
         );
 
-        MeshRenderer renderer = componentManager.getComponent(component.entity, MeshRenderer.class);
-        renderer.texture = new Texture("core/assets/textures/screen-frame-1024.png");
+        MeshRenderer renderer = this.getComponent(MeshRenderer.class);
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         renderer.mesh = new Mesh(visualCursorShape.toVertices(), component.indices, component.uv);
+        renderer.shader = new SimpleColorShader();
 //        renderer.shader = OldShader.SIMPLE_COLOR_SHADER;
     }
 
@@ -123,12 +124,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                     break;
 
                 case HOVER_CURSOR_STATE:
-//                    if (Input.isPressed(GLFW.GLFW_KEY_SPACE) && selectedEntity != null) {
-//                        selectedEntity.parent.transform.moveTo(cursor.topLeft.x, cursor.topLeft.y, selectedEntity.parent.transform.position.z);
-//                        selectedEntity.parent.transform.position.x = cursor.topLeft.x;
-//                        selectedEntity.parent.transform.position.y = cursor.topLeft.y;
-//                    }
-                    break;
             }
         } else {
             displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
@@ -165,7 +160,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                     break;
 
                 case IDLE_CURSOR_STATE:
-                    break;
             }
         }
 
@@ -174,8 +168,10 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
         Transform transform = component.getTransform();
         transform.moveTo(
-                (Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
-                (Input.getCursorPosition().y - Window.height / 2f) / Window.height,
+//                -(Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
+//                -(Input.getCursorPosition().y - Window.height / 2f) / Window.height,
+                -Input.getCursorX() / (float) Window.width * 2 + 2f,
+                -Input.getCursorY() / (float) Window.height * 2,
                 0f
         );
 
@@ -184,7 +180,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         // cursor is transform dependent now!
         setCursorPosition(imaginaryCursorShape, new Vector2f(transform.position.x, transform.position.y));
 
-        if (isCursorMoved) {  }
+        MeshRenderer renderer = this.getComponent(MeshRenderer.class);
+        renderer.color = cursorColor;
 
     }
 
@@ -217,14 +214,14 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     }
 
     private Vector2f getRectangleCenter(Rectangle rectangle) {
-        return new Vector2f(rectangle.topLeft).add(new Vector2f(rectangle.bottomRight).sub(rectangle.topLeft).mul(1 / 2.0f));
+        return new Vector2f(rectangle.topLeft).add(new Vector2f(rectangle.bottomRight).sub(rectangle.topLeft).mul(0.5f));
     }
 
-    @Override
-    public void render(Graphics graphics) {
+//    @Override
+//    public void render(Graphics graphics) {
 //        graphics.drawMesh(PredefinedMeshes.CUBE, Vector4f.one(), component.transform);
 //        component.vertexBuffer.updateVertexBuffer(component.cursor.toVertices());
 //        Shader.GUI.setUniform("u_color", cursorColor);
 //        Renderer2D.draw(component.vertexBuffer, component.texture, Shader.GUI);
-    }
+//    }
 }

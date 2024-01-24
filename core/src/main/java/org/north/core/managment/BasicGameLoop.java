@@ -65,8 +65,8 @@ public class BasicGameLoop implements GameLogic {
 
     @Override
     public void init() throws RuntimeException {
-        texture = new Texture("core/assets/textures/screen-frame-1024.png");
-        shader = new OldShader("core/assets/shaders/bg.vert", "core/assets/shaders/bg.frag");
+        texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        shader = new OldShader("core/src/main/resources/assets/shaders/bg.vert", "core/src/main/resources/assets/shaders/bg.frag");
         rectangle = new Rectangle(new Vector2f(10, 10), new Vector2f(30, 30));
     }
 

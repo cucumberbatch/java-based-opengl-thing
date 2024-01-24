@@ -4,20 +4,27 @@ import org.joml.Matrix4f;
 import org.north.core.physics.collision.TransformListener;
 import org.joml.Vector3f;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 /**
  * The main component of each game object that tells
  * you about its position, rotation and scale
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent implements Cloneable {
-    private TransformListener transformListener = (e, p1, p2) -> {};
+public class Transform extends AbstractComponent implements Serializable, Cloneable {
+    private transient TransformListener transformListener = (e, p1, p2) -> {};
 
-    public Transform parent;
+    private transient static final long serialVersionUID = 1L;
 
-    public Vector3f position = new Vector3f();
-    public Vector3f rotation = new Vector3f();
-    public Vector3f scale    = new Vector3f(1, 1, 1);
+    public transient Transform parent;
+
+    public transient Vector3f position = new Vector3f();
+    public transient Vector3f rotation = new Vector3f();
+    public transient Vector3f scale    = new Vector3f(1, 1, 1);
 
 
     public void moveTo(Vector3f position) {
@@ -44,11 +51,32 @@ public class Transform extends AbstractComponent implements Cloneable {
         this.transformListener = transformListener;
     }
 
+    // note: memory consumption! matrix object creation on each call
+    // deprecated: use method with matrix argument as temporary destination object
     public Matrix4f getLocalModelMatrix() {
-        return new Matrix4f().identity()
+        return getLocalModelMatrix(new Matrix4f());
+    }
+
+    public Matrix4f getLocalModelMatrix(Matrix4f destination) {
+        return destination.identity()
                 .translate(position.x, position.y, position.z)
                 .scale(scale.x, scale.y, scale.z);
     }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.write(42);
+//        out.writeObject(position);
+//        out.writeObject(rotation);
+//        out.writeObject(scale);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        this.position = (Vector3f) in.readObject();
+//        this.rotation = (Vector3f) in.readObject();
+//        this.scale = (Vector3f) in.readObject();
+
+    }
+
 
     @Override
     public void reset() {
@@ -59,7 +87,8 @@ public class Transform extends AbstractComponent implements Cloneable {
     public String toString() {
         return  "\nposition: " + position +
                 "\nrotation: " + rotation +
-                "\nscale:    " + scale;
+                "\nscale:    " + scale +
+                super.toString();
     }
 
     @Override
