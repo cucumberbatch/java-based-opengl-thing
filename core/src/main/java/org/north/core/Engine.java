@@ -32,7 +32,7 @@ public class Engine {
     }
 
     public Engine() {
-        Logger.info("Initializing engine..");
+        // Logger.info("Initializing engine..");
 
         window = new Window("windowTitle", 512, 512, false);
         gameLoop = new GameLogicUpdater(window);
@@ -40,7 +40,7 @@ public class Engine {
 
         setDataManagers(gameLoop);
 
-        Logger.info("Engine initialization succeeded");
+        // Logger.info("Engine initialization succeeded");
     }
 
     private void setDataManagers(GameLogic gameLogic) {
@@ -58,7 +58,7 @@ public class Engine {
 
     public void run() {
         if (window == null) {
-            Logger.error("Window is not set-up. Cannot run engine");
+            // Logger.error("Window is not set-up. Cannot run engine");
             return;
         }
 

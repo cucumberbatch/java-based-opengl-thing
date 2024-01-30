@@ -107,7 +107,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                     if (transitionTimeAccumulator > transitionTimeLimit) {
                         transitionTimeAccumulator = 0.0f;
                         cursorState = HOVER_CURSOR_STATE;
-                        Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
+                        // Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
@@ -120,7 +120,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                 case HOVER_TO_IDLE_CURSOR_STATE:
                 case IDLE_CURSOR_STATE:
                     cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
+                    // Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
                     break;
 
                 case HOVER_CURSOR_STATE:
@@ -143,7 +143,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                         transitionTimeAccumulator = 0.0f;
                         component.previouslySelectedButtonShape = null;
                         cursorState = IDLE_CURSOR_STATE;
-                        Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
+                        // Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
                         float ratio = transitionTimeAccumulator / transitionTimeLimit;
@@ -156,7 +156,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                 case HOVER_CURSOR_STATE:
                 case IDLE_TO_HOVER_CURSOR_STATE:
                     cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
+                    // Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
                     break;
 
                 case IDLE_CURSOR_STATE:

@@ -59,7 +59,7 @@ public class ShaderUtils {
         int compileStatus = glGetShaderi(shader, GL_COMPILE_STATUS);
 
         if (compileStatus == GL_FALSE) {
-            Logger.warn(String.format("Failed to compile shader! Reason: %s", glGetShaderInfoLog(shader)));
+            // Logger.warn(String.format("Failed to compile shader! Reason: %s", glGetShaderInfoLog(shader)));
             return -1;
         }
 

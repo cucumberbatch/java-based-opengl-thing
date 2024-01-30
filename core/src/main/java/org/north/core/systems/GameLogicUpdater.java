@@ -55,7 +55,7 @@ public class GameLogicUpdater implements GameLogic {
 
     @Override
     public void run() {
-        Logger.info("Game loop started");
+        // Logger.info("Game loop started");
 
         final FrameTiming timingContext = new FrameTiming();
 
@@ -77,12 +77,12 @@ public class GameLogicUpdater implements GameLogic {
 
                 timingContext.sync();
             } catch (RuntimeException e) {
-                Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
+                // Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
                 break;
             }
         }
 
-        Logger.info("Game loop ended");
+        // Logger.info("Game loop ended");
     }
 
     public void setDataManagers(EntityManager entityManager, ComponentManager componentManager, SystemManager systemManager) {
@@ -111,17 +111,17 @@ public class GameLogicUpdater implements GameLogic {
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling init component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling init component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.init();
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.LATE_INIT_STATE);
                     }
                 } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
@@ -137,7 +137,8 @@ public class GameLogicUpdater implements GameLogic {
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_P)) {
             isUpdatePaused = !isUpdatePaused;
-            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
+//            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
+            Input.holdenKeys.set(GLFW.GLFW_KEY_P, false);
         }
     }
 
@@ -193,11 +194,11 @@ public class GameLogicUpdater implements GameLogic {
                                     previousFrameCollision.pair = new CollisionPair(positionA, positionB);
                                     previousFrameCollision.state = Collision.HOLD;
                                     previousFrameCollision.isModified = true;
-                                    Logger.info(String.format(
-                                            "Collision modified! a1: %s\tstate: %s",
-                                            previousFrameCollision,
-                                            previousFrameCollision.state
-                                    ));
+                                    // Logger.info(String.format(
+//                                            "Collision modified! a1: %s\tstate: %s",
+//                                            previousFrameCollision,
+//                                            previousFrameCollision.state
+//                                    ));
                                 }
                                 break;
                             }
@@ -210,11 +211,11 @@ public class GameLogicUpdater implements GameLogic {
                             collision.isModified = true;
                             systemManager.collisions.add(collision);
                             collisionsListSize++;
-                            Logger.info(String.format(
-                                    "Collision added! a1: %s\tstate: %s",
-                                    collision,
-                                    collision.state
-                            ));
+                            // Logger.info(String.format(
+//                                    "Collision added! a1: %s\tstate: %s",
+//                                    collision,
+//                                    collision.state
+//                            ));
                         }
                     } else {
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
@@ -223,11 +224,11 @@ public class GameLogicUpdater implements GameLogic {
                                 if (Collision.EXITED != previousFrameCollision.state) {
                                     previousFrameCollision.isModified = true;
                                     previousFrameCollision.state = Collision.EXITED;
-                                    Logger.info(String.format(
-                                            "Collision modified! a1: %s\tstate: %s",
-                                            previousFrameCollision,
-                                            previousFrameCollision.state
-                                    ));
+                                    // Logger.info(String.format(
+//                                            "Collision modified! a1: %s\tstate: %s",
+//                                            previousFrameCollision,
+//                                            previousFrameCollision.state
+//                                    ));
                                 } else {
                                     previousFrameCollision.isModified = false;
                                 }
@@ -244,11 +245,11 @@ public class GameLogicUpdater implements GameLogic {
             if (Collision.EXITED == collision.state && !collision.isModified) {
                 systemManager.collisions.remove(cindex);
                 collisionsListSize--;
-                Logger.info(String.format(
-                        "Collision removed! a1: %s\tstate: %s",
-                        collision,
-                        collision.state
-                ));
+                // Logger.info(String.format(
+//                        "Collision removed! a1: %s\tstate: %s",
+//                        collision,
+//                        collision.state
+//                ));
             }
         }
 
@@ -273,16 +274,16 @@ public class GameLogicUpdater implements GameLogic {
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling update component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling update component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.update(deltaTime);
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.READY_TO_INIT_STATE);
                     }
                 }
@@ -303,7 +304,7 @@ public class GameLogicUpdater implements GameLogic {
                 Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
                     if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.ENTERED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -327,7 +328,7 @@ public class GameLogicUpdater implements GameLogic {
                 Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.HOLD == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -351,7 +352,7 @@ public class GameLogicUpdater implements GameLogic {
                 Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.EXITED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -388,24 +389,24 @@ public class GameLogicUpdater implements GameLogic {
             List<? extends Component> components = system.getComponentList();
             systemManager.sortComponentsByDistanceToCamera(components);
             if (MeshRendererSystem.class.isAssignableFrom(system.getClass())) {
-                Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
+                // Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
             }
             for (Component component : components) {
                 if (component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling render component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling render component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.render(graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.READY_TO_INIT_STATE);
                     } catch (ShaderUniformNotFoundException e) {
-                        Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
-                                e.getUniformName(), e.getShaderName()));
+                        // Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
+//                                e.getUniformName(), e.getShaderName()));
                         throw e;
                     }
                 }

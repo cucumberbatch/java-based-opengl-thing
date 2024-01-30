@@ -56,7 +56,7 @@ public class BasicGameLoop implements GameLogic {
                 handleCollisions();
                 render(window);
             } catch (RuntimeException e) {
-                Logger.error(e);
+                // Logger.error(e);
             }
 
             timingContext.sync();

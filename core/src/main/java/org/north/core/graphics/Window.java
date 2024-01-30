@@ -37,11 +37,11 @@ public class Window {
     }
 
     public void init() {
-        Logger.info("Window initialization started");
+        // Logger.info("Window initialization started");
         if (window != -1) return;
 
         GLFW.glfwSetErrorCallback((code, message) -> {
-            Logger.error(String.format("err_code 0x%08X: %s ", code, message));
+            // Logger.error(String.format("err_code 0x%08X: %s ", code, message));
         });
 
         if (!GLFW.glfwInit()) {
@@ -73,7 +73,7 @@ public class Window {
 //        GLFW.glfwSetWindowRefreshCallback(window, new GLFWWindowRefreshCallback() {
 //            @Override
 //            public void invoke(long l) {
-//                Logger.info(String.format("Refreshed window[%s] value[%s]", window, l));
+//                // Logger.info(String.format("Refreshed window[%s] value[%s]", window, l));
 //            }
 //        });
 
@@ -115,11 +115,11 @@ public class Window {
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        Logger.info("Window initialization ended");
+        // Logger.info("Window initialization ended");
     }
 
     public void destroy() {
-        Logger.info("Window destruction process started");
+        // Logger.info("Window destruction process started");
 
         if (window == -1) return;
 
@@ -132,7 +132,7 @@ public class Window {
         // when we hit an exit button in application we need to stop all threads
         MeshTransformListener.shutdownThreadExecution();
 
-        Logger.info("Window destruction process ended");
+        // Logger.info("Window destruction process ended");
     }
 
     public static Vector2f translatePointToWindow(Vector2f point) {

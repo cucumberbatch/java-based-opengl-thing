@@ -39,16 +39,16 @@ public class TextureManager {
             pixels = new int[width * height];
             image.getRGB(0, 0, width, height, pixels, 0, width);
         } catch (FileNotFoundException e) {
-            Logger.error(String.format("Texture '<underline>%s</>' not found!", path), e);
+            // Logger.error(String.format("Texture '<underline>%s</>' not found!", path), e);
             return null;
         } catch (SecurityException e) {
-            Logger.error(String.format("Texture file access denied on path '<underline>%s</>'!", path), e);
+            // Logger.error(String.format("Texture file access denied on path '<underline>%s</>'!", path), e);
             return null;
         } catch (IllegalArgumentException e) {
-            Logger.error(String.format("Incorrect texture file path '<underline>%s</>'!", path), e);
+            // Logger.error(String.format("Incorrect texture file path '<underline>%s</>'!", path), e);
             return null;
         } catch (IOException e) {
-            Logger.error(String.format("Error while loading texture '<underline>%s</>'!", path), e);
+            // Logger.error(String.format("Error while loading texture '<underline>%s</>'!", path), e);
             return null;
         }
 

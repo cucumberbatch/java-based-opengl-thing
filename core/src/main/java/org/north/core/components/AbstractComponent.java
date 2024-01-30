@@ -90,8 +90,8 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     public void setState(ComponentState state) {
         if (state == null) throw new NullPointerException("Component state cannot be null!");
         if (this.state == state) return;
-        Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
-                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
+        // Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
+//                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
         this.state = state;
     }
 

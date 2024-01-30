@@ -51,7 +51,7 @@ public class ComponentManager {
             //note: at this moment any component needs to have a constructor without any params
             component = componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Logger.error("Error while creating a component instance: " + e.getMessage());
+            // Logger.error("Error while creating a component instance: " + e.getMessage());
             throw new RuntimeException(e);
         }
 

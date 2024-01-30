@@ -20,6 +20,10 @@ public class Camera extends AbstractComponent {
         return new Vector3f(this.getTransform().position);
     }
 
+    public Vector3f getPosition(Vector3f destination) {
+        return destination.set(this.getTransform().position);
+    }
+
     @Override
     public String getName() {
         return this.getClass().getName();

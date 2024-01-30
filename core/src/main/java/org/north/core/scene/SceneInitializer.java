@@ -24,7 +24,7 @@ public class SceneInitializer {
 
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
             transform = (Transform) inputStream.readObject();
-            Logger.info("Read object: " + transform.toString());
+            // Logger.info("Read object: " + transform.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {

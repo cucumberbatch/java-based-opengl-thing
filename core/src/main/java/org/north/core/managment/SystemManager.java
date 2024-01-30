@@ -25,6 +25,8 @@ public class SystemManager {
     private static SystemManager instance;
 
     private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
+    private final List<System<? extends Component>> systemList = new ArrayList<>();
+
     private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations = new HashMap<>();
     private final List<DeferredCommand> deferredCommands = new LinkedList<>();
     private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
@@ -54,7 +56,7 @@ public class SystemManager {
 
     private void loadComponentSystemsFromPackage(String packagePath) {
         try {
-            Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
+            // Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
             List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
             annotatedClassesInPackage.forEach(pair -> componentToSystemAssociations.put(pair.component, pair.system));
 
@@ -62,9 +64,9 @@ public class SystemManager {
                     .map(pair -> pair.system.getName())
                     .collect(Collectors.toList());
 
-            Logger.info(String.format("Found %s system(s) classes: %s", classNames.size(), classNames));
+            // Logger.info(String.format("Found %s system(s) classes: %s", classNames.size(), classNames));
         } catch (Exception e) {
-            Logger.error("Error while loading systems. Reason: " + e.getMessage());
+            // Logger.error("Error while loading systems. Reason: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -98,8 +100,9 @@ public class SystemManager {
             try {
                 System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 systemMap.put(componentClass, system);
+                systemList.add(system);
                 attachToSystemLists(system);
-                Logger.info(String.format("System %s initialized", system.getClass().getName()));
+                // Logger.info(String.format("System %s initialized", system.getClass().getName()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -116,7 +119,10 @@ public class SystemManager {
 
     @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(long componentId) {
-        for (System<? extends Component> system: systemMap.values()) {
+        int systemCount = systemList.size();
+        for (int i = 0; i < systemCount; i++) {
+//        for (System<? extends Component> system: systemMap.values()) {
+            System<? extends Component> system = systemList.get(i);
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
@@ -134,13 +140,33 @@ public class SystemManager {
 
     public void sortComponentsByDistanceToCamera(List<? extends Component> components) {
         if (camera == null) return;
+        if (!cameraDistanceComparator.isCameraSet()) cameraDistanceComparator.setCamera(camera);
 
-        components.sort((o1, o2) -> {
-            Vector3f cameraPosition = camera.getPosition();
+        components.sort(cameraDistanceComparator);
+    }
+
+    private final EntityDistanceToCameraComparator cameraDistanceComparator = new EntityDistanceToCameraComparator();
+
+    static class EntityDistanceToCameraComparator implements Comparator<Component> {
+
+        private Camera camera;
+        private final Vector3f temp = new Vector3f();
+
+        public void setCamera(Camera camera) {
+            this.camera = camera;
+        }
+
+        public boolean isCameraSet() {
+            return this.camera != null;
+        }
+
+        @Override
+        public int compare(Component o1, Component o2) {
+            Vector3f cameraPosition = camera.getPosition(temp);
             float o1Distance = o1.getTransform().position.distance(cameraPosition);
             float o2Distance = o2.getTransform().position.distance(cameraPosition);
             return (int) ((o2Distance - o1Distance) * 100f);
-        } );
+        }
     }
 
     public void addDeferredCommand(DeferredCommand command) {

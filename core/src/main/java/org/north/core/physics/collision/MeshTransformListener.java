@@ -22,7 +22,7 @@ public class MeshTransformListener implements TransformListener {
     private void runAsync(Entity entity, Vector3f previousPosition, Vector3f currentPosition) {
         executor.execute(() -> {
             MeshCollider collider = entity.getComponent(MeshCollider.class);
-            Logger.info(String.format("Registered movement of entity [%s]: %s -> %s", entity.getName(), previousPosition.toString(), currentPosition.toString()));
+            // Logger.info(String.format("Registered movement of entity [%s]: %s -> %s", entity.getName(), previousPosition.toString(), currentPosition.toString()));
         });
     }
 

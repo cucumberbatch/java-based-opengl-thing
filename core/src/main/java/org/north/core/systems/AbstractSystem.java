@@ -78,7 +78,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
             throw new ComponentAlreadyExistsException(component.getClass());
         }
         componentMap.put(component.getId(), (E) component);
-        Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
+        // Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
     }
 
     @Override
