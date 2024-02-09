@@ -10,8 +10,11 @@ public interface System<E extends Component> {
     Iterator<E> getComponentIterator();
     List<E> getComponentList();
     E getComponent();
+    E getComponent(long componentId);
+    <C extends Component> C getComponent(Class<C> componentClass);
     void setCurrentComponent(Component component);
     void addComponent(Component component);
-    E getComponent(long componentId);
     E removeComponent(long componentId);
+    E removeComponent(Class<E> componentClass);
+
 }

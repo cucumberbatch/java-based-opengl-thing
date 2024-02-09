@@ -13,9 +13,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
 
     @Override
     public void update(float deltaTime) {
-        if (!component.isActive()) return;
-
-        RigidBody rigidBody = component;
+        RigidBody rigidBody = this.getComponent();
         Transform transform = rigidBody.getTransform();
 
         /* Catch the free vector from pool for calculations */
@@ -37,33 +35,28 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
     }
 
     private void updateGravitationalAcceleration(RigidBody rigidBody, float deltaTime, Vector3f temp) {
-        temp.set(Physics.gravityVector);
-        rigidBody.velocity.add(temp.mul(deltaTime));
+        rigidBody.velocity.add(Physics.gravityVector.mul(deltaTime, temp));
     }
 
     private void updateAngularVelocity(RigidBody that, float deltaTime, Vector3f temp) {
-        temp.set(that.angularAcceleration);
-        that.angularVelocity.add(temp.mul(deltaTime * deltaTime));
+        that.angularVelocity.add(that.angularAcceleration.mul(deltaTime * deltaTime, temp));
     }
 
     private void updateVelocity(RigidBody that, float deltaTime, Vector3f temp) {
-        temp.set(that.acceleration);
-        that.velocity.add(temp.mul(deltaTime * deltaTime));
+        that.velocity.add(that.acceleration.mul(deltaTime * deltaTime, temp));
     }
 
     private void updateRotation(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
-        temp.set(that.angularVelocity);
-        transform.rotation.add(temp.mul(deltaTime));
+        transform.rotation.add(that.angularVelocity.mul(deltaTime, temp));
     }
 
     private void updatePosition(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
-        temp.set(that.velocity);
-        transform.moveRel(temp.mul(deltaTime));
+        transform.moveRel(that.velocity.mul(deltaTime, temp));
     }
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
-        Vector3f temp = vector3IPool.get().set(direction);
-        component.velocity.add(temp.mul(mass));
+        Vector3f temp = vector3IPool.get();
+        component.velocity.add(direction.mul(mass, temp));
         vector3IPool.put(temp);
     }
 

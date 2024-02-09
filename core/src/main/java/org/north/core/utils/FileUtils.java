@@ -16,7 +16,7 @@ public class FileUtils {
                 result.append(buffer + '\n');
             }
         } catch (IOException e) {
-            Logger.warn("Unable to find file: " + e.getMessage());
+            // Logger.warn("Unable to find file: " + e.getMessage());
         }
         return result.toString();
     }

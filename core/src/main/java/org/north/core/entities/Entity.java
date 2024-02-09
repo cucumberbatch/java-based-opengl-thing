@@ -12,14 +12,11 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity implements TreeNode<Entity>, Collidable {
-    public long     id;
-    public String   name;
-    public Entity   parent;
-    public List<Entity> daughters = new LinkedList<>();
-
+public class Entity extends TreeNode<Entity> implements Collidable {
+    public long id;
+    public String name;
     public Transform transform;
-    public Map<Class<? extends Component>, Component> components = new HashMap<>();
+    public Map<Class<? extends Component>, Component> components;
 
     public Entity() {
         this(UUID.randomUUID().toString());
@@ -27,6 +24,24 @@ public class Entity implements TreeNode<Entity>, Collidable {
 
     public Entity(String name) {
         this.id = -1;
+        this.name = name;
+        this.daughters = new LinkedList<>();
+        this.components = new HashMap<>();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -47,73 +62,10 @@ public class Entity implements TreeNode<Entity>, Collidable {
 
     @SuppressWarnings("unchecked")
     public <E extends Component> E removeComponent(Class<E> clazz) {
+        if (Transform.class.isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException("Transform component cannot be removed from entity!");
+        }
         return (E) components.remove(clazz);
     }
 
-    @Override
-    public long getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Entity getParent() {
-        return parent;
-    }
-
-    @Override
-    public List<Entity> getDaughters() {
-        return daughters;
-    }
-
-    @Override
-    public List<Entity> getSiblings() {
-        if (this.parent == null) {
-            return new LinkedList<>();
-        }
-
-        LinkedList<Entity> siblings = new LinkedList<>(this.parent.daughters);
-        siblings.removeIf(this::equals);
-
-        return siblings;
-    }
-
-    @Override
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void setParent(Entity parent) {
-        if (this.parent != null) {
-            this.parent.daughters.remove(this);
-        }
-        if (this.daughters.contains(parent)) {
-            this.daughters.remove(parent);
-            parent.parent = null;
-        }
-        if (this.parent != parent) {
-            parent.daughters.add(this);
-        }
-        this.parent = parent;
-    }
-
-    @Override
-    public void setDaughters(List<Entity> daughters) {
-        this.daughters = daughters;
-    }
-
-    @Override
-    public boolean isParentOf(Entity entity) {
-        return this.daughters.contains(entity);
-    }
 }

@@ -3,15 +3,18 @@ package org.north.core.components;
 import org.north.core.entities.Entity;
 import org.north.core.utils.Logger;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public abstract class AbstractComponent implements Component, Serializable, Cloneable {
 
-    public long id;
+    public transient long id;
     public String name;
 
     /* Entity which this component is belongs to */
-    public Entity entity;
+    public transient Entity entity;
 
     /* Activity state of component */
     public boolean isActive = true;
@@ -87,8 +90,8 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     public void setState(ComponentState state) {
         if (state == null) throw new NullPointerException("Component state cannot be null!");
         if (this.state == state) return;
-        Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
-                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
+        // Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
+//                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
         this.state = state;
     }
 
@@ -111,5 +114,27 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
             throw new AssertionError();
         }
     }
+
+    @Override
+    public String toString() {
+        return "AbstractComponent{" +
+                "name='" + name + '\'' +
+                ", isActive=" + isActive +
+                ", state=" + state.name() +
+                '}';
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUTF(this.name == null ? "" : this.name);
+        out.writeBoolean(this.isActive);
+        out.writeObject(this.state);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        this.name = in.readUTF();
+        this.isActive = in.readBoolean();
+        this.state = (ComponentState) in.readObject();
+    }
+
 
 }

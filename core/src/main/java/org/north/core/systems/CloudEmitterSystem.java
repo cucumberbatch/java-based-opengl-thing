@@ -36,8 +36,8 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
             MeshRenderer renderer = em.take(gasCloudEntity).add(MeshRenderer.class);
             GasCloud gasCloud = em.take(gasCloudEntity).add(GasCloud.class);
 
-            transform.position = new Vector3f(emittingPosition);
-            transform.scale = new Vector3f(emittingScale);
+            transform.position.set(emittingPosition);
+            transform.scale.set(emittingScale);
 
             renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
             renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");

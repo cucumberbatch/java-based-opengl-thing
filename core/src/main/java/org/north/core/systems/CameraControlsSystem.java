@@ -35,6 +35,11 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private final Queue<Vector3f> cameraTrace = new ArrayDeque<>();
     private float projectionProgress = 0;
     private Graphics graphics;
+    private float cameraMovementSpeed;
+    private Vector2f mousePosition = new Vector2f();
+    private float verticalMousePosition = 0;
+    private boolean mouseCaptured = false;
+
 
     @Override
     public void init() {
@@ -53,10 +58,14 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private void updateScreenCapture(Graphics graphics) {
         if (Input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+//            Logger.info("ESC: " + graphics.view.toString());
+            mouseCaptured = false;
         }
 
         if (Input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+//            Logger.info("CLICK: " + graphics.view.toString());
+            mouseCaptured = true;
         }
     }
 
@@ -98,61 +107,70 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     }
 
     private void updateCameraMovement(float deltaTime) {
+        if (!mouseCaptured) return;
+
+        Vector3f temp = vector3IPool.get();
+        Vector3f temp2 = vector3IPool.get();
+
         Vector2f cursorPosition = Input.getCursorPosition();
 
         float verticalAngle = cursorPosition.y / (Window.width / 256f) - 180;
         float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
-        float restrictedVerticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
+        verticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
-        Vector3f point = new Vector3f(0, 0, 1)
-                .rotateX((float) Math.toRadians(restrictedVerticalAngle))
+
+
+        Vector3f point = temp.set(0f, 0f, 1f)
+                .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        float speedFactor;
-
         if (Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-            speedFactor = 3f;
+            cameraMovementSpeed = cameraMovementSpeed + deltaTime * 1.3f;
         } else {
-            speedFactor = 1f;
+            cameraMovementSpeed = 1f;
         }
 
         Transform componentTransform = component.getTransform();
 
         // up-down movement
+        // note: incorrect
         if (Input.isHeldDown(GLFW.GLFW_KEY_Q)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_E)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
 
         // left-right movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            componentTransform.moveRel(new Vector3f(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
 
         // forward-backward movement
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().mul(deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            componentTransform.moveRel(new Vector3f(point).normalize().mul(-deltaTime * speedFactor));
-            cameraTrace.add(componentTransform.position);
+            componentTransform.moveRel(temp2.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
+//            cameraTrace.add(componentTransform.position);
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix = new Matrix4f().identity().lookAt(componentTransform.position, new Vector3f(componentTransform.position).add(point), new Vector3f(0, 1, 0));
+        camera.viewMatrix.identity().lookAt(componentTransform.position, point.add(componentTransform.position), temp2.set(0f, 1f, 0f));
         graphics.view = camera.viewMatrix;
+
+        vector3IPool.put(temp2);
+        vector3IPool.put(temp);
     }
 
     private float restrictAngle(float angle, float lowest, float highest) {
@@ -174,7 +192,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
             else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;
 
             GL30.glViewport(0, 0, width, height);
-            Logger.info(String.format("Aspect ratio: %f width: %s height: %s", camera.ratio, width, height));
+            // Logger.info(String.format("Aspect ratio: %f width: %s height: %s", camera.ratio, width, height));
         }
     }
 }

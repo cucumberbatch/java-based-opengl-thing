@@ -7,7 +7,7 @@ public interface InitProcess {
      * of the component it inherits at the first frame of after the component
      * initialization
      *
-     * @throws Exception
+     * @throws RuntimeException if a runtime exception occurs..
      * @author cucumberbatch
      */
     default void init() throws RuntimeException {};

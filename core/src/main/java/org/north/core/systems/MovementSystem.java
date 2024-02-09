@@ -20,7 +20,7 @@ public class MovementSystem extends AbstractSystem<MovementComponent> implements
         float initialZ = component.initialZ;
 
 
-        component.getTransform().position.set(
+        component.getTransform().moveTo(
                 component.getTransform().position.x,
                 component.getTransform().position.y,
                 initialZ + (float) Math.sin(acc) * range

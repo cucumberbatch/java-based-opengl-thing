@@ -1,8 +1,19 @@
 package org.north.core.graphics;
 
+import org.joml.Matrix4f;
 import org.north.core.components.MeshRenderer;
 
 public class TextureShader extends AbstractGLShader {
+
+    private final Matrix4f temp = new Matrix4f();
+
+    private int textureUniformPtr;
+    private int colorUniformPtr;
+    private int projectionUniformPtr;
+    private int viewUniformPtr;
+    private int modelUniformPtr;
+
+    private boolean initializedPtr = false;
 
     public TextureShader() {
         String vertexShaderPath = "texture_shader.vert";
@@ -12,10 +23,19 @@ public class TextureShader extends AbstractGLShader {
 
     @Override
     public void updateUniforms(Graphics graphics, MeshRenderer renderer) {
-        setUniform("u_texture", renderer.texture);
-        setUniform("u_color", renderer.color);
-        setUniform("u_projection", graphics.projection);
-        setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getLocalModelMatrix());
+        if (!initializedPtr) {
+            textureUniformPtr = getUniformLocation("u_texture");
+            colorUniformPtr = getUniformLocation("u_color");
+            projectionUniformPtr = getUniformLocation("u_projection");
+            viewUniformPtr = getUniformLocation("u_view");
+            modelUniformPtr = getUniformLocation("u_model");
+            initializedPtr = true;
+        }
+
+        setUniform(textureUniformPtr, renderer.texture);
+        setUniform(colorUniformPtr, renderer.color);
+        setUniform(projectionUniformPtr, graphics.projection);
+        setUniform(viewUniformPtr, graphics.view);
+        setUniform(modelUniformPtr, renderer.getTransform().getLocalModelMatrix(temp));
     }
 }

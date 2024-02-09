@@ -23,11 +23,32 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
     @Override
     public void init() throws RuntimeException {
-//        initCubeAndCamera();
+        initReferenceScene();
+        initCubeAndCamera();
 //        initSpaceshipOnScreen();
-        initSprites();
+//        initSprites();
+//        initScene1();
 //        initScene4();
-//        initSingleButtonScene();
+        initSingleButtonScene();
+    }
+
+    private void initReferenceScene() {
+        Entity camera = em.create("camera");
+        Entity referenceBox = em.create("referenceBox");
+
+        em.take(camera)
+                .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
+
+        List<Component> componentList = em.take(referenceBox)
+                .add(Transform.class, MeshRenderer.class, RigidBody.class);
+
+        MeshRenderer renderer = (MeshRenderer) componentList.get(1);
+        renderer.shader = new SimpleColorShader();
+        renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
+        renderer.mesh = PredefinedMeshes.QUAD;
+
+        referenceBox.setParent(camera);
+
     }
 
     private void initSpaceshipOnScreen() {
@@ -221,15 +242,11 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     }
 
     private void initScene1() {
-        Scene scene = new Scene("scene name");
+        Entity cursor = em.create("cursor");
+        Entity camera = em.create("camera");
+        Entity parentEntity = em.create("parentEntity");
 
-        Entity cursor       = new Entity("cursor");
-        Entity camera       = new Entity("camera");
-        Entity parentEntity = new Entity("parentEntity");
-
-        scene.addEntity(cursor);
-        scene.addEntity(camera);
-        scene.addEntity(parentEntity);
+        em.take(camera).add(Transform.class, Camera.class);
 
         int height = EngineConfig.instance.windowHeight;
         int width = EngineConfig.instance.windowWidth;
@@ -244,8 +261,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         int widthStep   = width  / wCount;
         for (int h = 0; h < height; h += heightStep) {
             for (int w = 0; w < width; w += widthStep) {
-                Entity generatedButton = new Entity("g_button_" + h + "_" + w);
-                scene.addEntity(generatedButton);
+                Entity generatedButton = em.create("g_button_" + h + "_" + w);
 
                 List<Component> componentList = em.take(generatedButton)
                         .add(Transform.class, MeshCollider.class, Button.class, MeshRenderer.class);
@@ -265,7 +281,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                entityManager.linkWithParent(parentEntity, generatedButton);
+                generatedButton.setParent(parentEntity);
             }
         }
 
@@ -324,7 +340,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                entityManager.linkWithParent(parentEntity, generatedButton);
+                generatedButton.setParent(parentEntity);
             }
         }
 
@@ -347,7 +363,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         Transform transform = (Transform) componentList.get(0);
         Renderer  renderer  = (Renderer) componentList.get(1);
 
-        renderer.texture    = new Texture("core/assets/textures/screen-frame-1024.png");
+        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
 
 //        transform = new Transform();

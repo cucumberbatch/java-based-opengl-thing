@@ -45,18 +45,18 @@ public class ComponentHandlerScanner {
         URL packageUrl = classLoader.getResource(packageName);
 
         if (Objects.isNull(packageUrl)) {
-            Logger.info("Package URL is null!");
+            // Logger.info("Package URL is null!");
             return classes;
         }
 
         String packagePath = URLDecoder.decode(packageUrl.getPath(), StandardCharsets.UTF_8);
         File packageDir = new File(packagePath);
         if (packageDir.isDirectory()) {
-            Logger.trace("Checking package classes in path: " + packageDir);
+            // Logger.trace("Checking package classes in path: " + packageDir);
             File[] files = packageDir.listFiles();
             for (File file : Objects.requireNonNull(files)) {
                 String className = file.getName();
-                Logger.trace("Found file: " + className);
+                // Logger.trace("Found file: " + className);
                 if (className.endsWith(".class")) {
                     className = packageName.replace("/", ".") + "." + className.substring(0, className.length() - 6);
                     Class<?> loadedClass = classLoader.loadClass(className);
@@ -70,7 +70,7 @@ public class ComponentHandlerScanner {
                         @SuppressWarnings("rawtypes") Pair componentSystemPair = new Pair<>(systemClass, componentClass);
 
                         classes.add(componentSystemPair);
-                        Logger.trace("Component system pair registered: " + componentSystemPair);
+                        // Logger.trace("Component system pair registered: " + componentSystemPair);
                     }
                 }
             }

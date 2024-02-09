@@ -104,18 +104,18 @@ public class ImprovedEntityManager {
 
         private void push(ManagedEntity managedEntity) {
             this.managedEntityDeque.push(managedEntity);
-            Logger.debug("Push ManagedEntity instance [" + managedEntity + "] from pool. Pool size: " + this.managedEntityDeque.size());
+            // Logger.debug("Push ManagedEntity instance [" + managedEntity + "] from pool. Pool size: " + this.managedEntityDeque.size());
         }
 
         private ManagedEntity pop(Entity entity) {
             if (this.managedEntityDeque.isEmpty()) {
                 ManagedEntity managedEntity = new ManagedEntity(entityManager, entity);
-                Logger.debug("Created ManagedEntity instance [" + managedEntity + "] for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
+                // Logger.debug("Created ManagedEntity instance [" + managedEntity + "] for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
                 return managedEntity;
             }
             ManagedEntity managedEntity = this.managedEntityDeque.pop();
             managedEntity.setEntity(entity);
-            Logger.debug("Pop ManagedEntity instance [" + managedEntity + "] from pool for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
+            // Logger.debug("Pop ManagedEntity instance [" + managedEntity + "] from pool for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
             return managedEntity;
         }
 

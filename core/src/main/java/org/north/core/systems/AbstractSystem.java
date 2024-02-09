@@ -3,6 +3,7 @@ package org.north.core.systems;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
 import org.north.core.architecture.TreeEntityManager;
+import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
@@ -16,9 +17,9 @@ import java.util.*;
 public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     // map for storing componentId-to-component pair
-    private Map<Long, E>  componentMap  = new HashMap<>();
+    private final Map<Long, E> componentMap = new HashMap<>();
 
-    protected IPool<Vector3f> vector3IPool = new Pool<>(1000, Vector3f::new);
+    protected IPool<Vector3f> vector3IPool = new Pool<>(1, Vector3f::new);
 
     public ComponentManager componentManager;
     public EntityManager entityManager;
@@ -27,6 +28,10 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     public AbstractSystem() {
         this.componentManager = ComponentManager.getInstance();
         this.entityManager = TreeEntityManager.getInstance();
+    }
+
+    public void setCameraComponent(Camera camera) {
+        componentManager.setCameraComponent(camera);
     }
 
     @Override
@@ -45,6 +50,20 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
+    public E getComponent(long componentId) {
+        E component = componentMap.get(componentId);
+        if (component == null) {
+            throw new ComponentNotFoundException(componentId);
+        }
+        return component;
+    }
+
+    @Override
+    public <C extends Component> C getComponent(Class<C> componentClass) {
+        return component.getEntity().getComponent(componentClass);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void setCurrentComponent(Component component) {
         this.component = (E) component;
@@ -59,21 +78,18 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
             throw new ComponentAlreadyExistsException(component.getClass());
         }
         componentMap.put(component.getId(), (E) component);
-        Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
-    }
-
-    @Override
-    public E getComponent(long componentId) {
-        E component = componentMap.get(componentId);
-        if (component == null) {
-            throw new ComponentNotFoundException(componentId);
-        }
-        return component;
+        // Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
     }
 
     @Override
     public E removeComponent(long componentId) {
         return componentMap.remove(componentId);
     }
+
+    @Override
+    public E removeComponent(Class<E> componentClass) {
+        return null;//componentMap.
+    }
+
 
 }

@@ -16,10 +16,7 @@ import org.north.core.graphics.Window;
 import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
 import org.north.core.physics.Collidable;
-import org.north.core.systems.processes.CollisionHandlingProcess;
-import org.north.core.systems.processes.InitProcess;
-import org.north.core.systems.processes.RenderProcess;
-import org.north.core.systems.processes.UpdateProcess;
+import org.north.core.systems.processes.*;
 import org.north.core.utils.Logger;
 import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
@@ -30,17 +27,19 @@ import java.util.stream.Collectors;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-//@SuppressWarnings("rawtypes")
-public class GameLogicUpdater implements GameLogic {
+public class GameLogicUpdater implements ISystem, Runnable {
 
     private Window window;
     private SceneInitializer sceneInitializer;
     private Scene scene;
     private Graphics graphics;
 
-    private Camera camera;
-
     private boolean isUpdatePaused = false;
+
+    public EntityManager    entityManager;
+    public ComponentManager componentManager;
+    public SystemManager systemManager;
+
 
     public GameLogicUpdater(Window window) {
         this.window = window;
@@ -51,16 +50,13 @@ public class GameLogicUpdater implements GameLogic {
         this.scene = scene;
     }
 
-    public EntityManager    entityManager;
-    public ComponentManager componentManager;
-    public SystemManager systemManager;
-
     @Override
     public void run() {
-        Logger.info("Game loop started");
+        // Logger.info("Game loop started");
 
         final FrameTiming timingContext = new FrameTiming();
 
+        // todo: load scene from file (game data deserialization)
         loadScene(scene);
 
         while (window.shouldNotClose()) {
@@ -68,22 +64,22 @@ public class GameLogicUpdater implements GameLogic {
                 timingContext.updateTiming();
                 final float elapsedTime = timingContext.getElapsedTime();
 
+                applyDeferredCommands();
                 updateInput();
                 init();
                 update(elapsedTime);
                 registerCollisions();
                 handleCollisions();
                 render(window);
-                applyDeferredCommands();
 
                 timingContext.sync();
             } catch (RuntimeException e) {
-                Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
+                // Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
                 break;
             }
         }
 
-        Logger.info("Game loop ended");
+        // Logger.info("Game loop ended");
     }
 
     public void setDataManagers(EntityManager entityManager, ComponentManager componentManager, SystemManager systemManager) {
@@ -95,6 +91,7 @@ public class GameLogicUpdater implements GameLogic {
     private void loadScene(Scene scene) {
         sceneInitializer = new SceneInitializer(scene);
         sceneInitializer.initSceneInUpdater(this);
+//        sceneInitializer.readSceneFromFile("transform_temp");
     }
 
     @Override
@@ -107,24 +104,21 @@ public class GameLogicUpdater implements GameLogic {
 
         for (InitProcess process : systemManager.listOfSystemsForInit) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling init component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling init component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.init();
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
-
-                        if (component instanceof Camera) {
-                            this.camera = (Camera) component;
-                        }
-
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.LATE_INIT_STATE);
                     }
                 } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
@@ -134,18 +128,17 @@ public class GameLogicUpdater implements GameLogic {
         }
     }
 
-    @Override
     public void updateInput() {
         Input.updateInput();
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_P)) {
             isUpdatePaused = !isUpdatePaused;
-            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
+//            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
+            Input.holdenKeys.set(GLFW.GLFW_KEY_P, false);
         }
     }
 
     //todo: performance
-    @Override
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
         if (systemManager.listOfSystemsForCollision.isEmpty()) return;
@@ -196,11 +189,11 @@ public class GameLogicUpdater implements GameLogic {
                                     previousFrameCollision.pair = new CollisionPair(positionA, positionB);
                                     previousFrameCollision.state = Collision.HOLD;
                                     previousFrameCollision.isModified = true;
-                                    Logger.info(String.format(
-                                            "Collision modified! a1: %s\tstate: %s",
-                                            previousFrameCollision,
-                                            previousFrameCollision.state
-                                    ));
+                                    // Logger.info(String.format(
+//                                            "Collision modified! a1: %s\tstate: %s",
+//                                            previousFrameCollision,
+//                                            previousFrameCollision.state
+//                                    ));
                                 }
                                 break;
                             }
@@ -213,11 +206,11 @@ public class GameLogicUpdater implements GameLogic {
                             collision.isModified = true;
                             systemManager.collisions.add(collision);
                             collisionsListSize++;
-                            Logger.info(String.format(
-                                    "Collision added! a1: %s\tstate: %s",
-                                    collision,
-                                    collision.state
-                            ));
+                            // Logger.info(String.format(
+//                                    "Collision added! a1: %s\tstate: %s",
+//                                    collision,
+//                                    collision.state
+//                            ));
                         }
                     } else {
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
@@ -226,11 +219,11 @@ public class GameLogicUpdater implements GameLogic {
                                 if (Collision.EXITED != previousFrameCollision.state) {
                                     previousFrameCollision.isModified = true;
                                     previousFrameCollision.state = Collision.EXITED;
-                                    Logger.info(String.format(
-                                            "Collision modified! a1: %s\tstate: %s",
-                                            previousFrameCollision,
-                                            previousFrameCollision.state
-                                    ));
+                                    // Logger.info(String.format(
+//                                            "Collision modified! a1: %s\tstate: %s",
+//                                            previousFrameCollision,
+//                                            previousFrameCollision.state
+//                                    ));
                                 } else {
                                     previousFrameCollision.isModified = false;
                                 }
@@ -247,11 +240,11 @@ public class GameLogicUpdater implements GameLogic {
             if (Collision.EXITED == collision.state && !collision.isModified) {
                 systemManager.collisions.remove(cindex);
                 collisionsListSize--;
-                Logger.info(String.format(
-                        "Collision removed! a1: %s\tstate: %s",
-                        collision,
-                        collision.state
-                ));
+                // Logger.info(String.format(
+//                        "Collision removed! a1: %s\tstate: %s",
+//                        collision,
+//                        collision.state
+//                ));
             }
         }
 
@@ -272,18 +265,20 @@ public class GameLogicUpdater implements GameLogic {
         for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
             if (isUpdatePaused && !CameraControlsSystem.class.isAssignableFrom(process.getClass())) continue;
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling update component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling update component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.update(deltaTime);
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.READY_TO_INIT_STATE);
                     }
                 }
@@ -299,10 +294,12 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
                     if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.ENTERED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -321,10 +318,12 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.HOLD == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -343,10 +342,12 @@ public class GameLogicUpdater implements GameLogic {
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
-            for (Component component : system.getComponentList()) {
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
                 system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
-                    Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
+                    // Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
                     if (Collision.EXITED == collision.state) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
@@ -365,14 +366,12 @@ public class GameLogicUpdater implements GameLogic {
         collision.A = temp;
     }
 
-    @Override
     public void handleCollisions() {
         handleCollisionEnter();
         handleCollisionHold();
         handleCollisionExit();
     }
 
-    @Override
     public void render(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -381,26 +380,26 @@ public class GameLogicUpdater implements GameLogic {
         for (RenderProcess process : systemManager.listOfSystemsForRender) {
             System<? extends Component> system = (System<? extends Component>) process;
             List<? extends Component> components = system.getComponentList();
-            sortComponentsByDistanceToCamera(components);
+            systemManager.sortComponentsByDistanceToCamera(components);
             if (MeshRendererSystem.class.isAssignableFrom(system.getClass())) {
-                Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
+                // Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
             }
             for (Component component : components) {
                 if (component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
-                    Logger.trace(String.format(
-                            "Handling render component [%s: %s]",
-                            system.getClass().getName(),
-                            component.getEntity().getName())
-                    );
+                    // Logger.trace(String.format(
+//                            "Handling render component [%s: %s]",
+//                            system.getClass().getName(),
+//                            component.getEntity().getName())
+//                    );
                     try {
                         system.setCurrentComponent(component);
                         process.render(graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
-                        Logger.error(e);
+                        // Logger.error(e);
                         component.setState(ComponentState.READY_TO_INIT_STATE);
                     } catch (ShaderUniformNotFoundException e) {
-                        Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
-                                e.getUniformName(), e.getShaderName()));
+                        // Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
+//                                e.getUniformName(), e.getShaderName()));
                         throw e;
                     }
                 }
@@ -417,17 +416,6 @@ public class GameLogicUpdater implements GameLogic {
 
     private void applyDeferredCommands() {
         systemManager.applyDeferredCommands();
-    }
-
-    private void sortComponentsByDistanceToCamera(List<? extends Component> components) {
-        if (Objects.isNull(camera)) return;
-
-        components.sort((o1, o2) -> {
-            Vector3f cameraPosition = camera.getPosition();
-            float o1Distance = o1.getTransform().position.distance(cameraPosition);
-            float o2Distance = o2.getTransform().position.distance(cameraPosition);
-            return (int) ((o2Distance - o1Distance) * 100f);
-        } );
     }
 
 }

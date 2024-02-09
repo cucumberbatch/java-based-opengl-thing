@@ -59,17 +59,18 @@ public abstract class AbstractGLShader implements Shader {
 
     protected abstract void updateUniforms(Graphics graphics, MeshRenderer renderer);
 
-    private int getUniformLocation(String name) throws ShaderUniformNotFoundException {
-        if (uniformLocationCache.containsKey(name)) {
-            return uniformLocationCache.get(name);
+    protected int getUniformLocation(String name) throws ShaderUniformNotFoundException {
+        Integer pointer;
+        if ((pointer = uniformLocationCache.get(name)) != null) {
+            return pointer;
         }
-        int result = GL20.glGetUniformLocation(id, name);
-        if (result == -1) {
+        pointer = GL20.glGetUniformLocation(id, name);
+        if (pointer == -1) {
             throw new ShaderUniformNotFoundException(name, this.getClass().getSimpleName());
         } else {
-            uniformLocationCache.put(name, result);
+            uniformLocationCache.put(name, pointer);
         }
-        return result;
+        return pointer;
     }
 
     protected void setUniform(String name, int value) throws ShaderUniformNotFoundException {
@@ -121,13 +122,71 @@ public abstract class AbstractGLShader implements Shader {
         GL20.glActiveTexture(activeTextureCount);
         GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
         GL20.glUniform1i(getUniformLocation(name), activeTextureCount);
-        Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
-                texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
+        // Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
+//                texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
         activeTextureCount++;
     }
 
     protected void setUniform(String name, Matrix4f matrix4f) throws ShaderUniformNotFoundException {
         GL20.glUniformMatrix4fv(getUniformLocation(name), false, BufferUtils.createFloatBuffer(matrix4f));
+    }
+
+    protected void setUniform(int uniformPointer, int value) throws ShaderUniformNotFoundException {
+        GL20.glUniform1i(uniformPointer, value);
+    }
+
+    protected void setUniform(int uniformPointer, float value) throws ShaderUniformNotFoundException {
+        GL20.glUniform1f(uniformPointer, value);
+    }
+
+    protected void setUniform(int uniformPointer, int x, int y) throws ShaderUniformNotFoundException {
+        GL20.glUniform2i(uniformPointer, x, y);
+    }
+
+    protected void setUniform(int uniformPointer, float x, float y) throws ShaderUniformNotFoundException {
+        GL20.glUniform2f(uniformPointer, x, y);
+    }
+
+    protected void setUniform(int uniformPointer, Vector2f vector2) throws ShaderUniformNotFoundException {
+        GL20.glUniform2f(uniformPointer, vector2.x, vector2.y);
+    }
+
+    protected void setUniform(int uniformPointer, int x, int y, int z) throws ShaderUniformNotFoundException {
+        GL20.glUniform3i(uniformPointer, x, y, z);
+    }
+
+    protected void setUniform(int uniformPointer, float x, float y, float z) throws ShaderUniformNotFoundException {
+        GL20.glUniform3f(uniformPointer, x, y, z);
+    }
+
+    protected void setUniform(int uniformPointer, Vector3f vector3) throws ShaderUniformNotFoundException {
+        GL20.glUniform3f(uniformPointer, vector3.x, vector3.y, vector3.z);
+    }
+
+    protected void setUniform(int uniformPointer, int x, int y, int z, int w) throws ShaderUniformNotFoundException {
+        GL20.glUniform4i(uniformPointer, x, y, z, w);
+    }
+
+    protected void setUniform(int uniformPointer, float x, float y, float z, float w) throws ShaderUniformNotFoundException {
+        GL20.glUniform4f(uniformPointer, x, y, z, w);
+    }
+
+    protected void setUniform(int uniformPointer, Vector4f vector4) throws ShaderUniformNotFoundException {
+        GL20.glUniform4f(uniformPointer, vector4.x, vector4.y, vector4.z, vector4.w);
+    }
+
+    protected void setUniform(int uniformPointer, Texture texture) throws ShaderUniformNotFoundException {
+        texture.bind();
+        GL20.glActiveTexture(activeTextureCount);
+        GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
+        GL20.glUniform1i(uniformPointer, activeTextureCount);
+        // Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
+//                texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
+        activeTextureCount++;
+    }
+
+    protected void setUniform(int uniformPointer, Matrix4f matrix4f) throws ShaderUniformNotFoundException {
+        GL20.glUniformMatrix4fv(uniformPointer, false, BufferUtils.createFloatBuffer(matrix4f));
     }
 
 }

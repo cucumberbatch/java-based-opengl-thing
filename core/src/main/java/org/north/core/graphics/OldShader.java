@@ -39,7 +39,7 @@ public class OldShader {
         }
         int result = GL20.glGetUniformLocation(id, name);
         if (result == -1) {
-            Logger.error("Couldn't find uniform variable '" + name + "'!");
+            // Logger.error("Couldn't find uniform variable '" + name + "'!");
         } else {
             uniformLocationCache.put(name, result);
         }

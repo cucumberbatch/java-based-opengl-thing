@@ -10,7 +10,8 @@ public class TreeEntityManager implements EntityManager {
     private static TreeEntityManager instance;
 
     private Entity root;
-    private long idSequence = 1;
+
+    transient private long idSequence = 1;
 
     private long generateId() {
         return idSequence++;
@@ -24,9 +25,24 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity createEntity() {
+    public Entity createEntity(Entity parent) {
         Entity entity = new Entity();
         entity.id = generateId();
+        if (this.root == null) {
+            this.root = entity;
+        }
+        entity.setParent(parent);
+        return entity;
+    }
+
+    @Override
+    public Entity createEntity(Entity parent, String name) {
+        Entity entity = new Entity(name);
+        entity.id = generateId();
+        if (this.root == null) {
+            this.root = entity;
+        }
+        entity.setParent(parent);
         return entity;
     }
 
@@ -48,44 +64,26 @@ public class TreeEntityManager implements EntityManager {
     //  ..  ..
     @Override
     public void linkWithParent(Entity parent, Entity entity) {
-        if (entity.parent != null) {
-            entity.parent.daughters.remove(entity);
-        }
-        if (entity.daughters.contains(parent)) {
-            entity.daughters.remove(parent);
-            parent.parent = null;
-        }
-        if (entity.parent != parent) {
-            parent.daughters.add(entity);
-        }
-        entity.parent = parent;
     }
 
     @Override
-    public Entity getById(Entity parent, long id) {
-        return getByIdFromParent(this.getRoot(parent), id);
+    public Entity getById(long id) {
+        return getByIdFromParent(this.root, id);
     }
 
     @Override
-    public Entity getByName(Entity parent, String name) {
-        return getByNameFromParent(this.getRoot(parent), name);
+    public Entity getByName(String name) {
+        return getByNameFromParent(this.root, name);
     }
 
     @Override
     public Entity getRoot(Entity currentEntity) {
-        Entity root = currentEntity;
-        while (root.parent != null) {
-            root = root.parent;
-        }
-        return root;
+        return currentEntity.getRoot();
     }
 
     @Override
     public List<Entity> getSiblings(Entity currentEntity) {
-        if (currentEntity.parent != null) {
-            return currentEntity.parent.daughters;
-        }
-        return Collections.singletonList(currentEntity);
+        return Collections.emptyList();
     }
 
     @Override
@@ -98,13 +96,6 @@ public class TreeEntityManager implements EntityManager {
      */
     @Override
     public boolean isParent(Entity current, Entity target) {
-        Entity selected = current;
-        while (selected.parent != null) {
-            if (selected.parent == target) {
-                return true;
-            }
-            selected = selected.parent;
-        }
         return false;
     }
 
@@ -119,8 +110,8 @@ public class TreeEntityManager implements EntityManager {
             return parent;
         }
         Entity target;
-        if (!parent.daughters.isEmpty()) {
-            for (Entity daughter : parent.daughters) {
+        if (!parent.getDaughters().isEmpty()) {
+            for (Entity daughter : parent.getDaughters()) {
                 target = this.getByIdFromParent(daughter, id);
                 if (target != null) return target;
             }
@@ -134,8 +125,8 @@ public class TreeEntityManager implements EntityManager {
             return parent;
         }
         Entity target;
-        if (!parent.daughters.isEmpty()) {
-            for (Entity daughter : parent.daughters) {
+        if (!parent.getDaughters().isEmpty()) {
+            for (Entity daughter : parent.getDaughters()) {
                 target = this.getByNameFromParent(daughter, name);
                 if (target != null) return target;
             }
