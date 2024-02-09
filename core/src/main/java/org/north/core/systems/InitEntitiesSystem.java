@@ -47,7 +47,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
         renderer.mesh = PredefinedMeshes.QUAD;
 
-        entityManager.linkWithParent(camera, referenceBox);
+        referenceBox.setParent(camera);
 
     }
 
@@ -281,7 +281,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                entityManager.linkWithParent(parentEntity, generatedButton);
+                generatedButton.setParent(parentEntity);
             }
         }
 
@@ -340,7 +340,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                entityManager.linkWithParent(parentEntity, generatedButton);
+                generatedButton.setParent(parentEntity);
             }
         }
 

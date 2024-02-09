@@ -31,7 +31,7 @@ public class TreeEntityManager implements EntityManager {
         if (this.root == null) {
             this.root = entity;
         }
-        linkWithParent(parent, entity);
+        entity.setParent(parent);
         return entity;
     }
 
@@ -42,7 +42,7 @@ public class TreeEntityManager implements EntityManager {
         if (this.root == null) {
             this.root = entity;
         }
-        linkWithParent(parent, entity);
+        entity.setParent(parent);
         return entity;
     }
 
@@ -64,20 +64,6 @@ public class TreeEntityManager implements EntityManager {
     //  ..  ..
     @Override
     public void linkWithParent(Entity parent, Entity entity) {
-        if (entity.parent != null) {
-            entity.parent.daughters.remove(entity);
-        }
-        if (entity.daughters.contains(parent)) {
-            entity.daughters.remove(parent);
-            parent.parent = null;
-        }
-        if (entity.parent != parent) {
-            parent.daughters.add(entity);
-        }
-        if (this.root == null) {
-            this.root = parent;
-        }
-        entity.parent = parent;
     }
 
     @Override
@@ -92,19 +78,12 @@ public class TreeEntityManager implements EntityManager {
 
     @Override
     public Entity getRoot(Entity currentEntity) {
-        Entity root = currentEntity;
-        while (root.parent != null) {
-            root = root.parent;
-        }
-        return root;
+        return currentEntity.getRoot();
     }
 
     @Override
     public List<Entity> getSiblings(Entity currentEntity) {
-        if (currentEntity.parent != null) {
-            return currentEntity.parent.daughters;
-        }
-        return Collections.singletonList(currentEntity);
+        return Collections.emptyList();
     }
 
     @Override
@@ -117,13 +96,6 @@ public class TreeEntityManager implements EntityManager {
      */
     @Override
     public boolean isParent(Entity current, Entity target) {
-        Entity selected = current;
-        while (selected.parent != null) {
-            if (selected.parent == target) {
-                return true;
-            }
-            selected = selected.parent;
-        }
         return false;
     }
 
@@ -138,8 +110,8 @@ public class TreeEntityManager implements EntityManager {
             return parent;
         }
         Entity target;
-        if (!parent.daughters.isEmpty()) {
-            for (Entity daughter : parent.daughters) {
+        if (!parent.getDaughters().isEmpty()) {
+            for (Entity daughter : parent.getDaughters()) {
                 target = this.getByIdFromParent(daughter, id);
                 if (target != null) return target;
             }
@@ -153,8 +125,8 @@ public class TreeEntityManager implements EntityManager {
             return parent;
         }
         Entity target;
-        if (!parent.daughters.isEmpty()) {
-            for (Entity daughter : parent.daughters) {
+        if (!parent.getDaughters().isEmpty()) {
+            for (Entity daughter : parent.getDaughters()) {
                 target = this.getByNameFromParent(daughter, name);
                 if (target != null) return target;
             }
