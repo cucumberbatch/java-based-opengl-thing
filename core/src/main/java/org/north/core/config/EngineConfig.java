@@ -1,6 +1,5 @@
 package org.north.core.config;
 
-import org.north.core.systems.GameLogic;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
 import org.north.core.architecture.TreeEntityManager;
@@ -27,6 +26,6 @@ public class EngineConfig {
     public final boolean vsync = false;
     public final String windowTitle = "test_engine";
     public final Window window = new Window(windowTitle, windowWidth, windowHeight, vsync);
-    public final GameLogic gameLogic = new GameLogicUpdater(window);
+    public final GameLogicUpdater gameLogic = new GameLogicUpdater(window);
 
 }

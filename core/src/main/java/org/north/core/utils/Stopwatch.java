@@ -6,7 +6,7 @@ public class Stopwatch {
     private static final LongStack NANO_TIME_STACK = new LongStack();
 
     public static void start() {
-        NANO_TIME_STACK.add(System.nanoTime());
+        NANO_TIME_STACK.push(System.nanoTime());
     }
 
     public static void stop(String messageTemplate) {
@@ -31,7 +31,7 @@ public class Stopwatch {
             this.stack = new long[capacity];
         }
 
-        public void add(long value) {
+        public void push(long value) {
             if (index + 1 >= capacity) {
                 capacity *= 2;
                 stack = Arrays.copyOf(stack, capacity);

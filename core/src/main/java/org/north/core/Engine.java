@@ -7,7 +7,6 @@ import org.north.core.config.EngineConfig;
 import org.north.core.graphics.Window;
 import org.north.core.managment.SystemManager;
 import org.north.core.scene.Scene;
-import org.north.core.systems.GameLogic;
 import org.north.core.systems.GameLogicUpdater;
 import org.north.core.utils.Logger;
 
@@ -21,9 +20,8 @@ import org.north.core.utils.Logger;
 //    - developer console
 //    - editor visual cursor, that can select and manipulate objects in scene
 public class Engine {
-    public static Engine     engine;
-    public final  Window     window;
-    public final GameLogic gameLoop;
+    public final Window window;
+    public final GameLogicUpdater gameLoop;
 
     public EngineConfig config;
 
@@ -36,20 +34,19 @@ public class Engine {
 
         window = new Window("windowTitle", 512, 512, false);
         gameLoop = new GameLogicUpdater(window);
-        engine = this;
 
         setDataManagers(gameLoop);
 
         // Logger.info("Engine initialization succeeded");
     }
 
-    private void setDataManagers(GameLogic gameLogic) {
+    private void setDataManagers(GameLogicUpdater gameLogic) {
         EntityManager entityManager = TreeEntityManager.getInstance();
         SystemManager systemManager = SystemManager.getInstance();
         ComponentManager componentManager = ComponentManager.getInstance();
 
         componentManager.setDataManagers(entityManager, systemManager);
-        ((GameLogicUpdater) gameLoop).setDataManagers(entityManager, componentManager, systemManager);
+        gameLoop.setDataManagers(entityManager, componentManager, systemManager);
     }
 
     public void setScene(Scene scene) {

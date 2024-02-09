@@ -16,10 +16,7 @@ import org.north.core.graphics.Window;
 import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
 import org.north.core.physics.Collidable;
-import org.north.core.systems.processes.CollisionHandlingProcess;
-import org.north.core.systems.processes.InitProcess;
-import org.north.core.systems.processes.RenderProcess;
-import org.north.core.systems.processes.UpdateProcess;
+import org.north.core.systems.processes.*;
 import org.north.core.utils.Logger;
 import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
@@ -30,7 +27,7 @@ import java.util.stream.Collectors;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-public class GameLogicUpdater implements GameLogic {
+public class GameLogicUpdater implements ISystem, Runnable {
 
     private Window window;
     private SceneInitializer sceneInitializer;
@@ -131,7 +128,6 @@ public class GameLogicUpdater implements GameLogic {
         }
     }
 
-    @Override
     public void updateInput() {
         Input.updateInput();
 
@@ -143,7 +139,6 @@ public class GameLogicUpdater implements GameLogic {
     }
 
     //todo: performance
-    @Override
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
         if (systemManager.listOfSystemsForCollision.isEmpty()) return;
@@ -371,14 +366,12 @@ public class GameLogicUpdater implements GameLogic {
         collision.A = temp;
     }
 
-    @Override
     public void handleCollisions() {
         handleCollisionEnter();
         handleCollisionHold();
         handleCollisionExit();
     }
 
-    @Override
     public void render(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

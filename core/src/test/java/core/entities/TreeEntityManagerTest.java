@@ -8,7 +8,7 @@ import org.north.core.entities.Entity;
 public class TreeEntityManagerTest {
 
     @Test
-    void test2EntityHierarchy1() {
+    void testEntityHierarchy1() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
         Entity e1 = entityManager.createEntity(null);
@@ -19,7 +19,7 @@ public class TreeEntityManagerTest {
     }
 
     @Test
-    void test2EntityHierarchy2() {
+    void testEntityHierarchy2() {
         TreeEntityManager entityManager = new TreeEntityManager();
 
         Entity e1 = entityManager.createEntity(null);
