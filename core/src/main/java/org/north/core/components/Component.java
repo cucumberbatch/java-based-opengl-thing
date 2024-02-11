@@ -1,6 +1,6 @@
 package org.north.core.components;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 
 public interface Component {
 

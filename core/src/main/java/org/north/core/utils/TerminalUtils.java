@@ -1,6 +1,6 @@
 package org.north.core.utils;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.joml.Vector3f;
 
 import java.text.DecimalFormat;

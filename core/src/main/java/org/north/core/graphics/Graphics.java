@@ -2,13 +2,14 @@ package org.north.core.graphics;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.north.core.graphics.shader.Shader;
 
 public class Graphics {
     private static Graphics instance;
 
     public Window window;
 
-    public Shader   previouslyRenderedShader = null;
+    public Shader previouslyRenderedShader = null;
     public Texture  previouslyRenderedTexture = null;
 
     public Matrix4f projection = new Matrix4f().identity();

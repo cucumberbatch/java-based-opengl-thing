@@ -51,8 +51,13 @@ public class Transform extends AbstractComponent implements Serializable, Clonea
         this.transformListener = transformListener;
     }
 
-    // note: memory consumption! matrix object creation on each call
-    // deprecated: use method with matrix argument as temporary destination object
+    /**
+     * Returns a local model matrix of this transform
+     *
+     * @apiNote memory consumption! matrix object creation on each call
+     * @deprecated use method with matrix argument as temporary destination object
+     * @return a local model matrix of this transform
+     */
     public Matrix4f getLocalModelMatrix() {
         return getLocalModelMatrix(new Matrix4f());
     }

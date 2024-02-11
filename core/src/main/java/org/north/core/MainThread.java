@@ -1,7 +1,7 @@
 package org.north.core;
 
 import org.north.core.components.InitEntities;
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.scene.Scene;
 
 public class MainThread {

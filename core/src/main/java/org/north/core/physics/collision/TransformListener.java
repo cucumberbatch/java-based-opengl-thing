@@ -1,6 +1,6 @@
 package org.north.core.physics.collision;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.joml.Vector3f;
 
 public interface TransformListener {

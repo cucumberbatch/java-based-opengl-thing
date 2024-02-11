@@ -1,4 +1,4 @@
-package org.north.core.entities;
+package org.north.core.architecture.entity;
 
 import org.north.core.components.Component;
 

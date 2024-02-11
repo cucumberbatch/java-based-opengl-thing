@@ -1,7 +1,6 @@
 package org.north.core.components;
 
-import org.north.core.entities.Entity;
-import org.north.core.utils.Logger;
+import org.north.core.architecture.entity.Entity;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

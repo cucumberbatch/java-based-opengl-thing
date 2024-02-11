@@ -1,8 +1,7 @@
 package org.north.core.physics.collision;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.systems.MeshCollider;
-import org.north.core.utils.Logger;
 import org.joml.Vector3f;
 
 import java.util.concurrent.ExecutorService;

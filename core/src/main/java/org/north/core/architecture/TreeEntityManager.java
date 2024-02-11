@@ -1,9 +1,8 @@
 package org.north.core.architecture;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Component;
 
-import java.util.Collections;
 import java.util.List;
 
 public class TreeEntityManager implements EntityManager {
@@ -17,7 +16,7 @@ public class TreeEntityManager implements EntityManager {
         return idSequence++;
     }
 
-    public static EntityManager getInstance() {
+    public static TreeEntityManager getInstance() {
         if (instance == null) {
             instance = new TreeEntityManager();
         }
@@ -28,10 +27,7 @@ public class TreeEntityManager implements EntityManager {
     public Entity createEntity(Entity parent) {
         Entity entity = new Entity();
         entity.id = generateId();
-        if (this.root == null) {
-            this.root = entity;
-        }
-        entity.setParent(parent);
+        updateEntityHierarchy(entity, parent);
         return entity;
     }
 
@@ -39,31 +35,25 @@ public class TreeEntityManager implements EntityManager {
     public Entity createEntity(Entity parent, String name) {
         Entity entity = new Entity(name);
         entity.id = generateId();
-        if (this.root == null) {
-            this.root = entity;
-        }
-        entity.setParent(parent);
+        updateEntityHierarchy(entity, parent);
         return entity;
     }
 
-    // todo: реализовать проверки на образование неявного цикла при связывании
-    // например, связывание 1 в качестве предка для 4, и 2 в качестве родителя для 4:
-    //       1      и     4
-    //      / \
-    //     2   3
-    //
-    //
-    //       1
-    //      / \
-    //     2   3
-    //    /
-    //   4
-    //    \
-    //     1  <- на данный момент возможна такая привязка,
-    //    / \     которая при вызове метода получения корня образует бесконечный цикл
-    //  ..  ..
+    private void updateEntityHierarchy(Entity entity, Entity parent) {
+        if (this.root == null) {
+            this.root = entity;
+        } else {
+            entity.setParent((parent == null) ? this.root : parent);
+        }
+    }
+
+    public void setRoot(Entity root) {
+        this.root = root;
+    }
+
     @Override
     public void linkWithParent(Entity parent, Entity entity) {
+        entity.setParent(parent);
     }
 
     @Override
@@ -83,7 +73,7 @@ public class TreeEntityManager implements EntityManager {
 
     @Override
     public List<Entity> getSiblings(Entity currentEntity) {
-        return Collections.emptyList();
+        return currentEntity.getSiblings();
     }
 
     @Override
@@ -96,12 +86,12 @@ public class TreeEntityManager implements EntityManager {
      */
     @Override
     public boolean isParent(Entity current, Entity target) {
-        return false;
+        return target.isParentOf(current);
     }
 
     @Override
     public boolean isDaughter(Entity current, Entity target) {
-        return false;
+        return current.isParentOf(target);
     }
 
     @Override
@@ -125,8 +115,9 @@ public class TreeEntityManager implements EntityManager {
             return parent;
         }
         Entity target;
-        if (!parent.getDaughters().isEmpty()) {
-            for (Entity daughter : parent.getDaughters()) {
+        List<Entity> daughters = parent.getDaughters();
+        if (!daughters.isEmpty()) {
+            for (Entity daughter : daughters) {
                 target = this.getByNameFromParent(daughter, name);
                 if (target != null) return target;
             }
