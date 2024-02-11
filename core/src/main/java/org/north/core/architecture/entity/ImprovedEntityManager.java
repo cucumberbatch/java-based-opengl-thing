@@ -1,9 +1,8 @@
 package org.north.core.architecture.entity;
 
 import org.north.core.architecture.ComponentManager;
+import org.north.core.architecture.TreeEntityManager;
 import org.north.core.components.Component;
-import org.north.core.entities.Entity;
-import org.north.core.utils.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,21 +10,23 @@ import java.util.stream.Collectors;
 public class ImprovedEntityManager {
 
     private final ManagedEntityPool managedEntityPool;
+    private final TreeEntityManager entityManager;
     private final ComponentManager componentManager;
 
     private Entity root;
 
-    public ImprovedEntityManager(ComponentManager componentManager) {
+    public ImprovedEntityManager(TreeEntityManager entityManager, ComponentManager componentManager) {
+        this.entityManager = entityManager;
         this.componentManager = componentManager;
         this.managedEntityPool = new ManagedEntityPool(this);
     }
 
     public Entity create() {
-        return new Entity();
+        return entityManager.createEntity(null);
     }
 
     public Entity create(String name) {
-        return new Entity(name);
+        return entityManager.createEntity(null, name);
     }
 
     public ManagedEntity take(Entity entity) {

@@ -7,9 +7,8 @@ import org.north.core.scene.Scene;
 import org.north.core.scene.SceneInitializer;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
-import org.north.core.components.Camera;
 import org.north.core.components.Component;
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
@@ -17,12 +16,10 @@ import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
 import org.north.core.physics.Collidable;
 import org.north.core.systems.processes.*;
-import org.north.core.utils.Logger;
 import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;

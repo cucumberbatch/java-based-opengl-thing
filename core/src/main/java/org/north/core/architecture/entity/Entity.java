@@ -1,5 +1,6 @@
-package org.north.core.entities;
+package org.north.core.architecture.entity;
 
+import org.north.core.architecture.tree.TreeNode;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
 import org.north.core.physics.Collidable;
@@ -23,9 +24,9 @@ public class Entity extends TreeNode<Entity> implements Collidable {
     }
 
     public Entity(String name) {
+        super();
         this.id = -1;
         this.name = name;
-        this.daughters = new LinkedList<>();
         this.components = new HashMap<>();
     }
 

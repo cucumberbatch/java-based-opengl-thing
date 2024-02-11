@@ -1,6 +1,6 @@
 package org.north.core.scene;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.north.core.architecture;
 
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Component;
 
 import java.util.List;

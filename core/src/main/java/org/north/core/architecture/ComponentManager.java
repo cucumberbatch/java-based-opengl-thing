@@ -3,11 +3,10 @@ package org.north.core.architecture;
 import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.managment.SystemManager;
 import org.north.core.systems.command.AddComponentDeferredCommand;
 import org.north.core.systems.command.RemoveComponentDeferredCommand;
-import org.north.core.utils.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

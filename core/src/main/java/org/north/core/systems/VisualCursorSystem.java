@@ -3,15 +3,14 @@ package org.north.core.systems;
 import org.north.core.components.MeshRenderer;
 import org.north.core.components.VisualCursor;
 import org.north.core.components.Transform;
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.graphics.*;
+import org.north.core.graphics.shader.SimpleColorShader;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.shapes.Rectangle;
 import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
-import org.north.core.systems.processes.RenderProcess;
 import org.north.core.systems.processes.UpdateProcess;
-import org.north.core.utils.Logger;
 import org.joml.Vector4f;
 import org.joml.Vector2f;
 
@@ -82,7 +81,6 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         renderer.mesh = new Mesh(visualCursorShape.toVertices(), component.indices, component.uv);
         renderer.shader = new SimpleColorShader();
-//        renderer.shader = OldShader.SIMPLE_COLOR_SHADER;
     }
 
     @Override

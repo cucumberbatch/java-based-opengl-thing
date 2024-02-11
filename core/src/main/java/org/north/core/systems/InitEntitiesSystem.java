@@ -1,11 +1,14 @@
 package org.north.core.systems;
 
+import org.north.core.architecture.TreeEntityManager;
 import org.north.core.graphics.*;
+import org.north.core.graphics.shader.SimpleColorShader;
+import org.north.core.graphics.shader.TextureShader;
 import org.north.core.scene.Scene;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.entity.ImprovedEntityManager;
 import org.north.core.config.EngineConfig;
-import org.north.core.entities.Entity;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.systems.processes.InitProcess;
 import org.joml.Vector3f;
@@ -19,7 +22,8 @@ import java.util.List;
 public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         implements InitProcess {
 
-    private final ImprovedEntityManager em = new ImprovedEntityManager(ComponentManager.getInstance());
+    private final ImprovedEntityManager em =
+            new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
 
     @Override
     public void init() throws RuntimeException {
@@ -36,6 +40,8 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         Entity camera = em.create("camera");
         Entity referenceBox = em.create("referenceBox");
 
+        referenceBox.setParent(camera);
+
         em.take(camera)
                 .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
 
@@ -46,9 +52,6 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.shader = new SimpleColorShader();
         renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
         renderer.mesh = PredefinedMeshes.QUAD;
-
-        referenceBox.setParent(camera);
-
     }
 
     private void initSpaceshipOnScreen() {
@@ -351,29 +354,6 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         MeshCollider collider = (MeshCollider) componentList.get(1);
         VisualCursor visualCursor = (VisualCursor) componentList.get(2);
 
-    }
-
-    private void initScene2() {
-        Entity rendererEntity = new Entity("screen");
-//        Entity cursor         = new Entity("cursor");
-
-        List<Component> componentList = em.take(rendererEntity)
-                .add(Transform.class, Renderer.class);
-
-        Transform transform = (Transform) componentList.get(0);
-        Renderer  renderer  = (Renderer) componentList.get(1);
-
-        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-
-
-//        transform = new Transform();
-//        MeshCollider meshCollider = new MeshCollider();
-//        renderer  = new Renderer();
-//        VisualCursor visualCursor = new VisualCursor();
-
-//        componentManager.addComponent(cursor, transform);
-//        componentManager.addComponent(cursor, renderer);
-//        componentManager.addComponent(cursor, visualCursor);
     }
 
     private void initScene4() {

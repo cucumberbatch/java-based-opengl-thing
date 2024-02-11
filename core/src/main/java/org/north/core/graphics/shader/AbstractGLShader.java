@@ -1,4 +1,4 @@
-package org.north.core.graphics;
+package org.north.core.graphics.shader;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -7,11 +7,11 @@ import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
 import org.north.core.components.MeshRenderer;
 import org.north.core.exception.ShaderUniformNotFoundException;
+import org.north.core.graphics.Graphics;
+import org.north.core.graphics.Texture;
 import org.north.core.utils.BufferUtils;
-import org.north.core.utils.Logger;
 import org.north.core.utils.ResourceManager;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 

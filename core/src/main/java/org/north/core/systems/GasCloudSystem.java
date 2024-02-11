@@ -1,18 +1,19 @@
 package org.north.core.systems;
 
 import org.north.core.architecture.ComponentManager;
+import org.north.core.architecture.TreeEntityManager;
 import org.north.core.architecture.entity.ImprovedEntityManager;
 import org.north.core.components.MeshRenderer;
 import org.north.core.components.GasCloud;
 import org.north.core.components.Transform;
-import org.north.core.graphics.*;
+import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.systems.processes.UpdateProcess;
 
 @ComponentHandler(GasCloud.class)
 public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdateProcess {
 
-    private final ImprovedEntityManager em = new ImprovedEntityManager(ComponentManager.getInstance());
+    private final ImprovedEntityManager em = new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
 
     private float acc = 0;
 

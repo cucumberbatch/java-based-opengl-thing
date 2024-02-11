@@ -30,27 +30,27 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
         this.entityManager = TreeEntityManager.getInstance();
     }
 
-    public void setCameraComponent(Camera camera) {
+    public final void setCameraComponent(Camera camera) {
         componentManager.setCameraComponent(camera);
     }
 
     @Override
-    public Iterator<E> getComponentIterator() {
+    public final Iterator<E> getComponentIterator() {
         return componentMap.values().iterator();
     }
 
     @Override
-    public List<E> getComponentList() {
+    public final List<E> getComponentList() {
         return new ArrayList<>(componentMap.values());
     }
 
     @Override
-    public E getComponent() {
+    public final E getComponent() {
         return component;
     }
 
     @Override
-    public E getComponent(long componentId) {
+    public final E getComponent(long componentId) {
         E component = componentMap.get(componentId);
         if (component == null) {
             throw new ComponentNotFoundException(componentId);
@@ -59,20 +59,20 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public <C extends Component> C getComponent(Class<C> componentClass) {
+    public final <C extends Component> C getComponent(Class<C> componentClass) {
         return component.getEntity().getComponent(componentClass);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setCurrentComponent(Component component) {
+    public final void setCurrentComponent(Component component) {
         this.component = (E) component;
     }
 
 
     @Override
     @SuppressWarnings("unchecked")
-    public void addComponent(Component component)
+    public final void addComponent(Component component)
             throws IllegalArgumentException, ClassCastException, ComponentAlreadyExistsException {
         if (componentMap.containsKey(component.getId())) {
             throw new ComponentAlreadyExistsException(component.getClass());
@@ -82,12 +82,12 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public E removeComponent(long componentId) {
+    public final E removeComponent(long componentId) {
         return componentMap.remove(componentId);
     }
 
     @Override
-    public E removeComponent(Class<E> componentClass) {
+    public final E removeComponent(Class<E> componentClass) {
         return null;//componentMap.
     }
 

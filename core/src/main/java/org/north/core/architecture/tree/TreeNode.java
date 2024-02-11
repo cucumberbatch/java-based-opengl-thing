@@ -1,5 +1,6 @@
-package org.north.core.entities;
+package org.north.core.architecture.tree;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -7,17 +8,21 @@ public abstract class TreeNode<E extends TreeNode<E>> {
     protected E parent;
     protected List<E> daughters;
 
+    protected TreeNode() {
+        this.daughters = new ArrayList<>();
+    }
+
     public E getParent() {
         return parent;
     }
 
     public List<E> getDaughters() {
-        return daughters;
+        return Collections.unmodifiableList(daughters);
     }
 
     public List<E> getSiblings() {
         if (this.parent != null) {
-            return this.parent.getDaughters();
+            return Collections.unmodifiableList(this.parent.daughters);
         }
         return Collections.emptyList();
     }
@@ -32,9 +37,20 @@ public abstract class TreeNode<E extends TreeNode<E>> {
     }
 
     @SuppressWarnings("unchecked")
+    public void addDaughter(E daughter) {
+        daughter.setParent((E) this);
+    }
+
+    @SuppressWarnings("unchecked")
     public void setParent(E parent) {
+        if (parent.isParentOf((E) this)) {
+            return;
+        }
+        if (this.isAncestorOf(parent)) {
+            throw new TreeNodeLoopException("Cannot link entity to target parent if this entity is ancestor of target parent");
+        }
         if (this.parent != null) {
-            this.parent.daughters.remove(this);
+            this.parent.daughters.remove((E) this);
         }
         if (this.daughters.contains(parent)) {
             this.daughters.remove(parent);
@@ -54,7 +70,7 @@ public abstract class TreeNode<E extends TreeNode<E>> {
     }
 
     public boolean isParentOf(E daughter) {
-        return this.daughters.contains(daughter);
+        return daughter.parent == this;
     }
 
     public boolean isAncestorOf(E daughter) {
