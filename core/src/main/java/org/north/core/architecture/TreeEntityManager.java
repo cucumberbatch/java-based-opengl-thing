@@ -3,7 +3,9 @@ package org.north.core.architecture;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class TreeEntityManager implements EntityManager {
     private static TreeEntityManager instance;
@@ -54,6 +56,16 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
+    public Entity getRoot(Entity currentEntity) {
+        return currentEntity.getRoot();
+    }
+
+    @Override
+    public List<Entity> getSiblings(Entity currentEntity) {
+        return currentEntity.getSiblings();
+    }
+
+    @Override
     public void linkWithParent(Entity parent, Entity entity) {
         entity.setParent(parent);
     }
@@ -69,18 +81,9 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity getRoot(Entity currentEntity) {
-        return currentEntity.getRoot();
-    }
-
-    @Override
-    public List<Entity> getSiblings(Entity currentEntity) {
-        return currentEntity.getSiblings();
-    }
-
-    @Override
-    public List<Entity> getByComponents(Class<Component>... componentTypes) {
-        throw new RuntimeException("Not implemented yet!");
+    @SafeVarargs
+    public final List<Entity> getByComponents(Class<? extends Component>... componentTypes) {
+        return getByComponentsFromParent(new ArrayList<>(), root, componentTypes);
     }
 
     /**
@@ -103,7 +106,7 @@ public class TreeEntityManager implements EntityManager {
         }
         Entity target;
         if (!parent.getDaughters().isEmpty()) {
-            for (Entity daughter : parent.getDaughters()) {
+            for (Entity daughter: parent.getDaughters()) {
                 target = this.getByIdFromParent(daughter, id);
                 if (target != null) return target;
             }
@@ -119,12 +122,29 @@ public class TreeEntityManager implements EntityManager {
         Entity target;
         List<Entity> daughters = parent.getDaughters();
         if (!daughters.isEmpty()) {
-            for (Entity daughter : daughters) {
+            for (Entity daughter: daughters) {
                 target = this.getByNameFromParent(daughter, name);
                 if (target != null) return target;
             }
         }
         return null;
+    }
+
+    @Override
+    @SafeVarargs
+    public final List<Entity> getByComponentsFromParent(List<Entity> entities, Entity parent, Class<? extends Component>... componentTypes) {
+        if (parent == null) {
+            return entities;
+        }
+        if (!parent.getDaughters().isEmpty()) {
+            for (Entity daughter: parent.getDaughters()) {
+                this.getByComponentsFromParent(entities, daughter, componentTypes);
+                if (daughter.getComponentClassSet().equals(Set.of(componentTypes))) {
+                    entities.add(parent);
+                }
+            }
+        }
+        return entities;
     }
 
 

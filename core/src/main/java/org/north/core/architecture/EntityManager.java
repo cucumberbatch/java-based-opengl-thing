@@ -16,9 +16,10 @@ public interface EntityManager {
     Entity getByIdFromParent(Entity parent, long id);
     Entity getByName(String name);
     Entity getByNameFromParent(Entity parent, String name);
+    List<Entity> getByComponents(Class<? extends Component>... componentTypes);
+    List<Entity> getByComponentsFromParent(List<Entity> entities, Entity parent, Class<? extends Component>... componentTypes);
     Entity getRoot(Entity currentEntity);
     List<Entity> getSiblings(Entity currentEntity);
-    List<Entity> getByComponents(Class<Component>... componentTypes);
     boolean isParent(Entity current, Entity target);
     boolean isDaughter(Entity current, Entity target);
 }

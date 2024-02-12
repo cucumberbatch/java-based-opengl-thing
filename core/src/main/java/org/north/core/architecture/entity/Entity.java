@@ -65,6 +65,10 @@ public class Entity extends TreeNode<Entity> implements Collidable {
         return (E) components.get(clazz);
     }
 
+    public Set<Class<? extends Component>> getComponentClassSet() {
+        return Collections.unmodifiableSet(components.keySet());
+    }
+
     @SuppressWarnings("unchecked")
     public <E extends Component> E removeComponent(Class<E> clazz) {
         if (Transform.class.isAssignableFrom(clazz)) {
