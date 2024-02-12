@@ -13,7 +13,8 @@ import org.north.core.systems.processes.UpdateProcess;
 @ComponentHandler(GasCloud.class)
 public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdateProcess {
 
-    private final ImprovedEntityManager em = new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
+    private final ImprovedEntityManager em =
+            new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
 
     private float acc = 0;
 
@@ -23,17 +24,19 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
         AtlasTextureAnimationShader shader = (AtlasTextureAnimationShader) meshRenderer.shader;
 
         if (shader.spriteIndex > 4) {
-            em.take(component.entity).get(Transform.class)
-                    .moveTo(0f, -0.225f, 1f);
+//            em.take(component.entity).get(Transform.class)
+//                    .moveTo(0f, -0.225f, 1f);
+
+            em.take(component.entity).remove(MeshRenderer.class);
         }
 
         if (acc > 1) {
             shader.incrementSpriteIndex();
             acc = 0;
         }
-        acc += deltaTime * 8f;
+        acc += deltaTime * 6f;
 
-        em.take(component.entity).get(Transform.class)
-                .moveRel(0f, -deltaTime, 0f);
+//        em.take(component.entity).get(Transform.class)
+//                .moveRel(0f, -deltaTime, 0f);
     }
 }

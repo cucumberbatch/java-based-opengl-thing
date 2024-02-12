@@ -24,15 +24,17 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity createEntity(Entity parent) {
-        Entity entity = new Entity();
-        entity.id = generateId();
-        updateEntityHierarchy(entity, parent);
-        return entity;
+    public Entity create(String name) {
+        return create(null, name);
     }
 
     @Override
-    public Entity createEntity(Entity parent, String name) {
+    public Entity create(Entity parent) {
+        return create(parent, null);
+    }
+
+    @Override
+    public Entity create(Entity parent, String name) {
         Entity entity = new Entity(name);
         entity.id = generateId();
         updateEntityHierarchy(entity, parent);

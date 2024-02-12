@@ -6,8 +6,9 @@ import org.north.core.components.Component;
 import java.util.List;
 
 public interface EntityManager {
-    Entity createEntity(Entity parent);
-    Entity createEntity(Entity parent, String name);
+    Entity create(String name);
+    Entity create(Entity parent);
+    Entity create(Entity parent, String name);
 
     void linkWithParent(Entity parent, Entity entity);
 

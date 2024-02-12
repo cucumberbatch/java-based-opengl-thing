@@ -16,18 +16,22 @@ import java.util.*;
 public class Entity extends TreeNode<Entity> implements Collidable {
     public long id;
     public String name;
-    public Transform transform;
+
     public Map<Class<? extends Component>, Component> components;
+    public Transform transform;
 
     public Entity() {
-        this(UUID.randomUUID().toString());
+        this(null);
     }
 
     public Entity(String name) {
-        super();
         this.id = -1;
-        this.name = name;
+        this.name = Objects.requireNonNullElse(name, generateName());
         this.components = new HashMap<>();
+    }
+
+    private String generateName() {
+        return UUID.randomUUID().toString();
     }
 
     public long getId() {

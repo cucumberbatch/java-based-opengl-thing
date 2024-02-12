@@ -1,6 +1,7 @@
 package org.north.core.components;
 
 import org.joml.Matrix4f;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.physics.collision.TransformListener;
 import org.joml.Vector3f;
 
@@ -66,6 +67,28 @@ public class Transform extends AbstractComponent implements Serializable, Clonea
         return destination.identity()
                 .translate(position.x, position.y, position.z)
                 .scale(scale.x, scale.y, scale.z);
+    }
+
+    public Matrix4f getWorldModelMatrix(Matrix4f destination) {
+        Transform iterableTransform = this;
+        Transform worldTransform = new Transform();
+        do {
+            worldTransform.position.add(iterableTransform.position);
+            worldTransform.rotation.add(iterableTransform.rotation);
+            worldTransform.scale.set(
+                    worldTransform.scale.x * iterableTransform.scale.x,
+                    worldTransform.scale.y * iterableTransform.scale.y,
+                    worldTransform.scale.z * iterableTransform.scale.z
+            );
+            Entity entityParent = iterableTransform.entity.getParent();
+            iterableTransform = (entityParent != null) ? entityParent.getComponent(Transform.class) : null;
+        } while (iterableTransform != null);
+
+        destination.identity()
+                .translate(worldTransform.position.x, worldTransform.position.y, worldTransform.position.z)
+                .scale(worldTransform.scale.x, worldTransform.scale.y, worldTransform.scale.z);
+
+        return destination;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
