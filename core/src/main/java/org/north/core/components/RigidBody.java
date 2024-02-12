@@ -18,6 +18,10 @@ public class RigidBody extends AbstractComponent {
 
     public float frictionFactor         = 0.0f;
 
+    public void addImpulseToMassCenter(Vector3f direction, Vector3f destination) {
+        this.velocity.add(direction.mul(mass, destination.zero()));
+    }
+
     @Override
     public void reset() {
         super.reset();

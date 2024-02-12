@@ -27,20 +27,23 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
     @Override
     public void init() throws RuntimeException {
-        initReferenceScene();
-        initCubeAndCamera();
+        Entity root = em.create("root");
+        Transform rootTransform = em.take(root).add(Transform.class);
+
+//        initSingleButtonScene();
+//        initCubeAndCamera();
+//        initReferenceScene();
 //        initSpaceshipOnScreen();
-//        initSprites();
+        initSprites();
 //        initScene1();
 //        initScene4();
-        initSingleButtonScene();
     }
 
     private void initReferenceScene() {
-        Entity camera = em.create("camera");
         Entity referenceBox = em.create("referenceBox");
+        Entity camera = em.create("camera");
 
-        referenceBox.setParent(camera);
+        camera.setParent(referenceBox);
 
         em.take(camera)
                 .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
@@ -107,7 +110,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         transform = em.take(tvScreen).add(Transform.class);
         renderer = em.take(tvScreen).add(MeshRenderer.class);
 
-        transform.position = new Vector3f(0, 0, 0f);
+        transform.position = new Vector3f(0f, 0f, 0f);
         transform.scale = new Vector3f(2, 2, 2);
         transform.rotation = new Vector3f(1, 1, 1);
 
@@ -156,9 +159,17 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         // Camera
         Entity camera = em.create("camera");
         transform = em.take(camera).add(Transform.class);
-        transform.position = new Vector3f(0f, 0f, -1f);
+        transform.position = new Vector3f(0f, 0f, 0f);
 
         em.take(camera).add(Camera.class);
+
+        Entity movableWorld = em.create("movableWorld");
+        em.take(movableWorld).add(Transform.class, RigidBody.class);
+
+        tvScreen.setParent(camera);
+        background.setParent(tvScreen);
+        player.setParent(tvScreen);
+
     }
 
     private void initCubeAndCamera() {

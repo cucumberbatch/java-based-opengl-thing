@@ -1,5 +1,6 @@
 package org.north.core.systems;
 
+import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Transform;
 import org.north.core.reflection.ComponentHandler;
 import org.joml.Vector3f;
@@ -7,14 +8,17 @@ import org.joml.Vector3f;
 @ComponentHandler(Transform.class)
 public class TransformSystem extends AbstractSystem<Transform> {
 
-    public static Vector3f getWorldPosition(Transform transform) {
+    public static Vector3f getWorldPosition(Transform transform, Vector3f destination) {
         Transform iterableTransform = transform;
-        Vector3f worldPosition = new Vector3f();
+        destination.zero();
+
         do {
-            worldPosition.add(iterableTransform.position);
-            iterableTransform = iterableTransform.parent;
-        } while (iterableTransform.parent != null);
-        return worldPosition;
+            destination.add(iterableTransform.position);
+            Entity entityParent = iterableTransform.entity.getParent();
+            iterableTransform = (entityParent != null) ? entityParent.getComponent(Transform.class) : null;
+        } while (iterableTransform != null);
+
+        return destination;
     }
 
     public static Vector3f getWorldRotation(Transform transform) {

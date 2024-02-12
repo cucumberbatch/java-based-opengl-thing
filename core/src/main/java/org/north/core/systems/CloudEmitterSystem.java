@@ -1,52 +1,96 @@
 package org.north.core.systems;
 
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.TreeEntityManager;
 import org.north.core.architecture.entity.ImprovedEntityManager;
-import org.north.core.components.CloudEmitter;
-import org.north.core.components.GasCloud;
-import org.north.core.components.MeshRenderer;
-import org.north.core.components.Transform;
+import org.north.core.components.*;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 
 @ComponentHandler(CloudEmitter.class)
-public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements UpdateProcess {
+public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess, UpdateProcess {
 
-    private final ImprovedEntityManager em = new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
-    private final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 1f);
-    private final Vector3f emittingScale = new Vector3f(0.13f, 0.13f, 0.13f);
+    private final ImprovedEntityManager em =
+            new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
+
+    private final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
+    private final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
 
     private float acc = 0;
     private long gasCloudEntityNumber = 0;
     private int gasCloudCount = 0;
 
+    private Entity world;
+    private Transform worldTransform;
+    private RigidBody rigidBody;
+
+    private Vector3f temp = new Vector3f();
+
+    @Override
+    public void init() {
+        world = entityManager.getByName("movableWorld");
+        worldTransform = world.transform;
+
+        rigidBody = world.getComponent(RigidBody.class);
+        rigidBody.isGravitational = false;
+    }
 
     @Override
     public void update(final float deltaTime) {
-        if (gasCloudCount > 6) return;
+        boolean moving = false;
 
-        if (acc > 1) {
-            Entity gasCloudEntity = em.create("gas_cloud_" + gasCloudEntityNumber++);
-
-            Transform transform = em.take(gasCloudEntity).add(Transform.class);
-            MeshRenderer renderer = em.take(gasCloudEntity).add(MeshRenderer.class);
-            GasCloud gasCloud = em.take(gasCloudEntity).add(GasCloud.class);
-
-            transform.position.set(emittingPosition);
-            transform.scale.set(emittingScale);
-
-            renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
-            renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
-
-            gasCloudCount++;
-            acc = 0;
+        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
+            rigidBody.addImpulseToMassCenter(new Vector3f(0f, -deltaTime * 2, 0f), temp);
+            moving = true;
+//            worldTransform.moveRel(0f, -deltaTime / 2, 0f);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
+            rigidBody.addImpulseToMassCenter(new Vector3f(0f, deltaTime * 2, 0f), temp);
+            moving = true;
+//            worldTransform.moveRel(0f, deltaTime / 2, 0f);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
+            rigidBody.addImpulseToMassCenter(new Vector3f(-deltaTime * 2, 0f, 0f), temp);
+            moving = true;
+//            worldTransform.moveRel(-deltaTime / 2, 0f, 0f);
+        }
+        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
+            rigidBody.addImpulseToMassCenter(new Vector3f(deltaTime * 2, 0f, 0f), temp);
+            moving = true;
+//            worldTransform.moveRel(deltaTime / 2, 0f, 0f);
         }
 
-        acc += deltaTime * 3;
+//        if (gasCloudCount > 6) return;
+
+        if (moving) {
+            if (acc > 1) {
+                Entity gasCloudEntity = em.create("gas_cloud_" + gasCloudEntityNumber++);
+
+                em.take(gasCloudEntity)
+                        .add(Transform.class, MeshRenderer.class, GasCloud.class);
+
+                gasCloudEntity.setParent(world);
+
+                Transform transform = gasCloudEntity.getComponent(Transform.class);
+                MeshRenderer renderer = gasCloudEntity.getComponent(MeshRenderer.class);
+
+                transform.position.set(emittingPosition.sub(worldTransform.position, new Vector3f()));
+                transform.scale.set(emittingScale);
+
+                renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
+                renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+
+                gasCloudCount++;
+                acc = 0;
+            }
+        }
+
+        acc += deltaTime * 6;
     }
 }

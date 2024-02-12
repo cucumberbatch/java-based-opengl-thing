@@ -362,8 +362,8 @@ public class EntityTreeNodeHierarchyTest {
 
     @Test
     void testEntityManagerEntityCreation1() {
-        Entity e1 = em.createEntity(null, "e1");
-        Entity e2 = em.createEntity(null, "e2");
+        Entity e1 = em.create(null, "e1");
+        Entity e2 = em.create(null, "e2");
 
         Assertions.assertEquals(e1, e2.getParent());
         Assertions.assertNotEquals(e2, e1.getParent());
@@ -373,8 +373,8 @@ public class EntityTreeNodeHierarchyTest {
 
     @Test
     void testEntityManagerWithSetParent1() {
-        Entity e1 = em.createEntity(null, "e1");
-        Entity e2 = em.createEntity(null, "e2");
+        Entity e1 = em.create(null, "e1");
+        Entity e2 = em.create(null, "e2");
 
         e2.setParent(e1);
 
@@ -386,13 +386,13 @@ public class EntityTreeNodeHierarchyTest {
 
     @Test
     void testEntityManagerWithSetParent2() {
-        Entity e1 = em.createEntity(null, "e1");
-        Entity e2 = em.createEntity(null, "e2");
+        Entity e1 = em.create(null, "e1");
+        Entity e2 = em.create(null, "e2");
 
         e2.setParent(e1);
 
-        Entity e3 = em.createEntity(null, "e3");
-        Entity e4 = em.createEntity(null, "e4");
+        Entity e3 = em.create(null, "e3");
+        Entity e4 = em.create(null, "e4");
 
         Assertions.assertNull(e1.getParent());
         Assertions.assertTrue(e1.isParentOf(e2));

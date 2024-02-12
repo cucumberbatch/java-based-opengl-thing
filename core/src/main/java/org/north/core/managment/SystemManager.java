@@ -8,6 +8,7 @@ import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.reflection.initializer.ClassInitializer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.systems.System;
+import org.north.core.systems.TransformSystem;
 import org.north.core.systems.command.AddComponentDeferredCommand;
 import org.north.core.systems.command.DeferredCommand;
 import org.north.core.systems.command.RemoveComponentDeferredCommand;
@@ -15,7 +16,6 @@ import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
 import org.north.core.systems.processes.UpdateProcess;
-import org.north.core.utils.Logger;
 import org.north.core.systems.Collision;
 
 import java.util.*;
@@ -150,7 +150,8 @@ public class SystemManager {
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
 
         private Camera camera;
-        private final Vector3f temp = new Vector3f();
+        private final Vector3f temp1 = new Vector3f();
+        private final Vector3f temp2 = new Vector3f();
 
         public void setCamera(Camera camera) {
             this.camera = camera;
@@ -162,9 +163,9 @@ public class SystemManager {
 
         @Override
         public int compare(Component o1, Component o2) {
-            Vector3f cameraPosition = camera.getPosition(temp);
-            float o1Distance = o1.getTransform().position.distance(cameraPosition);
-            float o2Distance = o2.getTransform().position.distance(cameraPosition);
+            Vector3f cameraPosition = TransformSystem.getWorldPosition(camera.getTransform(), temp1);
+            float o1Distance = TransformSystem.getWorldPosition(o1.getTransform(), temp2).distance(cameraPosition);
+            float o2Distance = TransformSystem.getWorldPosition(o2.getTransform(), temp2).distance(cameraPosition);
             return (int) ((o2Distance - o1Distance) * 100f);
         }
     }
@@ -183,7 +184,8 @@ public class SystemManager {
                 }
                 case REMOVE_COMPONENT: {
                     RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
-                    // not implemented !
+                    Component component = removeComponentCommand.component;
+                    systemMap.get(component.getClass()).removeComponent(component.getId());
                     break;
                 }
                 default: break;

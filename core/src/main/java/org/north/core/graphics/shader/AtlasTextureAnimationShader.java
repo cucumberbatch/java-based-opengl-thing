@@ -35,6 +35,6 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
         setUniform("u_color", renderer.color);
         setUniform("u_projection", graphics.projection);
         setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getLocalModelMatrix(temp));
+        setUniform("u_model", renderer.getTransform().getWorldModelMatrix(temp));
     }
 }

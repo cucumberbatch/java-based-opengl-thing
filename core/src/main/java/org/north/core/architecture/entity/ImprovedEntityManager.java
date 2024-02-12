@@ -22,11 +22,11 @@ public class ImprovedEntityManager {
     }
 
     public Entity create() {
-        return entityManager.createEntity(null);
+        return entityManager.create((Entity) null);
     }
 
     public Entity create(String name) {
-        return entityManager.createEntity(null, name);
+        return entityManager.create(name);
     }
 
     public ManagedEntity take(Entity entity) {
