@@ -52,13 +52,7 @@ public abstract class TreeNode<E extends TreeNode<E>> {
         if (this.parent != null) {
             this.parent.daughters.remove((E) this);
         }
-        if (this.daughters.contains(parent)) {
-            this.daughters.remove(parent);
-            parent.parent = null;
-        }
-        if (this.parent != parent) {
-            parent.daughters.add((E) this);
-        }
+        parent.daughters.add((E) this);
         this.parent = parent;
     }
 
