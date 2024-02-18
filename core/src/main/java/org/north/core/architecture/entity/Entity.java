@@ -19,7 +19,7 @@ import java.util.*;
  * @author cucumberbatch
  */
 public class Entity extends TreeNode<Entity> implements Collidable, Serializable<ObjectOutputStream, ObjectInputStream> {
-    public long id;
+    public UUID id;
     public String name;
 
     public Map<Class<? extends Component>, Component> components;
@@ -30,20 +30,17 @@ public class Entity extends TreeNode<Entity> implements Collidable, Serializable
     }
 
     public Entity(String name) {
-        this.id = -1;
-        this.name = Objects.requireNonNullElse(name, generateName());
+        UUID id = UUID.randomUUID();
+        this.id = id;
+        this.name = Objects.requireNonNullElse(name, id.toString());
         this.components = new HashMap<>();
     }
 
-    private String generateName() {
-        return UUID.randomUUID().toString();
-    }
-
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

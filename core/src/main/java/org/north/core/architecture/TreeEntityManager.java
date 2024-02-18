@@ -6,9 +6,9 @@ import org.north.core.components.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class TreeEntityManager implements EntityManager {
-    private long idSequence = 1;
     private Entity root;
 
     @Override
@@ -29,13 +29,8 @@ public class TreeEntityManager implements EntityManager {
     @Override
     public Entity create(Entity parent, String name) {
         Entity entity = new Entity(name);
-        entity.id = generateId();
         updateEntityHierarchy(entity, parent);
         return entity;
-    }
-
-    private long generateId() {
-        return idSequence++;
     }
 
     private void updateEntityHierarchy(Entity entity, Entity parent) {
@@ -47,7 +42,7 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity getById(long id) {
+    public Entity getById(UUID id) {
         return getByIdFromParent(this.root, id);
     }
 
@@ -63,8 +58,8 @@ public class TreeEntityManager implements EntityManager {
     }
 
     @Override
-    public Entity getByIdFromParent(Entity parent, long id) {
-        if (parent.id == id) {
+    public Entity getByIdFromParent(Entity parent, UUID id) {
+        if (id.equals(parent.id)) {
             return parent;
         }
         Entity target;
@@ -79,7 +74,7 @@ public class TreeEntityManager implements EntityManager {
 
     @Override
     public Entity getByNameFromParent(Entity parent, String name) {
-        if (parent.name.equals(name)) {
+        if (name.equals(parent.name)) {
             return parent;
         }
         Entity target;

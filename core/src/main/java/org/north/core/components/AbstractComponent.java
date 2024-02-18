@@ -5,10 +5,11 @@ import org.north.core.architecture.entity.Entity;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.UUID;
 
 public abstract class AbstractComponent implements Component, Cloneable {
 
-    public long id;
+    public UUID id;
 
     /* Entity which this component is belongs to */
     public transient Entity entity;
@@ -29,12 +30,12 @@ public abstract class AbstractComponent implements Component, Cloneable {
      Getters and setters implementation by an abstract component class
      */
     @Override
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

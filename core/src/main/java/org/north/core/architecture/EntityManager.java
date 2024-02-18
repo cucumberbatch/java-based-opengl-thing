@@ -4,6 +4,7 @@ import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface EntityManager {
     Entity create();
@@ -11,8 +12,8 @@ public interface EntityManager {
     Entity create(Entity parent);
     Entity create(Entity parent, String name);
 
-    Entity getById(long id);
-    Entity getByIdFromParent(Entity parent, long id);
+    Entity getById(UUID id);
+    Entity getByIdFromParent(Entity parent, UUID id);
     Entity getByName(String name);
     Entity getByNameFromParent(Entity parent, String name);
     List<Entity> getByComponents(Class<? extends Component>... componentTypes);

@@ -16,7 +16,7 @@ import java.util.*;
 public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     // map for storing componentId-to-component pair
-    private final Map<Long, E> componentMap = new HashMap<>();
+    private final Map<UUID, E> componentMap = new HashMap<>();
 
     protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
@@ -50,7 +50,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public final E getComponent(long componentId) {
+    public final E getComponent(UUID componentId) {
         E component = componentMap.get(componentId);
         if (component == null) {
             throw new ComponentNotFoundException(componentId);
@@ -82,7 +82,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public final E removeComponent(long componentId) {
+    public final E removeComponent(UUID componentId) {
         return componentMap.remove(componentId);
     }
 

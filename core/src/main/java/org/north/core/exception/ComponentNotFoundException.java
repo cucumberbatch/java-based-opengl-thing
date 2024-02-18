@@ -2,9 +2,11 @@ package org.north.core.exception;
 
 import org.north.core.components.Component;
 
+import java.util.UUID;
+
 public class ComponentNotFoundException extends RuntimeException {
-    public ComponentNotFoundException(long id) {
-        super(String.format("Component with id=%s not found!", id));
+    public ComponentNotFoundException(UUID id) {
+        super(String.format("Component with id=%s not found!", id.toString()));
     }
 
     public ComponentNotFoundException(Class<? extends Component> clazz) {

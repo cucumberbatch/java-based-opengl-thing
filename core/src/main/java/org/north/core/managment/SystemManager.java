@@ -123,7 +123,7 @@ public class SystemManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends Component> E getComponent(long componentId) {
+    public <E extends Component> E getComponent(UUID componentId) {
         int systemCount = systemList.size();
         for (int i = 0; i < systemCount; i++) {
 //        for (System<? extends Component> system: systemMap.values()) {
@@ -131,7 +131,7 @@ public class SystemManager {
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
-                if (component.getId() == componentId) {
+                if (component.getId().equals(componentId)) {
                     return (E) component;
                 }
             }

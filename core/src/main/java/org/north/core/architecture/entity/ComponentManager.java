@@ -17,8 +17,6 @@ public class ComponentManager {
     private final ManagedEntityPool managedEntityPool;
     private final SystemManager systemManager;
 
-    private int idCounter = 0;
-
     @Inject
     public ComponentManager(ApplicationContext context) {
         this.systemManager = context.getSystemManager();
@@ -41,8 +39,8 @@ public class ComponentManager {
         return this.managedEntityPool.pop(entity);
     }
 
-    private int nextId() {
-        return idCounter++;
+    private UUID nextId() {
+        return UUID.randomUUID();
     }
 
     public final <E extends Component> E add(Entity entity, Class<E> componentClass) {
