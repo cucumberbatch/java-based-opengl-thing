@@ -4,7 +4,11 @@ import org.joml.Vector3f;
 import org.north.core.components.Camera;
 import org.north.core.components.Component;
 import org.north.core.components.ComponentState;
+import org.north.core.config.EngineConfig;
+import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.reflection.di.Inject;
+import org.north.core.reflection.di.registerer.DependencyRegisterer;
 import org.north.core.reflection.initializer.ClassInitializer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.systems.System;
@@ -16,21 +20,19 @@ import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
 import org.north.core.systems.processes.UpdateProcess;
-import org.north.core.systems.Collision;
+import org.north.core.physics.collision.Collision;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager {
-    private static SystemManager instance;
+    private final Map<Class<? extends Component>, System<? extends Component>> systemMap;
+    private final List<System<? extends Component>> systemList;
 
-    private final Map<Class<? extends Component>, System<? extends Component>> systemMap  = new HashMap<>();
-    private final List<System<? extends Component>> systemList = new ArrayList<>();
-
-    private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations = new HashMap<>();
-    private final List<DeferredCommand> deferredCommands = new LinkedList<>();
-    private final ComponentHandlerScanner scanner = new ComponentHandlerScanner();
-    private final ClassInitializer initializer = new ClassInitializer();
+    private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
+    private final List<DeferredCommand> deferredCommands;
+    private final ComponentHandlerScanner scanner;
+    private final DependencyRegisterer dependencyRegisterer;
 
     private Camera camera;
 
@@ -43,15 +45,16 @@ public class SystemManager {
     public final List<Collision> collisions = new ArrayList<>();
 
 
-    private SystemManager() {
-        loadComponentSystemsFromPackage("org/north/core/systems");
-    }
+    @Inject
+    public SystemManager(ApplicationContext context) {
+        dependencyRegisterer = context.getDependencyRegisterer();
+        scanner = new ComponentHandlerScanner();
+        deferredCommands = new LinkedList<>();
+        componentToSystemAssociations = new HashMap<>();
+        systemList = new ArrayList<>();
+        systemMap = new HashMap<>();
 
-    public static SystemManager getInstance() {
-        if (instance == null) {
-            instance = new SystemManager();
-        }
-        return instance;
+        loadComponentSystemsFromPackage("org/north/core/systems");
     }
 
     private void loadComponentSystemsFromPackage(String packagePath) {
@@ -76,7 +79,7 @@ public class SystemManager {
     }
 
     private void attachToSystemLists(System<? extends Component> system) {
-        Class<? extends System> clazz = system.getClass();
+        Class<?> clazz = system.getClass();
         if (InitProcess.class.isAssignableFrom(clazz))               this.listOfSystemsForInit.add((InitProcess) system);
         if (UpdateProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForUpdate.add((UpdateProcess) system);
         if (RenderProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForRender.add((RenderProcess) system);
@@ -98,7 +101,9 @@ public class SystemManager {
         // initialize system if it is not
         if (systemMap.get(componentClass) == null) {
             try {
-                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
+//                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
+                Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
+                System<?> system = dependencyRegisterer.registerDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
                 attachToSystemLists(system);

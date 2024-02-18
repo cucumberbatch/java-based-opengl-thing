@@ -2,14 +2,21 @@ package org.north.core.systems;
 
 import org.north.core.components.RigidBody2d;
 import org.north.core.components.Transform;
+import org.north.core.context.ApplicationContext;
 import org.north.core.physics.Physics;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.UpdateProcess;
 import org.joml.Vector2f;
 
 @ComponentHandler(RigidBody2d.class)
 public class RigidBody2dSystem extends AbstractSystem<RigidBody2d>
         implements UpdateProcess {
+
+    @Inject
+    public RigidBody2dSystem(ApplicationContext context) {
+        super(context);
+    }
 
     @Override
     public void update(float deltaTime) {

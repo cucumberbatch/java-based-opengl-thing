@@ -1,8 +1,11 @@
 package org.north.core.systems;
 
+import org.north.core.components.MeshCollider;
 import org.north.core.components.Transform;
+import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.MeshTransformListener;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 import org.joml.Vector2f;
@@ -13,6 +16,11 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     private static final int xOffsetLeft = 10;
     private static final int yOffsetUp = 10;
+
+    @Inject
+    public MeshColliderSystem(ApplicationContext context) {
+        super(context);
+    }
 
     @Override
     public void init() {

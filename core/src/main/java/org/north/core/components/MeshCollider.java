@@ -1,4 +1,4 @@
-package org.north.core.systems;
+package org.north.core.components;
 
 import org.north.core.components.AbstractComponent;
 import org.north.core.shapes.Rectangle;

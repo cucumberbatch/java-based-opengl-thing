@@ -4,10 +4,13 @@ import org.lwjgl.opengl.GL30;
 import org.north.core.components.Button;
 import org.north.core.components.VisualCursor;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.VertexArray;
+import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
@@ -25,6 +28,10 @@ public class ButtonSystem extends AbstractSystem<Button>
     public static final int IDLE_TO_HOVER_BUTTON_STATE = 2;
     public static final int HOVER_TO_IDLE_BUTTON_STATE = 3;
 
+    @Inject
+    public ButtonSystem(ApplicationContext context) {
+        super(context);
+    }
 
     @Override
     public void init() throws RuntimeException {

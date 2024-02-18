@@ -1,12 +1,16 @@
 package org.north.core.systems;
 
+import org.north.core.components.MeshCollider;
 import org.north.core.components.MeshRenderer;
 import org.north.core.components.VisualCursor;
 import org.north.core.components.Transform;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.*;
 import org.north.core.graphics.shader.SimpleColorShader;
+import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.shapes.Rectangle;
 import org.north.core.systems.processes.CollisionHandlingProcess;
 import org.north.core.systems.processes.InitProcess;
@@ -54,6 +58,11 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     private Rectangle imaginaryCursorShape = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
 
     private Entity selectedEntity = null;
+
+    @Inject
+    public VisualCursorSystem(ApplicationContext context) {
+        super(context);
+    }
 
     @Override
     public void init() throws RuntimeException {

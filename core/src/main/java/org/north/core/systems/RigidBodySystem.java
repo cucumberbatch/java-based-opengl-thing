@@ -2,8 +2,10 @@ package org.north.core.systems;
 
 import org.north.core.components.RigidBody;
 import org.north.core.components.Transform;
+import org.north.core.context.ApplicationContext;
 import org.north.core.physics.Physics;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.UpdateProcess;
 import org.joml.Vector3f;
 
@@ -11,13 +13,18 @@ import org.joml.Vector3f;
 public class RigidBodySystem extends AbstractSystem<RigidBody>
         implements UpdateProcess {
 
+    @Inject
+    public RigidBodySystem(ApplicationContext context) {
+        super(context);
+    }
+
     @Override
     public void update(float deltaTime) {
         RigidBody rigidBody = this.getComponent();
         Transform transform = rigidBody.getTransform();
 
         /* Catch the free vector from pool for calculations */
-        Vector3f temp = vector3IPool.get();
+        Vector3f temp = vector3fPool.get();
 
         /* Update all kinds of movement for transform and rigid body components */
         updatePosition(transform, rigidBody, deltaTime, temp);
@@ -31,7 +38,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
         }
 
         /* Take it back */
-        vector3IPool.put(temp);
+        vector3fPool.put(temp);
     }
 
     private void updateGravitationalAcceleration(RigidBody rigidBody, float deltaTime, Vector3f temp) {
@@ -55,9 +62,9 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
     }
 
     public void addImpulseToMassCenter(Vector3f direction, float mass) {
-        Vector3f temp = vector3IPool.get();
+        Vector3f temp = vector3fPool.get();
         component.velocity.add(direction.mul(mass, temp));
-        vector3IPool.put(temp);
+        vector3fPool.put(temp);
     }
 
 }

@@ -1,6 +1,6 @@
 package org.north.core.systems.processes;
 
-import org.north.core.systems.Collision;
+import org.north.core.physics.collision.Collision;
 
 public interface CollisionHandlingProcess {
 

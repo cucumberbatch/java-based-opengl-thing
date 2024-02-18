@@ -3,6 +3,7 @@ package org.north.core.graphics;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.north.core.graphics.shader.Shader;
+import org.north.core.reflection.di.Inject;
 
 public class Graphics {
     private static Graphics instance;
@@ -23,8 +24,10 @@ public class Graphics {
         return instance;
     }
 
-    private Graphics(Window window) {
+    @Inject
+    public Graphics(Window window) {
         this.window = window;
+        Graphics.instance = this;
     }
 
     public void enableShader(Shader shader) {

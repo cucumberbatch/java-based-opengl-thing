@@ -1,6 +1,4 @@
-package org.north.core.systems;
-
-import org.north.core.physics.Collidable;
+package org.north.core.physics.collision;
 
 public class Collision {
     public Collidable A;

@@ -4,7 +4,9 @@ import org.lwjgl.glfw.GLFW;
 import org.north.core.components.PlayerControls;
 import org.north.core.components.RigidBody;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 
@@ -17,10 +19,15 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
     private Entity physicalBody;
     private boolean gravitationalState = false;
 
+    @Inject
+    public PlayerControlsSystem(ApplicationContext context) {
+        super(context);
+    }
+
 
     @Override
     public void init() {
-        physicalBody = entityManager.getByName("referenceBox");
+        physicalBody = em.getByName("referenceBox");
     }
 
     @Override

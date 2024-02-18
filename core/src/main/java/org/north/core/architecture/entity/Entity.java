@@ -3,7 +3,7 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.TreeNode;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
-import org.north.core.physics.Collidable;
+import org.north.core.physics.collision.Collidable;
 
 import java.util.*;
 

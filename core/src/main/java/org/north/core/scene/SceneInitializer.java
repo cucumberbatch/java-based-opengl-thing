@@ -1,8 +1,8 @@
 package org.north.core.scene;
 
+import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.Transform;
 import org.north.core.systems.GameLogicUpdater;
-import org.north.core.utils.Logger;
 
 import java.io.*;
 
@@ -13,9 +13,9 @@ public class SceneInitializer {
         this.scene = scene;
     }
 
-    public void initSceneInUpdater(GameLogicUpdater updater) {
+    public void initSceneInUpdater(ComponentManager cm) {
         scene.entities.forEach(entity -> entity.components.values()
-                .forEach(component -> updater.componentManager.addComponent(entity, component.getClass())));
+                .forEach(component -> cm.add(entity, component.getClass())));
     }
 
     public Transform readSceneFromFile(String filePath) {

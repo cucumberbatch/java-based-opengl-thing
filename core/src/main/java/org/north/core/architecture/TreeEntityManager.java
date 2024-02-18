@@ -8,21 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 public class TreeEntityManager implements EntityManager {
-    private static TreeEntityManager instance;
-
+    private long idSequence = 1;
     private Entity root;
 
-    transient private long idSequence = 1;
-
-    private long generateId() {
-        return idSequence++;
-    }
-
-    public static TreeEntityManager getInstance() {
-        if (instance == null) {
-            instance = new TreeEntityManager();
-        }
-        return instance;
+    @Override
+    public Entity create() {
+        return create(null, null);
     }
 
     @Override
@@ -43,31 +34,16 @@ public class TreeEntityManager implements EntityManager {
         return entity;
     }
 
+    private long generateId() {
+        return idSequence++;
+    }
+
     private void updateEntityHierarchy(Entity entity, Entity parent) {
         if (this.root == null) {
             this.root = entity;
         } else {
             entity.setParent((parent == null) ? this.root : parent);
         }
-    }
-
-    public void setRoot(Entity root) {
-        this.root = root;
-    }
-
-    @Override
-    public Entity getRoot(Entity currentEntity) {
-        return currentEntity.getRoot();
-    }
-
-    @Override
-    public List<Entity> getSiblings(Entity currentEntity) {
-        return currentEntity.getSiblings();
-    }
-
-    @Override
-    public void linkWithParent(Entity parent, Entity entity) {
-        entity.setParent(parent);
     }
 
     @Override
@@ -84,19 +60,6 @@ public class TreeEntityManager implements EntityManager {
     @SafeVarargs
     public final List<Entity> getByComponents(Class<? extends Component>... componentTypes) {
         return getByComponentsFromParent(new ArrayList<>(), root, componentTypes);
-    }
-
-    /**
-     * Checks if target entity is a parent for a current entity
-     */
-    @Override
-    public boolean isParent(Entity current, Entity target) {
-        return target.isParentOf(current);
-    }
-
-    @Override
-    public boolean isDaughter(Entity current, Entity target) {
-        return current.isParentOf(target);
     }
 
     @Override

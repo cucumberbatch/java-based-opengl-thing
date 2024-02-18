@@ -2,11 +2,18 @@ package org.north.core.systems;
 
 import org.north.core.architecture.entity.Entity;
 import org.north.core.components.Transform;
+import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;
 import org.joml.Vector3f;
+import org.north.core.reflection.di.Inject;
 
 @ComponentHandler(Transform.class)
 public class TransformSystem extends AbstractSystem<Transform> {
+
+    @Inject
+    public TransformSystem(ApplicationContext context) {
+        super(context);
+    }
 
     public static Vector3f getWorldPosition(Transform transform, Vector3f destination) {
         Transform iterableTransform = transform;

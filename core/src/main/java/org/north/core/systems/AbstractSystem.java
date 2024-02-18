@@ -1,15 +1,14 @@
 package org.north.core.systems;
 
-import org.north.core.architecture.ComponentManager;
 import org.north.core.architecture.EntityManager;
-import org.north.core.architecture.TreeEntityManager;
+import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.Camera;
 import org.north.core.components.Component;
+import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.managment.memory.Vector3fPool;
 import org.north.core.managment.memory.Pool;
-import org.north.core.managment.memory.IPool;
-import org.north.core.utils.Logger;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -19,19 +18,20 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     // map for storing componentId-to-component pair
     private final Map<Long, E> componentMap = new HashMap<>();
 
-    protected IPool<Vector3f> vector3IPool = new Pool<>(1, Vector3f::new);
+    protected Pool<Vector3f> vector3fPool = new Vector3fPool(1);
 
-    public ComponentManager componentManager;
-    public EntityManager entityManager;
+    protected final ComponentManager cm;
+    protected final EntityManager em;
+
     public E component;
 
-    public AbstractSystem() {
-        this.componentManager = ComponentManager.getInstance();
-        this.entityManager = TreeEntityManager.getInstance();
+    public AbstractSystem(ApplicationContext context) {
+        this.cm = context.getComponentManager();
+        this.em = context.getEntityManager();
     }
 
     public final void setCameraComponent(Camera camera) {
-        componentManager.setCameraComponent(camera);
+        cm.setCameraComponent(camera);
     }
 
     @Override
