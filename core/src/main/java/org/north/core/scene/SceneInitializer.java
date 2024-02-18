@@ -20,9 +20,8 @@ public class SceneInitializer {
 
     public Transform readSceneFromFile(String filePath) {
         Transform transform;
-        File file = new File(filePath);
 
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filePath))) {
             transform = (Transform) inputStream.readObject();
             // Logger.info("Read object: " + transform.toString());
         } catch (IOException e) {

@@ -1,11 +1,9 @@
 package org.north.core.systems;
 
-import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.MeshRenderer;
 import org.north.core.components.GasCloud;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
-import org.north.core.managment.SystemManager;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.UpdateProcess;

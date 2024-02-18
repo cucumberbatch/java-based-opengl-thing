@@ -10,8 +10,6 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 
-import java.io.*;
-
 @ComponentHandler(PlayerControls.class)
 public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
         implements InitProcess, UpdateProcess {
@@ -40,18 +38,6 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
             rigidBody.velocity.set(0);
             rigidBody.acceleration.set(0);
             physicalBody.transform.moveTo(0f, 0f, 0f);
-        }
-
-        if (Input.isPressed(GLFW.GLFW_KEY_K)) {
-            File file = new File("transform_temp");
-
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
-                outputStream.writeObject(component.getTransform());
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 }

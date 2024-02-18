@@ -5,12 +5,10 @@ import org.north.core.architecture.entity.Entity;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
-public abstract class AbstractComponent implements Component, Serializable, Cloneable {
+public abstract class AbstractComponent implements Component, Cloneable {
 
-    public transient long id;
-    public String name;
+    public long id;
 
     /* Entity which this component is belongs to */
     public transient Entity entity;
@@ -38,16 +36,6 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     @Override
     public void setId(int id) {
         this.id = id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
@@ -104,7 +92,6 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
         try {
             AbstractComponent clone = (AbstractComponent) super.clone();
             clone.id = this.id;
-            clone.name = this.name;
             clone.entity = this.entity;
             clone.isActive = this.isActive;
             clone.state = this.state;
@@ -117,20 +104,33 @@ public abstract class AbstractComponent implements Component, Serializable, Clon
     @Override
     public String toString() {
         return "AbstractComponent{" +
-                "name='" + name + '\'' +
+                "id=" + id +
                 ", isActive=" + isActive +
                 ", state=" + state.name() +
                 '}';
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeUTF(this.name == null ? "" : this.name);
+    @Override
+    public void serializeObject(ObjectOutputStream out) throws IOException {
+        serializeObjectInternal(out);
+        serialize(out);
+    }
+
+    @Override
+    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        deserializeObjectInternal(in);
+        deserialize(in);
+    }
+
+    protected abstract void serialize(ObjectOutputStream out) throws IOException;
+    protected abstract void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException;
+
+    private void serializeObjectInternal(ObjectOutputStream out) throws IOException {
         out.writeBoolean(this.isActive);
         out.writeObject(this.state);
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.name = in.readUTF();
+    private void deserializeObjectInternal(ObjectInputStream in) throws IOException, ClassNotFoundException {
         this.isActive = in.readBoolean();
         this.state = (ComponentState) in.readObject();
     }

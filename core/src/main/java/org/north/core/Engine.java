@@ -11,14 +11,10 @@ import org.north.core.scene.Scene;
 import org.north.core.systems.GameLogicUpdater;
 
 public class Engine {
-    public Window window;
-    public GameLogicUpdater gameLoop;
     public final EngineConfig config;
+    public final Window window;
+    public final GameLogicUpdater gameLoop;
     public final ApplicationContext context;
-
-    public Engine(EngineConfig config, Window window) throws Exception {
-        this(config);
-    }
 
     public Engine(EngineConfig engineConfig) throws Exception {
         // Logger.info("Initializing engine..");
@@ -42,11 +38,6 @@ public class Engine {
     }
 
     public void run() {
-        if (window == null) {
-            // Logger.error("Window is not set-up. Cannot run engine");
-            return;
-        }
-
         window.init();
         gameLoop.run();
         window.destroy();

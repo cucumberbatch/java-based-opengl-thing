@@ -3,6 +3,10 @@ package org.north.core.components;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class Camera extends AbstractComponent {
     public Vector3f at      = new Vector3f();
     public Vector3f up      = new Vector3f();
@@ -25,17 +29,22 @@ public class Camera extends AbstractComponent {
     }
 
     @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
-
-    @Override
     public String toString() {
         return "\nat:   " + at +
                 "\nup:   " + up +
                 "\neye:  " + eye +
                 "\nview: " + viewMatrix +
                 "\nprojection: " + projectionMatrix;
+
+    }
+
+    @Override
+    protected void serialize(ObjectOutputStream out) throws IOException {
+
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
     }
 }

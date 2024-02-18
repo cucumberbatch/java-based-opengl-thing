@@ -6,6 +6,10 @@ import org.north.core.shapes.Rectangle;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class Button extends AbstractComponent {
 
     public float[] vertices = new float[]{
@@ -39,4 +43,14 @@ public class Button extends AbstractComponent {
     public float transitionTimeAccumulator = 0.0f;
 
     public int buttonState = 0;
+
+    @Override
+    protected void serialize(ObjectOutputStream out) throws IOException {
+
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+    }
 }

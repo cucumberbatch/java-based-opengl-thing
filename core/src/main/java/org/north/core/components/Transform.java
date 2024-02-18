@@ -16,10 +16,8 @@ import java.io.Serializable;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent implements Serializable, Cloneable {
+public class Transform extends AbstractComponent implements Cloneable {
     private transient TransformListener transformListener = (e, p1, p2) -> {};
-
-    private transient static final long serialVersionUID = 1L;
 
     public transient Transform parent;
 
@@ -91,21 +89,6 @@ public class Transform extends AbstractComponent implements Serializable, Clonea
         return destination;
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.write(42);
-//        out.writeObject(position);
-//        out.writeObject(rotation);
-//        out.writeObject(scale);
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        this.position = (Vector3f) in.readObject();
-//        this.rotation = (Vector3f) in.readObject();
-//        this.scale = (Vector3f) in.readObject();
-
-    }
-
-
     @Override
     public void reset() {
         super.reset();
@@ -120,8 +103,17 @@ public class Transform extends AbstractComponent implements Serializable, Clonea
     }
 
     @Override
-    public String getName() {
-        return this.getClass().getName();
+    protected void serialize(ObjectOutputStream out) throws IOException {
+        out.writeObject(position);
+        out.writeObject(rotation);
+        out.writeObject(scale);
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        position = (Vector3f) in.readObject();
+        rotation = (Vector3f) in.readObject();
+        scale = (Vector3f) in.readObject();
     }
 
     @Override

@@ -2,6 +2,10 @@ package org.north.core.components;
 
 import org.joml.Vector3f;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class RigidBody extends AbstractComponent {
 
     public float mass = 1.0f;
@@ -38,11 +42,6 @@ public class RigidBody extends AbstractComponent {
     }
 
     @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
-
-    @Override
     public String toString() {
         return  "\nmass:                " + mass +
                 "\ncenterOfMass:        " + centerOfMass +
@@ -52,5 +51,15 @@ public class RigidBody extends AbstractComponent {
                 "\nangularAcceleration: " + angularAcceleration +
                 "\nisGravitational:     " + isGravitational +
                 "\nfrictionFactor:      " + frictionFactor;
+    }
+
+    @Override
+    protected void serialize(ObjectOutputStream out) throws IOException {
+
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
     }
 }

@@ -2,6 +2,10 @@ package org.north.core.components;
 
 import org.joml.Vector2f;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class RigidBody2d extends AbstractComponent {
 
     public float    mass                = 1.0f;
@@ -40,5 +44,15 @@ public class RigidBody2d extends AbstractComponent {
                 "\nfrictionFactor:      " + frictionFactor +
                 "\nrestoringForce:      " + restoringForce +
                 "\nspringFactor:        " + springFactor;
+    }
+
+    @Override
+    protected void serialize(ObjectOutputStream out) throws IOException {
+
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
     }
 }

@@ -3,8 +3,13 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.TreeNode;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
+import org.north.core.components.serialization.Serializable;
 import org.north.core.physics.collision.Collidable;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -13,7 +18,7 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity extends TreeNode<Entity> implements Collidable {
+public class Entity extends TreeNode<Entity> implements Collidable, Serializable<ObjectOutputStream, ObjectInputStream> {
     public long id;
     public String name;
 
@@ -77,4 +82,25 @@ public class Entity extends TreeNode<Entity> implements Collidable {
         return (E) components.remove(clazz);
     }
 
+    @Override
+    public void serializeObject(ObjectOutputStream out) throws IOException {
+        out.writeShort(components.size());
+
+        for (Class<? extends Component> componentClass: components.keySet()) {
+            out.writeObject(componentClass);
+            Component component = components.get(componentClass);
+            component.serializeObject(out);
+        }
+    }
+
+    @Override
+    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        short componentsCount = in.readShort();
+
+        for (int i = 0; i < componentsCount; i++) {
+            Class<? extends Component> componentClass = (Class<? extends Component>) in.readObject();
+            Component component = componentClass.getConstructor().newInstance();
+            component.deserializeObject(in);
+        }
+    }
 }

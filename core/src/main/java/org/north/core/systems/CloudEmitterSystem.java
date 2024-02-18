@@ -12,6 +12,9 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess, UpdateProcess {
 
@@ -25,6 +28,8 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     private Entity world;
     private Transform worldTransform;
     private RigidBody rigidBody;
+
+    private boolean serialized = false;
 
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
@@ -86,5 +91,25 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
         }
 
         acc += deltaTime * 6;
+
+        if (Input.isPressed(GLFW.GLFW_KEY_K)) {
+            if (!serialized) {
+                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("transform_temp.txt"))) {
+                    component.entity.serializeObject(out);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                serialized = true;
+            } else {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("transform_temp.txt"))) {
+                    component.entity.deserializeObject(in);
+                } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                         InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                serialized = false;
+            }
+        }
+
     }
 }

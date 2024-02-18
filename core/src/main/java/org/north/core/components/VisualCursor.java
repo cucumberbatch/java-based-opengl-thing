@@ -5,6 +5,10 @@ import org.north.core.graphics.VertexArray;
 import org.joml.Vector2f;
 import org.north.core.shapes.Rectangle;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 
 public class VisualCursor extends AbstractComponent {
 
@@ -49,4 +53,13 @@ public class VisualCursor extends AbstractComponent {
     // Switching of this parameter is controlled by onCollision methods of VisualCursorSystem
     public boolean   isIntersects = false;
 
+    @Override
+    protected void serialize(ObjectOutputStream out) throws IOException {
+
+    }
+
+    @Override
+    protected void deserialize(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+    }
 }
