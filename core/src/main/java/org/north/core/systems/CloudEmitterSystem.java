@@ -2,22 +2,20 @@ package org.north.core.systems;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.north.core.architecture.ComponentManager;
-import org.north.core.architecture.TreeEntityManager;
-import org.north.core.architecture.entity.ImprovedEntityManager;
+import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.*;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;
+import org.north.core.managment.SystemManager;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
 
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess, UpdateProcess {
-
-    private final ImprovedEntityManager em =
-            new ImprovedEntityManager(TreeEntityManager.getInstance(), ComponentManager.getInstance());
 
     private final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
     private final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
@@ -32,9 +30,14 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
 
     private Vector3f temp = new Vector3f();
 
+    @Inject
+    public CloudEmitterSystem(ApplicationContext context) {
+        super(context);
+    }
+
     @Override
     public void init() {
-        world = entityManager.getByName("movableWorld");
+        world = em.getByName("movableWorld");
         worldTransform = world.transform;
 
         rigidBody = world.getComponent(RigidBody.class);
@@ -72,7 +75,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
             if (acc > 1) {
                 Entity gasCloudEntity = em.create("gas_cloud_" + gasCloudEntityNumber++);
 
-                em.take(gasCloudEntity)
+                cm.take(gasCloudEntity)
                         .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
                 gasCloudEntity.setParent(world);

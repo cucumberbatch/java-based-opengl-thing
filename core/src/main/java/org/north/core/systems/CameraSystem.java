@@ -1,8 +1,10 @@
 package org.north.core.systems;
 
+import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.components.Camera;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.RenderProcess;
 import org.joml.Matrix4f;
@@ -15,6 +17,11 @@ public class CameraSystem extends AbstractSystem<Camera>
 
     public static Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
     public static Matrix4f ORTHOGRAPHIC_MATRIX = new Matrix4f();
+
+    @Inject
+    public CameraSystem(ApplicationContext context) {
+        super(context);
+    }
 
     @Override
     public void init() throws RuntimeException {

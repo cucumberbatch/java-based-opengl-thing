@@ -1,12 +1,16 @@
 package org.north.core.systems;
 
 import org.lwjgl.glfw.GLFW;
+import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.ComponentState;
+import org.north.core.components.MeshCollider;
+import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ShaderUniformNotFoundException;
+import org.north.core.physics.collision.Collision;
+import org.north.core.physics.collision.CollisionPair;
+import org.north.core.reflection.di.Inject;
 import org.north.core.scene.Scene;
 import org.north.core.scene.SceneInitializer;
-import org.north.core.architecture.ComponentManager;
-import org.north.core.architecture.EntityManager;
 import org.north.core.components.Component;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.exception.ComponentNotFoundException;
@@ -14,7 +18,7 @@ import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
-import org.north.core.physics.Collidable;
+import org.north.core.physics.collision.Collidable;
 import org.north.core.systems.processes.*;
 import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
@@ -25,22 +29,22 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameLogicUpdater implements ISystem, Runnable {
+    private final Window window;
+    private final Graphics graphics;
+    private final ComponentManager componentManager;
+    private final SystemManager systemManager;
 
-    private Window window;
-    private SceneInitializer sceneInitializer;
     private Scene scene;
-    private Graphics graphics;
 
     private boolean isUpdatePaused = false;
 
-    public EntityManager    entityManager;
-    public ComponentManager componentManager;
-    public SystemManager systemManager;
 
-
-    public GameLogicUpdater(Window window) {
-        this.window = window;
-        this.graphics = Graphics.getInstance(window);
+    @Inject
+    public GameLogicUpdater(ApplicationContext context) {
+        this.window = context.getDependency(Window.class);
+        this.graphics = context.getDependency(Graphics.class);
+        this.componentManager = context.getDependency(ComponentManager.class);
+        this.systemManager = context.getDependency(SystemManager.class);
     }
 
     public void setScene(Scene scene) {
@@ -79,15 +83,9 @@ public class GameLogicUpdater implements ISystem, Runnable {
         // Logger.info("Game loop ended");
     }
 
-    public void setDataManagers(EntityManager entityManager, ComponentManager componentManager, SystemManager systemManager) {
-        this.entityManager = entityManager;
-        this.componentManager = componentManager;
-        this.systemManager = systemManager;
-    }
-
     private void loadScene(Scene scene) {
-        sceneInitializer = new SceneInitializer(scene);
-        sceneInitializer.initSceneInUpdater(this);
+        SceneInitializer sceneInitializer = new SceneInitializer(scene);
+        sceneInitializer.initSceneInUpdater(componentManager);
 //        sceneInitializer.readSceneFromFile("transform_temp");
     }
 

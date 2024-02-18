@@ -3,7 +3,7 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.TreeNode;
 import org.north.core.components.Component;
 import org.north.core.components.Transform;
-import org.north.core.physics.Collidable;
+import org.north.core.physics.collision.Collidable;
 
 import java.util.*;
 
@@ -63,6 +63,10 @@ public class Entity extends TreeNode<Entity> implements Collidable {
     @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(Class<E> clazz) {
         return (E) components.get(clazz);
+    }
+
+    public Set<Class<? extends Component>> getComponentClassSet() {
+        return Collections.unmodifiableSet(components.keySet());
     }
 
     @SuppressWarnings("unchecked")

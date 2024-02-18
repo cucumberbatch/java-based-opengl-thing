@@ -1,7 +1,10 @@
 package org.north.core.graphics;
 
 import org.joml.Vector3f;
+import org.north.core.config.EngineConfig;
+import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.MeshTransformListener;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.CameraControlsSystem;
 import org.north.core.systems.Input;
 
@@ -28,6 +31,15 @@ public class Window {
 
     private long window = -1;
     private final boolean vSync;
+
+    @Inject
+    public Window(ApplicationContext context) throws ReflectiveOperationException {
+        EngineConfig config = context.getDependency(EngineConfig.class);
+        this.width = config.windowWidth;
+        this.height = config.windowHeight;
+        this.title = config.windowTitle;
+        this.vSync = config.vsync;
+    }
 
     public Window(String title, int width, int height, boolean vSync) {
         this.width = width;

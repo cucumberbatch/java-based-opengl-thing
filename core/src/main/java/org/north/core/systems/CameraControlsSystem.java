@@ -3,13 +3,13 @@ package org.north.core.systems;
 import org.north.core.components.Camera;
 import org.north.core.components.CameraControls;
 import org.north.core.components.Transform;
-import org.north.core.config.EngineConfig;
+import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.reflection.ComponentHandler;
+import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
 import org.north.core.systems.processes.UpdateProcess;
-import org.north.core.utils.Logger;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
@@ -32,19 +32,23 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
 
     private static int projectionState = ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE;
     private static Camera camera;
+    private static Graphics graphics;
+
     private final Queue<Vector3f> cameraTrace = new ArrayDeque<>();
     private float projectionProgress = 0;
-    private Graphics graphics;
     private float cameraMovementSpeed;
     private Vector2f mousePosition = new Vector2f();
     private float verticalMousePosition = 0;
     private boolean mouseCaptured = false;
 
+    @Inject
+    public CameraControlsSystem(ApplicationContext context) throws ReflectiveOperationException {
+        super(context);
+        graphics = context.getDependency(Graphics.class);
+    }
 
     @Override
     public void init() {
-        Window window = EngineConfig.instance.window;
-        graphics = Graphics.getInstance(window);
         camera = component.entity.getComponent(Camera.class);
     }
 
@@ -109,8 +113,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
     private void updateCameraMovement(float deltaTime) {
         if (!mouseCaptured) return;
 
-        Vector3f temp = vector3IPool.get();
-        Vector3f temp2 = vector3IPool.get();
+        Vector3f temp = vector3fPool.get();
+        Vector3f temp2 = vector3fPool.get();
 
         Vector2f cursorPosition = Input.getCursorPosition();
 
@@ -169,8 +173,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
         camera.viewMatrix.identity().lookAt(componentTransform.position, point.add(componentTransform.position), temp2.set(0f, 1f, 0f));
         graphics.view = camera.viewMatrix;
 
-        vector3IPool.put(temp2);
-        vector3IPool.put(temp);
+        vector3fPool.put(temp2);
+        vector3fPool.put(temp);
     }
 
     private float restrictAngle(float angle, float lowest, float highest) {
@@ -184,9 +188,6 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
             camera.ratio = (float) width / height;
             CameraSystem.PERSPECTIVE_MATRIX = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
             CameraSystem.ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1, 1, -1, 1);
-
-            Window windowObject = EngineConfig.instance.window;
-            Graphics graphics = Graphics.getInstance(windowObject);
 
             if (PERSPECTIVE_VIEW_STATE == projectionState) graphics.projection = CameraSystem.PERSPECTIVE_MATRIX;
             else if (ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;

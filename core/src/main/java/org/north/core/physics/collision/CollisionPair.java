@@ -1,4 +1,4 @@
-package org.north.core.systems;
+package org.north.core.physics.collision;
 
 import org.joml.Vector3f;
 
