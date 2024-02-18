@@ -18,8 +18,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     // map for storing componentId-to-component pair
     private final Map<Long, E> componentMap = new HashMap<>();
 
-    protected Pool<Vector3f> vector3fPool = new Vector3fPool(1);
-
+    protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
     protected final EntityManager em;
 
@@ -28,6 +27,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     public AbstractSystem(ApplicationContext context) {
         this.cm = context.getComponentManager();
         this.em = context.getEntityManager();
+        this.vector3fPool = context.getDependency(Vector3fPool.class);
     }
 
     public final void setCameraComponent(Camera camera) {

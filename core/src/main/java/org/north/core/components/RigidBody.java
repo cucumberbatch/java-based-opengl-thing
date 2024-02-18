@@ -22,6 +22,13 @@ public class RigidBody extends AbstractComponent {
         this.velocity.add(direction.mul(mass, destination.zero()));
     }
 
+    public void addImpulseToMassCenter(float x, float y, float z) {
+        x *= mass;
+        y *= mass;
+        z *= mass;
+        this.velocity.add(x, y, z);
+    }
+
     @Override
     public void reset() {
         super.reset();

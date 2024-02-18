@@ -2,13 +2,11 @@ package org.north.core.systems;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.components.*;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;
-import org.north.core.managment.SystemManager;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.systems.processes.InitProcess;
@@ -27,8 +25,6 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     private Entity world;
     private Transform worldTransform;
     private RigidBody rigidBody;
-
-    private Vector3f temp = new Vector3f();
 
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
@@ -49,27 +45,22 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
         boolean moving = false;
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            rigidBody.addImpulseToMassCenter(new Vector3f(0f, -deltaTime * 2, 0f), temp);
+            rigidBody.addImpulseToMassCenter(0f, -deltaTime * 2, 0f);
             moving = true;
-//            worldTransform.moveRel(0f, -deltaTime / 2, 0f);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            rigidBody.addImpulseToMassCenter(new Vector3f(0f, deltaTime * 2, 0f), temp);
+            rigidBody.addImpulseToMassCenter(0f, deltaTime * 2, 0f);
             moving = true;
-//            worldTransform.moveRel(0f, deltaTime / 2, 0f);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            rigidBody.addImpulseToMassCenter(new Vector3f(-deltaTime * 2, 0f, 0f), temp);
+            rigidBody.addImpulseToMassCenter(-deltaTime * 2, 0f, 0f);
             moving = true;
-//            worldTransform.moveRel(-deltaTime / 2, 0f, 0f);
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            rigidBody.addImpulseToMassCenter(new Vector3f(deltaTime * 2, 0f, 0f), temp);
+            rigidBody.addImpulseToMassCenter(deltaTime * 2, 0f, 0f);
             moving = true;
-//            worldTransform.moveRel(deltaTime / 2, 0f, 0f);
         }
 
-//        if (gasCloudCount > 6) return;
 
         if (moving) {
             if (acc > 1) {
