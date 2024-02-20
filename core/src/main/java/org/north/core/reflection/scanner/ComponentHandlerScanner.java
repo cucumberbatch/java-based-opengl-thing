@@ -1,9 +1,8 @@
 package org.north.core.reflection.scanner;
 
-import org.north.core.components.Component;
+import org.north.core.component.Component;
 import org.north.core.reflection.ComponentHandler;
-import org.north.core.systems.System;
-import org.north.core.utils.Logger;
+import org.north.core.system.System;
 
 import java.io.File;
 import java.net.URL;

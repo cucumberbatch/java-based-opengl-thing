@@ -1,14 +1,12 @@
 package org.north.core.graphics;
 
-import org.joml.Vector3f;
 import org.north.core.config.EngineConfig;
 import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.MeshTransformListener;
 import org.north.core.reflection.di.Inject;
-import org.north.core.systems.CameraControlsSystem;
-import org.north.core.systems.Input;
+import org.north.core.system.CameraControlsSystem;
+import org.north.core.system.Input;
 
-import org.north.core.utils.Logger;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;

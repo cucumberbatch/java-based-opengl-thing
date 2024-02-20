@@ -1,6 +1,6 @@
 package org.north.core.reflection;
 
-import org.north.core.components.Component;
+import org.north.core.component.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

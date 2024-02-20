@@ -30,15 +30,16 @@ public class ShaderUtils {
     }
 
     public static int load(String vertexPath, String fragmentPath) {
+        Integer id;
         int hash = hashShaderPaths(vertexPath, fragmentPath);
 
-        if (shaderPrograms.containsKey(hash)) {
-            return shaderPrograms.get(hash);
+        if ((id = shaderPrograms.get(hash)) != null) {
+            return id;
         }
 
         String vertex   = FileUtils.loadAsString(vertexPath);
         String fragment = FileUtils.loadAsString(fragmentPath);
-        int id = create(vertex, fragment);
+        id = create(vertex, fragment);
 
         shaderPrograms.put(hash, id);
         return id;

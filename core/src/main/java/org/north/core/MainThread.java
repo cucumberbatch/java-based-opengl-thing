@@ -1,6 +1,6 @@
 package org.north.core;
 
-import org.north.core.components.InitEntities;
+import org.north.core.component.InitEntities;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.config.EngineConfig;
 import org.north.core.scene.Scene;

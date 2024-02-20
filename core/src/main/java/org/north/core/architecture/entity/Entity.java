@@ -1,11 +1,19 @@
 package org.north.core.architecture.entity;
 
 import org.north.core.architecture.tree.TreeNode;
-import org.north.core.components.Component;
-import org.north.core.components.Transform;
+import org.north.core.component.Component;
+import org.north.core.component.Transform;
+import org.north.core.component.serialization.Serializable;
 import org.north.core.physics.collision.Collidable;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import static org.north.core.utils.SerializationUtils.readUUID;
+import static org.north.core.utils.SerializationUtils.writeUUID;
 
 /**
  * Entity is an object that contains a bunch of components
@@ -13,8 +21,8 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity extends TreeNode<Entity> implements Collidable {
-    public long id;
+public class Entity extends TreeNode<Entity> implements Collidable, Serializable<ObjectOutputStream, ObjectInputStream> {
+    public UUID id;
     public String name;
 
     public Map<Class<? extends Component>, Component> components;
@@ -25,20 +33,17 @@ public class Entity extends TreeNode<Entity> implements Collidable {
     }
 
     public Entity(String name) {
-        this.id = -1;
-        this.name = Objects.requireNonNullElse(name, generateName());
-        this.components = new HashMap<>();
+        UUID id = UUID.randomUUID();
+        this.id = id;
+        this.name = Objects.requireNonNullElse(name, id.toString());
+        this.components = new HashMap<>(4, 1.0f);
     }
 
-    private String generateName() {
-        return UUID.randomUUID().toString();
-    }
-
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -61,7 +66,7 @@ public class Entity extends TreeNode<Entity> implements Collidable {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends Component> E getComponent(Class<E> clazz) {
+    public <E extends Component> E get(Class<E> clazz) {
         return (E) components.get(clazz);
     }
 
@@ -77,4 +82,44 @@ public class Entity extends TreeNode<Entity> implements Collidable {
         return (E) components.remove(clazz);
     }
 
+    @Override
+    public void serializeObject(ObjectOutputStream out) throws IOException {
+        writeUUID(out, id);
+        out.writeUTF(name);
+        out.writeByte(components.size());
+
+        for (Class<? extends Component> componentClass: components.keySet()) {
+            out.writeObject(componentClass);
+            Component component = components.get(componentClass);
+            component.serializeObject(out);
+        }
+    }
+
+    @Override
+    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        id = readUUID(in);
+        name = in.readUTF();
+        byte componentsCount = in.readByte();
+
+        for (byte i = 0; i < componentsCount; i++) {
+            Class<? extends Component> componentClass = (Class<? extends Component>) in.readObject();
+            Component component = componentClass.getConstructor().newInstance();
+            component.deserializeObject(in);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Entity entity = (Entity) o;
+
+        return id.equals(entity.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

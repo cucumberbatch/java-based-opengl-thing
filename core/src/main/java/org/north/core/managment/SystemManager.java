@@ -1,49 +1,46 @@
 package org.north.core.managment;
 
 import org.joml.Vector3f;
-import org.north.core.components.Camera;
-import org.north.core.components.Component;
-import org.north.core.components.ComponentState;
-import org.north.core.config.EngineConfig;
+import org.north.core.component.Camera;
+import org.north.core.component.Component;
+import org.north.core.component.ComponentState;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.reflection.di.Inject;
 import org.north.core.reflection.di.registerer.DependencyRegisterer;
-import org.north.core.reflection.initializer.ClassInitializer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
-import org.north.core.systems.System;
-import org.north.core.systems.TransformSystem;
-import org.north.core.systems.command.AddComponentDeferredCommand;
-import org.north.core.systems.command.DeferredCommand;
-import org.north.core.systems.command.RemoveComponentDeferredCommand;
-import org.north.core.systems.processes.CollisionHandlingProcess;
-import org.north.core.systems.processes.InitProcess;
-import org.north.core.systems.processes.RenderProcess;
-import org.north.core.systems.processes.UpdateProcess;
+import org.north.core.system.System;
+import org.north.core.system.TransformSystem;
+import org.north.core.system.command.AddComponentDeferredCommand;
+import org.north.core.system.command.DeferredCommand;
+import org.north.core.system.command.RemoveComponentDeferredCommand;
+import org.north.core.system.process.CollisionHandlingProcess;
+import org.north.core.system.process.InitProcess;
+import org.north.core.system.process.RenderProcess;
+import org.north.core.system.process.UpdateProcess;
 import org.north.core.physics.collision.Collision;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager {
+    public final List<InitProcess<? extends Component>> listOfSystemsForInit;
+    public final List<UpdateProcess<? extends Component>> listOfSystemsForUpdate;
+    public final List<RenderProcess<? extends Component>> listOfSystemsForRender;
+    public final List<System<? extends Component>> listOfSystemsForCollision;
+    public final List<CollisionHandlingProcess<? extends Component>> listOfSystemsForCollisionHandling;
+
+    public final List<Collision> collisions;
+
     private final Map<Class<? extends Component>, System<? extends Component>> systemMap;
     private final List<System<? extends Component>> systemList;
-
     private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
     private final List<DeferredCommand> deferredCommands;
     private final ComponentHandlerScanner scanner;
     private final DependencyRegisterer dependencyRegisterer;
+    private final EntityDistanceToCameraComparator cameraDistanceComparator;
 
     private Camera camera;
-
-    public final List<InitProcess> listOfSystemsForInit              = new LinkedList<>();
-    public final List<UpdateProcess> listOfSystemsForUpdate            = new LinkedList<>();
-    public final List<RenderProcess> listOfSystemsForRender            = new LinkedList<>();
-    public final List<System<? extends Component>> listOfSystemsForCollision         = new LinkedList<>();
-    public final List<CollisionHandlingProcess> listOfSystemsForCollisionHandling = new LinkedList<>();
-
-    public final List<Collision> collisions = new ArrayList<>();
-
 
     @Inject
     public SystemManager(ApplicationContext context) {
@@ -54,7 +51,14 @@ public class SystemManager {
         systemList = new ArrayList<>();
         systemMap = new HashMap<>();
 
-        loadComponentSystemsFromPackage("org/north/core/systems");
+        loadComponentSystemsFromPackage("org/north/core/system");
+        cameraDistanceComparator = new EntityDistanceToCameraComparator();
+        collisions = new ArrayList<>();
+        listOfSystemsForCollisionHandling = new LinkedList<>();
+        listOfSystemsForCollision = new LinkedList<>();
+        listOfSystemsForRender = new LinkedList<>();
+        listOfSystemsForUpdate = new LinkedList<>();
+        listOfSystemsForInit = new LinkedList<>();
     }
 
     private void loadComponentSystemsFromPackage(String packagePath) {
@@ -74,17 +78,23 @@ public class SystemManager {
         }
     }
 
-    private void groupSystemsByProcesses() {
-        this.systemMap.values().forEach(this::attachToSystemLists);
-    }
-
     private void attachToSystemLists(System<? extends Component> system) {
         Class<?> clazz = system.getClass();
-        if (InitProcess.class.isAssignableFrom(clazz))               this.listOfSystemsForInit.add((InitProcess) system);
-        if (UpdateProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForUpdate.add((UpdateProcess) system);
-        if (RenderProcess.class.isAssignableFrom(clazz))             this.listOfSystemsForRender.add((RenderProcess) system);
-//        if (CollisionProcess.class.isAssignableFrom(clazz))          this.listOfSystemsForCollision.add(system);
-        if (CollisionHandlingProcess.class.isAssignableFrom(clazz))  this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess) system);
+        if (InitProcess.class.isAssignableFrom(clazz)) {
+            this.listOfSystemsForInit.add((InitProcess<? extends Component>) system);
+        }
+        if (UpdateProcess.class.isAssignableFrom(clazz)) {
+            this.listOfSystemsForUpdate.add((UpdateProcess<? extends Component>) system);
+        }
+        if (RenderProcess.class.isAssignableFrom(clazz)) {
+            this.listOfSystemsForRender.add((RenderProcess<? extends Component>) system);
+        }
+//        if (CollisionProcess.class.isAssignableFrom(clazz)) {
+//            this.listOfSystemsForCollision.add(system);
+//        }
+        if (CollisionHandlingProcess.class.isAssignableFrom(clazz)) {
+            this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess<? extends Component>) system);
+        }
     }
 
     public void setCameraComponent(Camera camera) {
@@ -123,7 +133,7 @@ public class SystemManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends Component> E getComponent(long componentId) {
+    public <E extends Component> E getComponent(UUID componentId) {
         int systemCount = systemList.size();
         for (int i = 0; i < systemCount; i++) {
 //        for (System<? extends Component> system: systemMap.values()) {
@@ -131,7 +141,7 @@ public class SystemManager {
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
-                if (component.getId() == componentId) {
+                if (component.getId().equals(componentId)) {
                     return (E) component;
                 }
             }
@@ -150,13 +160,36 @@ public class SystemManager {
         components.sort(cameraDistanceComparator);
     }
 
-    private final EntityDistanceToCameraComparator cameraDistanceComparator = new EntityDistanceToCameraComparator();
+    public void addDeferredCommand(DeferredCommand command) {
+        deferredCommands.add(command);
+    }
+
+    public void applyDeferredCommands() {
+        for (DeferredCommand command : deferredCommands) {
+            switch (command.getType()) {
+                case ADD_COMPONENT: {
+                    AddComponentDeferredCommand addComponentCommand = (AddComponentDeferredCommand) command;
+                    addComponent(addComponentCommand.component);
+                    break;
+                }
+                case REMOVE_COMPONENT: {
+                    RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
+                    Component component = removeComponentCommand.component;
+                    systemMap.get(component.getClass()).removeComponent(component.getId());
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        deferredCommands.clear();
+    }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
 
-        private Camera camera;
         private final Vector3f temp1 = new Vector3f();
         private final Vector3f temp2 = new Vector3f();
+        private Camera camera;
 
         public void setCamera(Camera camera) {
             this.camera = camera;
@@ -173,30 +206,6 @@ public class SystemManager {
             float o2Distance = TransformSystem.getWorldPosition(o2.getTransform(), temp2).distance(cameraPosition);
             return (int) ((o2Distance - o1Distance) * 100f);
         }
-    }
-
-    public void addDeferredCommand(DeferredCommand command) {
-        deferredCommands.add(command);
-    }
-
-    public void applyDeferredCommands() {
-        for (DeferredCommand command: deferredCommands) {
-            switch (command.getType()) {
-                case ADD_COMPONENT: {
-                    AddComponentDeferredCommand addComponentCommand = (AddComponentDeferredCommand) command;
-                    addComponent(addComponentCommand.component);
-                    break;
-                }
-                case REMOVE_COMPONENT: {
-                    RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
-                    Component component = removeComponentCommand.component;
-                    systemMap.get(component.getClass()).removeComponent(component.getId());
-                    break;
-                }
-                default: break;
-            }
-        }
-        deferredCommands.clear();
     }
 
 }
