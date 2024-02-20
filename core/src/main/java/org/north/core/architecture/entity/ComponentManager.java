@@ -1,13 +1,13 @@
 package org.north.core.architecture.entity;
 
-import org.north.core.components.Camera;
-import org.north.core.components.Component;
-import org.north.core.components.Transform;
+import org.north.core.component.Camera;
+import org.north.core.component.Component;
+import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.managment.SystemManager;
 import org.north.core.reflection.di.Inject;
-import org.north.core.systems.command.AddComponentDeferredCommand;
-import org.north.core.systems.command.RemoveComponentDeferredCommand;
+import org.north.core.system.command.AddComponentDeferredCommand;
+import org.north.core.system.command.RemoveComponentDeferredCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -76,13 +76,13 @@ public class ComponentManager {
     }
 
     public final <E extends Component> E get(Entity entity, Class<E> componentClass) {
-        return entity.getComponent(componentClass);
+        return entity.get(componentClass);
     }
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... classes) {
         return Arrays.stream(classes)
-                .map(entity::getComponent)
+                .map(entity::get)
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +91,7 @@ public class ComponentManager {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
 
-        E component = entity.getComponent(componentClass);
+        E component = entity.get(componentClass);
         systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
         return component;
     }
@@ -137,7 +137,7 @@ public class ComponentManager {
 
         public synchronized <E extends Component> E get(Class<E> componentClass) {
             em.pushManagedEntity(this);
-            return entity.getComponent(componentClass);
+            return entity.get(componentClass);
         }
 
         @SafeVarargs

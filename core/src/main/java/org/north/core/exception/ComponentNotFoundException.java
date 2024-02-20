@@ -1,6 +1,6 @@
 package org.north.core.exception;
 
-import org.north.core.components.Component;
+import org.north.core.component.Component;
 
 import java.util.UUID;
 

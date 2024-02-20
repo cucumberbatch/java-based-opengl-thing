@@ -1,11 +1,8 @@
 package org.north.core.reflection.initializer;
 
-import org.north.core.architecture.EntityManager;
-import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.config.EngineConfig;
-import org.north.core.systems.System;
+import org.north.core.system.System;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class ClassInitializer {

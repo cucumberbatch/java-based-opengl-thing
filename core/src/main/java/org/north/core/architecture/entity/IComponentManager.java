@@ -1,6 +1,6 @@
 package org.north.core.architecture.entity;
 
-import org.north.core.components.Component;
+import org.north.core.component.Component;
 
 /**
  * Interface for an entity components behaviour

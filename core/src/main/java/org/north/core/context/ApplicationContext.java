@@ -1,7 +1,8 @@
 package org.north.core.context;
 
-import org.north.core.architecture.EntityManager;
-import org.north.core.architecture.TreeEntityManager;
+import org.north.core.architecture.entity.Entity;
+import org.north.core.architecture.tree.Tree;
+import org.north.core.architecture.tree.EntityTree;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.config.EngineConfig;
 import org.north.core.managment.SystemManager;
@@ -39,8 +40,8 @@ public class ApplicationContext {
         return dependencyRegisterer.registerDependencies(classes);
     }
 
-    public EntityManager getEntityManager() {
-        return getDependencyInternal(TreeEntityManager.class);
+    public Tree<Entity> getEntityTree() {
+        return getDependencyInternal(EntityTree.class);
     }
 
     public ComponentManager getComponentManager() {
