@@ -2,6 +2,10 @@ package org.north.core.component;
 
 import org.joml.Vector3f;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 public class RigidBody extends AbstractComponent {
 
     public float mass = 1.0f;
@@ -35,6 +39,32 @@ public class RigidBody extends AbstractComponent {
         mass = 1.0f;
         isGravitational = true;
         frictionFactor = 0.0f;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeFloat(mass);
+        out.writeObject(centerOfMass);
+        out.writeObject(velocity);
+        out.writeObject(acceleration);
+        out.writeObject(angularVelocity);
+        out.writeObject(angularAcceleration);
+        out.writeBoolean(isGravitational);
+        out.writeFloat(frictionFactor);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        mass = in.readFloat();
+        centerOfMass = (Vector3f) in.readObject();
+        velocity = (Vector3f) in.readObject();
+        acceleration = (Vector3f) in.readObject();
+        angularVelocity = (Vector3f) in.readObject();
+        angularAcceleration = (Vector3f) in.readObject();
+        isGravitational = in.readBoolean();
+        frictionFactor = in.readFloat();
     }
 
     @Override

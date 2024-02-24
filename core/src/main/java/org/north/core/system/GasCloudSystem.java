@@ -1,5 +1,6 @@
 package org.north.core.system;
 
+import org.north.core.architecture.entity.Entity;
 import org.north.core.component.MeshRenderer;
 import org.north.core.component.GasCloud;
 import org.north.core.context.ApplicationContext;
@@ -11,8 +12,6 @@ import org.north.core.system.process.UpdateProcess;
 @ComponentHandler(GasCloud.class)
 public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdateProcess<GasCloud> {
 
-    private float acc = 0;
-
     @Inject
     public GasCloudSystem(ApplicationContext context) {
         super(context);
@@ -20,21 +19,24 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
 
     @Override
     public void update(GasCloud gasCloud, float deltaTime) {
-        MeshRenderer meshRenderer = cm.take(gasCloud.entity).get(MeshRenderer.class);
+        Entity entity = gasCloud.getEntity();
+
+        MeshRenderer meshRenderer = cm.take(entity).get(MeshRenderer.class);
         AtlasTextureAnimationShader shader = (AtlasTextureAnimationShader) meshRenderer.shader;
 
         if (shader.spriteIndex > 4) {
 //            cm.take(component.entity).get(Transform.class)
 //                    .moveTo(0f, -0.225f, 1f);
 
-            cm.take(gasCloud.entity).remove(MeshRenderer.class);
+            cm.take(entity).remove(MeshRenderer.class);
+            et.remove(entity);
         }
 
-        if (acc > 1) {
+        if (gasCloud.acc > 1) {
             shader.incrementSpriteIndex();
-            acc = 0;
+            gasCloud.acc = 0;
         }
-        acc += deltaTime * 6f;
+        gasCloud.acc += deltaTime * 7f;
 
 //        cm.take(component.entity).get(Transform.class)
 //                .moveRel(0f, -deltaTime, 0f);

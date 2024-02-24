@@ -29,8 +29,6 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     private Transform worldTransform;
     private RigidBody rigidBody;
 
-    private boolean serialized = false;
-
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
         super(context);
@@ -38,7 +36,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
 
     @Override
     public void init(CloudEmitter cloudEmitter) {
-        world = em.getByName("movableWorld");
+        world = et.getByName("movableWorld");
         worldTransform = world.transform;
         rigidBody = world.get(RigidBody.class);
 
@@ -48,33 +46,35 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     @Override
     public void update(CloudEmitter cloudEmitter, final float deltaTime) {
         boolean moving = false;
+        float speed = 4;
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            rigidBody.addImpulseToMassCenter(0f, -deltaTime * 2, 0f);
+            rigidBody.addImpulseToMassCenter(0f, -deltaTime * speed, 0f);
             moving = true;
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            rigidBody.addImpulseToMassCenter(0f, deltaTime * 2, 0f);
+            rigidBody.addImpulseToMassCenter(0f, deltaTime * speed, 0f);
             moving = true;
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            rigidBody.addImpulseToMassCenter(-deltaTime * 2, 0f, 0f);
+            rigidBody.addImpulseToMassCenter(-deltaTime * speed, 0f, 0f);
             moving = true;
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            rigidBody.addImpulseToMassCenter(deltaTime * 2, 0f, 0f);
+            rigidBody.addImpulseToMassCenter(deltaTime * speed, 0f, 0f);
             moving = true;
         }
 
 
         if (moving) {
             if (acc > 1) {
-                Entity gasCloudEntity = em.create("gas_cloud_" + gasCloudEntityNumber++);
+                Entity gasCloudEntity = et.create("gas_cloud_" + gasCloudEntityNumber++);
 
                 cm.take(gasCloudEntity)
                         .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
-                gasCloudEntity.setParent(world);
+                et.add(world, gasCloudEntity);
+//                gasCloudEntity.setParent(world);
 
                 Transform transform = gasCloudEntity.get(Transform.class);
                 MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
@@ -91,25 +91,5 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
         }
 
         acc += deltaTime * 6;
-
-        if (Input.isPressed(GLFW.GLFW_KEY_K)) {
-            if (!serialized) {
-                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("transform_temp.txt"))) {
-                    cloudEmitter.entity.serializeObject(out);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                serialized = true;
-            } else {
-                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("transform_temp.txt"))) {
-                    cloudEmitter.entity.deserializeObject(in);
-                } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                         InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-                serialized = false;
-            }
-        }
-
     }
 }

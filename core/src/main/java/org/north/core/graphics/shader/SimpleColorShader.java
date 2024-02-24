@@ -4,6 +4,8 @@ import org.joml.Matrix4f;
 import org.north.core.component.MeshRenderer;
 import org.north.core.graphics.Graphics;
 
+import java.io.*;
+
 public class SimpleColorShader extends AbstractGLShader {
 
     private final Matrix4f temp = new Matrix4f();
@@ -35,5 +37,15 @@ public class SimpleColorShader extends AbstractGLShader {
         setUniform(projectionUniformPtr, graphics.projection);
         setUniform(viewUniformPtr, graphics.view);
         setUniform(modelUniformPtr, renderer.getTransform().getWorldModelMatrix(temp));
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        super.readExternal(in);
     }
 }

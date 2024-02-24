@@ -13,6 +13,7 @@ public interface Tree<N extends TreeNode<N>> extends Collection<N> {
     N create(N parent);
     N create(N parent, String name);
 
+    N getRoot();
     N getById(UUID id);
     N getByIdFromParent(N parent, UUID id);
     N getByName(String name);

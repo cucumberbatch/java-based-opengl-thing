@@ -10,7 +10,6 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.reflection.di.registerer.DependencyRegisterer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
-import org.north.core.system.TransformSystem;
 import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.DeferredCommand;
 import org.north.core.system.command.RemoveComponentDeferredCommand;
@@ -113,6 +112,7 @@ public class SystemManager {
             try {
 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
+                if (systemClass == null) return;
                 System<?> system = dependencyRegisterer.registerDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
@@ -175,6 +175,7 @@ public class SystemManager {
                 case REMOVE_COMPONENT: {
                     RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
                     Component component = removeComponentCommand.component;
+                    component.setActivity(false);
                     systemMap.get(component.getClass()).removeComponent(component.getId());
                     break;
                 }
@@ -183,6 +184,12 @@ public class SystemManager {
             }
         }
         deferredCommands.clear();
+    }
+
+    public void reset() {
+        for (System<?> system: systemList) {
+            system.reset();
+        }
     }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
@@ -201,9 +208,9 @@ public class SystemManager {
 
         @Override
         public int compare(Component o1, Component o2) {
-            Vector3f cameraPosition = TransformSystem.getWorldPosition(camera.getTransform(), temp1);
-            float o1Distance = TransformSystem.getWorldPosition(o1.getTransform(), temp2).distance(cameraPosition);
-            float o2Distance = TransformSystem.getWorldPosition(o2.getTransform(), temp2).distance(cameraPosition);
+            Vector3f cameraPosition = camera.getTransform().getWorldPosition(temp1);
+            float o1Distance = o1.getTransform().getWorldPosition(temp2).distance(cameraPosition);
+            float o2Distance = o2.getTransform().getWorldPosition(temp2).distance(cameraPosition);
             return (int) ((o2Distance - o1Distance) * 100f);
         }
     }

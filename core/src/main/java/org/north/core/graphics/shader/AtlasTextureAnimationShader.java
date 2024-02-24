@@ -2,17 +2,23 @@ package org.north.core.graphics.shader;
 
 import org.joml.Matrix4f;
 import org.north.core.component.MeshRenderer;
+import org.north.core.component.serialization.Serializable;
 import org.north.core.graphics.Graphics;
+
+import java.io.*;
 
 public class AtlasTextureAnimationShader extends AbstractGLShader {
 
-    public final int spriteCount;
-    public final int spriteWidth;
-    public final int spriteHeight;
+    public int spriteCount;
+    public int spriteWidth;
+    public int spriteHeight;
 
     public int spriteIndex;
 
     private final Matrix4f temp = new Matrix4f();
+
+    public AtlasTextureAnimationShader() {
+    }
 
     public AtlasTextureAnimationShader(int spriteCount, int spriteWidth, int spriteHeight) {
         String vertexShaderPath = "atlas_texture_animation_shader.vert";
@@ -36,5 +42,23 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
         setUniform("u_projection", graphics.projection);
         setUniform("u_view", graphics.view);
         setUniform("u_model", renderer.getTransform().getWorldModelMatrix(temp));
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeInt(spriteCount);
+        out.writeInt(spriteWidth);
+        out.writeInt(spriteHeight);
+        out.writeInt(spriteIndex);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        super.readExternal(in);
+        spriteCount = in.readInt();
+        spriteWidth = in.readInt();
+        spriteHeight = in.readInt();
+        spriteIndex = in.readInt();
     }
 }

@@ -6,16 +6,18 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
 import org.north.core.component.MeshRenderer;
+import org.north.core.component.serialization.Serializable;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;
 import org.north.core.utils.BufferUtils;
 import org.north.core.utils.ResourceManager;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractGLShader implements Shader {
+public abstract class AbstractGLShader implements Shader, Externalizable {
 
     protected int id;
     protected Map<String, Integer> uniformLocationCache = new HashMap<>();
@@ -24,7 +26,12 @@ public abstract class AbstractGLShader implements Shader {
 
     protected boolean enabled;
 
+    private String vertexShaderPath;
+    private String fragmentShaderPath;
+
     protected void load(String vertexShaderPath, String fragmentShaderPath) {
+        this.vertexShaderPath = vertexShaderPath;
+        this.fragmentShaderPath = fragmentShaderPath;
         ResourceManager resourceManager = ResourceManager.getInstance();
         id = resourceManager.loadShader(vertexShaderPath, fragmentShaderPath);
     }
@@ -55,6 +62,19 @@ public abstract class AbstractGLShader implements Shader {
     public void prepareShader(Graphics graphics, MeshRenderer renderer) {
         activeTextureCount = GL20.GL_TEXTURE0;
         updateUniforms(graphics, renderer);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(vertexShaderPath);
+        out.writeUTF(fragmentShaderPath);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        String vertexShaderPath = in.readUTF();
+        String fragmentShaderPath = in.readUTF();
+        load(vertexShaderPath, fragmentShaderPath);
     }
 
     protected abstract void updateUniforms(Graphics graphics, MeshRenderer renderer);

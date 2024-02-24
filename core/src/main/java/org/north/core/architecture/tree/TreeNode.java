@@ -1,6 +1,9 @@
 package org.north.core.architecture.tree;
 
+import org.north.core.architecture.entity.Entity;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,15 +19,18 @@ public abstract class TreeNode<E extends TreeNode<E>> {
         return parent;
     }
 
-    public List<E> getDaughters() {
+    public Collection<E> getDaughters() {
+        if (daughters == null || daughters.isEmpty()) {
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableList(daughters);
     }
 
     public List<E> getSiblings() {
-        if (this.parent != null) {
-            return Collections.unmodifiableList(this.parent.daughters);
+        if (parent == null) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        return Collections.unmodifiableList(this.parent.daughters);
     }
 
     @SuppressWarnings("unchecked")
@@ -43,6 +49,10 @@ public abstract class TreeNode<E extends TreeNode<E>> {
 
     @SuppressWarnings("unchecked")
     public void setParent(E parent) {
+        if (parent == null) {
+            this.parent = null;
+            return;
+        }
         if (parent.isParentOf((E) this)) {
             return;
         }

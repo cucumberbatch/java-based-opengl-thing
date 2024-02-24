@@ -15,4 +15,5 @@ public interface System<E extends Component> {
     E removeComponent(UUID componentId);
     E removeComponent(Class<E> componentClass);
 
+    void reset();
 }

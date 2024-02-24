@@ -5,9 +5,7 @@ import org.north.core.architecture.entity.Entity;
 import org.north.core.physics.collision.TransformListener;
 import org.joml.Vector3f;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  * The main component of each game object that tells
@@ -88,6 +86,59 @@ public class Transform extends AbstractComponent implements Cloneable {
         return destination;
     }
 
+    public Vector3f getWorldPosition(Vector3f destination) {
+        Transform iterableTransform = this;
+        destination.zero();
+
+        do {
+            destination.add(iterableTransform.position);
+            Entity entityParent = iterableTransform.entity.getParent();
+            iterableTransform = (entityParent != null) ? entityParent.get(Transform.class) : null;
+        } while (iterableTransform != null);
+
+        return destination;
+    }
+
+    public Vector3f getWorldRotation(Vector3f destination) {
+        Transform iterableTransform = this;
+        destination.zero();
+        do {
+            destination.add(iterableTransform.rotation);
+            iterableTransform = iterableTransform.parent;
+        } while (iterableTransform.parent != null);
+        return destination;
+    }
+
+    public Vector3f getWorldScale(Vector3f destination) {
+        Transform iterableTransform = this;
+        destination.zero();
+        do {
+            destination.set(
+                    destination.x * iterableTransform.scale.x,
+                    destination.y * iterableTransform.scale.y,
+                    destination.z * iterableTransform.scale.z
+            );
+            iterableTransform = iterableTransform.parent;
+        } while (iterableTransform.parent != null);
+        return destination;
+    }
+
+    public Transform getWorldTransform() {
+        Transform iterableTransform = this;
+        Transform worldTransform = new Transform();
+        do {
+            worldTransform.position.add(iterableTransform.position);
+            worldTransform.rotation.add(iterableTransform.rotation);
+            worldTransform.scale.set(
+                    worldTransform.scale.x * iterableTransform.scale.x,
+                    worldTransform.scale.y * iterableTransform.scale.y,
+                    worldTransform.scale.z * iterableTransform.scale.z
+            );
+            iterableTransform = iterableTransform.parent;
+        } while (iterableTransform != null);
+        return worldTransform;
+    }
+
     @Override
     public void reset() {
         super.reset();
@@ -102,16 +153,16 @@ public class Transform extends AbstractComponent implements Cloneable {
     }
 
     @Override
-    public void serializeObject(ObjectOutputStream out) throws IOException {
-        super.serializeObject(out);
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
         out.writeObject(position);
         out.writeObject(rotation);
         out.writeObject(scale);
     }
 
     @Override
-    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        super.deserializeObject(in);
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
         position = (Vector3f) in.readObject();
         rotation = (Vector3f) in.readObject();
         scale = (Vector3f) in.readObject();
