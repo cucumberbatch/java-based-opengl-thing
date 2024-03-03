@@ -2,7 +2,6 @@ package org.north.core.graphics.shader;
 
 import org.joml.Matrix4f;
 import org.north.core.component.MeshRenderer;
-import org.north.core.component.serialization.Serializable;
 import org.north.core.graphics.Graphics;
 
 import java.io.*;
@@ -41,7 +40,7 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
         setUniform("u_color", renderer.color);
         setUniform("u_projection", graphics.projection);
         setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getWorldModelMatrix(temp));
+        setUniform("u_model", renderer.getTransform().getGlobalModelMatrix(temp));
     }
 
     @Override

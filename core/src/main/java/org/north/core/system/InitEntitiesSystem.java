@@ -69,7 +69,6 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
         transform.position = new Vector3f(0, 0, 0f);
         transform.scale = new Vector3f(2, 2, 2);
-        transform.rotation = new Vector3f(1, 1, 1);
 
         renderer.shader = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
@@ -109,12 +108,9 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         // TV Screen object
         Entity tvScreen = et.create("tvScreen");
         transform = cm.take(tvScreen).add(Transform.class);
-        renderer = cm.take(tvScreen).add(MeshRenderer.class);
-
-        transform.position = new Vector3f(0f, 0f, 0f);
         transform.scale = new Vector3f(2, 2, 2);
-        transform.rotation = new Vector3f(1, 1, 1);
 
+        renderer = cm.take(tvScreen).add(MeshRenderer.class);
         renderer.shader = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
@@ -129,6 +125,11 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
 
         cm.take(player).add(CloudEmitter.class);
+
+
+        Entity gasCloudSpawner = et.create("gasCloudSpawner");
+        transform = cm.take(gasCloudSpawner).add(Transform.class);
+        transform.position = new Vector3f(0f, -0.225f, 0.5f);
 
 
         /*
@@ -164,12 +165,16 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
         cm.take(camera).add(Camera.class);
 
+        // World that moves when player is "moving"
         Entity movableWorld = et.create("movableWorld");
-        cm.take(movableWorld).add(Transform.class, RigidBody.class);
+        cm.take(movableWorld).add(RigidBody.class);
+        transform = cm.take(movableWorld).add(Transform.class);
+//        transform.scale = new Vector3f(5, 5, 5);
 
         tvScreen.setParent(camera);
         background.setParent(tvScreen);
         player.setParent(tvScreen);
+        gasCloudSpawner.setParent(player);
 
     }
 

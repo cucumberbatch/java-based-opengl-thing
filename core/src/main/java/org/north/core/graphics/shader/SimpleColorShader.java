@@ -36,7 +36,7 @@ public class SimpleColorShader extends AbstractGLShader {
         setUniform(colorUniformPtr, renderer.color);
         setUniform(projectionUniformPtr, graphics.projection);
         setUniform(viewUniformPtr, graphics.view);
-        setUniform(modelUniformPtr, renderer.getTransform().getWorldModelMatrix(temp));
+        setUniform(modelUniformPtr, renderer.getTransform().getGlobalModelMatrix(temp));
     }
 
     @Override

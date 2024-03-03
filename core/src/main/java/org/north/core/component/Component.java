@@ -1,11 +1,8 @@
 package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
-import org.north.core.component.serialization.Serializable;
 
 import java.io.Externalizable;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.UUID;
 
 public interface Component extends Externalizable {

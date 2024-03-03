@@ -208,9 +208,9 @@ public class SystemManager {
 
         @Override
         public int compare(Component o1, Component o2) {
-            Vector3f cameraPosition = camera.getTransform().getWorldPosition(temp1);
-            float o1Distance = o1.getTransform().getWorldPosition(temp2).distance(cameraPosition);
-            float o2Distance = o2.getTransform().getWorldPosition(temp2).distance(cameraPosition);
+            Vector3f cameraPosition = camera.getTransform().getGlobalPosition(temp1);
+            float o1Distance = o1.getTransform().getGlobalPosition(temp2).distance(cameraPosition);
+            float o2Distance = o2.getTransform().getGlobalPosition(temp2).distance(cameraPosition);
             return (int) ((o2Distance - o1Distance) * 100f);
         }
     }

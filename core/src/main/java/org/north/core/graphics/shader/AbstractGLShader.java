@@ -6,7 +6,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
 import org.north.core.component.MeshRenderer;
-import org.north.core.component.serialization.Serializable;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;

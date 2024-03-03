@@ -1,6 +1,7 @@
 package org.north.core.component;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.physics.collision.TransformListener;
 import org.joml.Vector3f;
@@ -14,32 +15,42 @@ import java.io.*;
  * @author cucumberbatch
  */
 public class Transform extends AbstractComponent implements Cloneable {
-    private transient TransformListener transformListener = (e, p1, p2) -> {};
+    public Transform parent;
 
-    public transient Transform parent;
+    public Vector3f position = new Vector3f(0, 0, 0);
+    public Vector3f rotation = new Vector3f(0, 0, 0);
+    public Vector3f scale    = new Vector3f(1, 1, 1);
 
-    public transient Vector3f position = new Vector3f();
-    public transient Vector3f rotation = new Vector3f();
-    public transient Vector3f scale    = new Vector3f(1, 1, 1);
+    private static final TransformListener EMPTY_TRANSFORM_LISTENER = (e, p1, p2) -> {};
+
+    private TransformListener transformListener = EMPTY_TRANSFORM_LISTENER;
 
 
     public void moveTo(Vector3f position) {
-        transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(position));
+        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
+            transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(position));
+        }
         this.position.set(position);
     }
 
     public void moveTo(float x, float y, float z) {
-        transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(x, y, z));
+        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
+            transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(x, y, z));
+        }
         this.position.set(x, y, z);
     }
 
     public void moveRel(Vector3f position) {
-        transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(position).add(this.position));
+        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
+            transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(position).add(this.position));
+        }
         this.position.add(position);
     }
 
     public void moveRel(float x, float y, float z) {
-        transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
+        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
+            transformListener.registerMovement(this.entity, new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
+        }
         this.position.add(x, y, z);
     }
 
@@ -61,69 +72,53 @@ public class Transform extends AbstractComponent implements Cloneable {
     public Matrix4f getLocalModelMatrix(Matrix4f destination) {
         return destination.identity()
                 .translate(position.x, position.y, position.z)
+                .rotateX(rotation.x)
+                .rotateY(rotation.y)
+                .rotateZ(rotation.z)
                 .scale(scale.x, scale.y, scale.z);
     }
 
-    public Matrix4f getWorldModelMatrix(Matrix4f destination) {
-        Transform iterableTransform = this;
-        Transform worldTransform = new Transform();
+    public Matrix4f getGlobalModelMatrix(Matrix4f destination) {
+        Transform it;
+        Entity parentEntity = this.entity;
+        destination.identity();
         do {
-            worldTransform.position.add(iterableTransform.position);
-            worldTransform.rotation.add(iterableTransform.rotation);
-            worldTransform.scale.set(
-                    worldTransform.scale.x * iterableTransform.scale.x,
-                    worldTransform.scale.y * iterableTransform.scale.y,
-                    worldTransform.scale.z * iterableTransform.scale.z
-            );
-            Entity entityParent = iterableTransform.entity.getParent();
-            iterableTransform = (entityParent != null) ? entityParent.get(Transform.class) : null;
-        } while (iterableTransform != null);
-
-        destination.identity()
-                .translate(worldTransform.position.x, worldTransform.position.y, worldTransform.position.z)
-                .scale(worldTransform.scale.x, worldTransform.scale.y, worldTransform.scale.z);
-
+            it = parentEntity.transform;
+            destination
+                    .translate(it.position)
+                    .rotateX(it.rotation.x)
+                    .rotateY(it.rotation.y)
+                    .rotateZ(it.rotation.z)
+                    .scale(it.scale);
+            parentEntity = it.entity.getParent();
+        } while (parentEntity != null);
         return destination;
     }
 
-    public Vector3f getWorldPosition(Vector3f destination) {
-        Transform iterableTransform = this;
-        destination.zero();
-
-        do {
-            destination.add(iterableTransform.position);
-            Entity entityParent = iterableTransform.entity.getParent();
-            iterableTransform = (entityParent != null) ? entityParent.get(Transform.class) : null;
-        } while (iterableTransform != null);
-
-        return destination;
+    public Vector3f getGlobalPosition(Vector3f destination) {
+        return getGlobalModelMatrix(new Matrix4f()).getTranslation(destination);
     }
 
-    public Vector3f getWorldRotation(Vector3f destination) {
-        Transform iterableTransform = this;
+    public Vector3f getGlobalRotation(Vector3f destination) {
+        Transform it;
+        Entity parentEntity = this.entity;
         destination.zero();
         do {
-            destination.add(iterableTransform.rotation);
-            iterableTransform = iterableTransform.parent;
-        } while (iterableTransform.parent != null);
+            it = parentEntity.transform;
+            destination
+                    .rotateX(it.rotation.x)
+                    .rotateY(it.rotation.y)
+                    .rotateZ(it.rotation.z);
+            parentEntity = it.entity.getParent();
+        } while (parentEntity != null);
         return destination;
     }
 
-    public Vector3f getWorldScale(Vector3f destination) {
-        Transform iterableTransform = this;
-        destination.zero();
-        do {
-            destination.set(
-                    destination.x * iterableTransform.scale.x,
-                    destination.y * iterableTransform.scale.y,
-                    destination.z * iterableTransform.scale.z
-            );
-            iterableTransform = iterableTransform.parent;
-        } while (iterableTransform.parent != null);
-        return destination;
+    public Vector3f getGlobalScale(Vector3f destination) {
+        return getGlobalModelMatrix(new Matrix4f()).getScale(destination);
     }
 
-    public Transform getWorldTransform() {
+    public Transform getGlobalTransform() {
         Transform iterableTransform = this;
         Transform worldTransform = new Transform();
         do {

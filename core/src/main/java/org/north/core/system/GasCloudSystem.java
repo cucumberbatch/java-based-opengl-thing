@@ -25,20 +25,15 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
         AtlasTextureAnimationShader shader = (AtlasTextureAnimationShader) meshRenderer.shader;
 
         if (shader.spriteIndex > 4) {
-//            cm.take(component.entity).get(Transform.class)
-//                    .moveTo(0f, -0.225f, 1f);
-
             cm.take(entity).remove(MeshRenderer.class);
-            et.remove(entity);
+//            et.remove(entity);
         }
 
         if (gasCloud.acc > 1) {
             shader.incrementSpriteIndex();
             gasCloud.acc = 0;
         }
-        gasCloud.acc += deltaTime * 7f;
 
-//        cm.take(component.entity).get(Transform.class)
-//                .moveRel(0f, -deltaTime, 0f);
+        gasCloud.acc += deltaTime * 7f;
     }
 }
