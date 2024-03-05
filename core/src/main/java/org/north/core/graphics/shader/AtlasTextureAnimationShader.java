@@ -16,6 +16,15 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
 
     private final Matrix4f temp = new Matrix4f();
 
+    private boolean initializedPtr;
+    private int spriteIndexPtr;
+    private int spriteWidthPtr;
+    private int texturePtr;
+    private int colorPtr;
+    private int projectionPtr;
+    private int viewPtr;
+    private int modelPtr;
+
     public AtlasTextureAnimationShader() {
     }
 
@@ -33,14 +42,25 @@ public class AtlasTextureAnimationShader extends AbstractGLShader {
     }
 
     @Override
-    protected void updateUniforms(Graphics graphics, MeshRenderer renderer) {
-        setUniform("u_sprite_index", spriteIndex);
-        setUniform("u_sprite_width", spriteWidth);
-        setUniform("u_texture", renderer.texture);
-        setUniform("u_color", renderer.color);
-        setUniform("u_projection", graphics.projection);
-        setUniform("u_view", graphics.view);
-        setUniform("u_model", renderer.getTransform().getGlobalModelMatrix(temp));
+    public void updateUniforms(Graphics graphics, MeshRenderer renderer) {
+        if (!initializedPtr) {
+            spriteIndexPtr = graphics.getUniformLocation(this, "u_sprite_index");
+            spriteWidthPtr = graphics.getUniformLocation(this, "u_sprite_width");
+            texturePtr = graphics.getUniformLocation(this, "u_texture");
+            colorPtr = graphics.getUniformLocation(this, "u_color");
+            projectionPtr = graphics.getUniformLocation(this, "u_projection");
+            viewPtr = graphics.getUniformLocation(this, "u_view");
+            modelPtr = graphics.getUniformLocation(this, "u_model");
+            initializedPtr = true;
+        }
+
+        graphics.setUniform(spriteIndexPtr, spriteIndex);
+        graphics.setUniform(spriteWidthPtr, spriteWidth);
+        graphics.setUniform(texturePtr, renderer.texture);
+        graphics.setUniform(colorPtr, renderer.color);
+        graphics.setUniform(projectionPtr, graphics.projection);
+        graphics.setUniform(viewPtr, graphics.view);
+        graphics.setUniform(modelPtr, renderer.getTransform().getGlobalModelMatrix(temp));
     }
 
     @Override

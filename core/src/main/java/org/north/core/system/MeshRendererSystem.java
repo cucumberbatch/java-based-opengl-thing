@@ -23,7 +23,7 @@ public class MeshRendererSystem extends AbstractSystem<MeshRenderer> implements 
         int renderType = meshRenderer.renderType;
 
         shader.enable();
-        shader.prepareShader(graphics, meshRenderer);
+        graphics.prepareShader(shader, meshRenderer);
         vertexArray.render(renderType);
         shader.disable();
 

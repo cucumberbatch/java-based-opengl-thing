@@ -25,18 +25,18 @@ public class TextureShader extends AbstractGLShader {
     @Override
     public void updateUniforms(Graphics graphics, MeshRenderer renderer) {
         if (!initializedPtr) {
-            textureUniformPtr = getUniformLocation("u_texture");
-            colorUniformPtr = getUniformLocation("u_color");
-            projectionUniformPtr = getUniformLocation("u_projection");
-            viewUniformPtr = getUniformLocation("u_view");
-            modelUniformPtr = getUniformLocation("u_model");
+            textureUniformPtr = graphics.getUniformLocation(this, "u_texture");
+            colorUniformPtr = graphics.getUniformLocation(this, "u_color");
+            projectionUniformPtr = graphics.getUniformLocation(this, "u_projection");
+            viewUniformPtr = graphics.getUniformLocation(this, "u_view");
+            modelUniformPtr = graphics.getUniformLocation(this, "u_model");
             initializedPtr = true;
         }
 
-        setUniform(textureUniformPtr, renderer.texture);
-        setUniform(colorUniformPtr, renderer.color);
-        setUniform(projectionUniformPtr, graphics.projection);
-        setUniform(viewUniformPtr, graphics.view);
-        setUniform(modelUniformPtr, renderer.getTransform().getGlobalModelMatrix(temp));
+        graphics.setUniform(textureUniformPtr, renderer.texture);
+        graphics.setUniform(colorUniformPtr, renderer.color);
+        graphics.setUniform(projectionUniformPtr, graphics.projection);
+        graphics.setUniform(viewUniformPtr, graphics.view);
+        graphics.setUniform(modelUniformPtr, renderer.getTransform().getGlobalModelMatrix(temp));
     }
 }

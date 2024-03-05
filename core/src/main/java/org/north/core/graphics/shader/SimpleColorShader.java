@@ -24,19 +24,19 @@ public class SimpleColorShader extends AbstractGLShader {
     }
 
     @Override
-    public void updateUniforms(Graphics graphics, MeshRenderer renderer) {
+    public void updateUniforms(Graphics g, MeshRenderer renderer) {
         if (!initializedPtr) {
-            colorUniformPtr = getUniformLocation("u_color");
-            projectionUniformPtr = getUniformLocation("u_projection");
-            viewUniformPtr = getUniformLocation("u_view");
-            modelUniformPtr = getUniformLocation("u_model");
+            colorUniformPtr = g.getUniformLocation(this, "u_color");
+            projectionUniformPtr = g.getUniformLocation(this, "u_projection");
+            viewUniformPtr = g.getUniformLocation(this, "u_view");
+            modelUniformPtr = g.getUniformLocation(this, "u_model");
             initializedPtr = true;
         }
 
-        setUniform(colorUniformPtr, renderer.color);
-        setUniform(projectionUniformPtr, graphics.projection);
-        setUniform(viewUniformPtr, graphics.view);
-        setUniform(modelUniformPtr, renderer.getTransform().getGlobalModelMatrix(temp));
+        g.setUniform(colorUniformPtr, renderer.color);
+        g.setUniform(projectionUniformPtr, g.projection);
+        g.setUniform(viewUniformPtr, g.view);
+        g.setUniform(modelUniformPtr, renderer.getTransform().getGlobalModelMatrix(temp));
     }
 
     @Override
