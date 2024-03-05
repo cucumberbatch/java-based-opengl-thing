@@ -2,6 +2,7 @@ package org.north.core.system;
 
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.architecture.tree.EntityTree;
 import org.north.core.component.ComponentState;
 import org.north.core.component.MeshCollider;
 import org.north.core.context.ApplicationContext;
@@ -23,6 +24,10 @@ import org.north.core.system.process.*;
 import org.north.core.utils.Stopwatch;
 import org.joml.Vector3f;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -33,10 +38,12 @@ public class Pipeline implements ISystem, Runnable {
     private final Graphics graphics;
     private final ComponentManager componentManager;
     private final SystemManager systemManager;
+    private final EntityTree et;
 
     private Scene scene;
 
     private boolean isUpdatePaused = false;
+    private boolean load = false;
 
 
     @Inject
@@ -45,6 +52,7 @@ public class Pipeline implements ISystem, Runnable {
         this.graphics = context.getDependency(Graphics.class);
         this.componentManager = context.getDependency(ComponentManager.class);
         this.systemManager = context.getDependency(SystemManager.class);
+        this.et = (EntityTree) context.getEntityTree();
     }
 
     public void setScene(Scene scene) {
@@ -58,29 +66,65 @@ public class Pipeline implements ISystem, Runnable {
         final FrameTiming timingContext = new FrameTiming();
 
         // todo: load scene from file (game data deserialization)
+//        if (!load) {
         loadScene(scene);
+//        }
 
         while (window.shouldNotClose()) {
             try {
                 timingContext.updateTiming();
                 final float elapsedTime = timingContext.getElapsedTime();
 
-                applyDeferredCommands();
+                //test
+                updateScene();
+
                 updateInput();
                 init();
                 update(elapsedTime);
                 registerCollisions();
                 handleCollisions();
+
+                applyDeferredCommands();
+
                 render(window);
 
                 timingContext.sync();
             } catch (RuntimeException e) {
+                e.printStackTrace();
                 // Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
                 break;
             }
         }
 
         // Logger.info("Game loop ended");
+    }
+
+    private void updateScene() {
+        if (Input.isPressed(GLFW_KEY_M)) {
+            String fileName = "transform_temp.txt";
+            if (load) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName))) {
+                    et.updateFrom((EntityTree) in.readObject());
+                    for (Entity e: et) {
+                        for (Component component : e.components.values()) {
+                            systemManager.addComponent(component);
+                        }
+                    }
+                    load = false;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileName))) {
+                    out.writeObject(et);
+                    systemManager.reset();
+                    et.remove(et.getRoot());
+                    load = true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void loadScene(Scene scene) {
@@ -116,6 +160,7 @@ public class Pipeline implements ISystem, Runnable {
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
+                        e.printStackTrace();
                         component.setState(ComponentState.LATE_INIT_STATE);
                     }
                 } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
@@ -387,7 +432,7 @@ public class Pipeline implements ISystem, Runnable {
                 // Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
             }
             for (Component component : components) {
-                if (component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
+                if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     // Logger.trace(String.format(
 //                            "Handling render component [%s: %s]",
 //                            system.getClass().getName(),

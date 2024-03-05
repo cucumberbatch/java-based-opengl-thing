@@ -12,24 +12,23 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
+import static org.joml.Math.*;
 
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
 
     private final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
     private final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
+    private final float twoPi = (float) (2 * PI);
 
     private float acc = 0;
     private long gasCloudEntityNumber = 0;
-    private int gasCloudCount = 0;
 
     private Entity world;
     private Transform worldTransform;
-    private RigidBody rigidBody;
-
-    private boolean serialized = false;
+    private RigidBody movableWorldRigidBody;
+    private Transform spaceshipTransform;
+    private Transform spawnerTransform;
 
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
@@ -38,78 +37,64 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
 
     @Override
     public void init(CloudEmitter cloudEmitter) {
-        world = em.getByName("movableWorld");
+        world = et.getByName("movableWorld");
         worldTransform = world.transform;
-        rigidBody = world.get(RigidBody.class);
+        movableWorldRigidBody = world.get(RigidBody.class);
+        spaceshipTransform = cloudEmitter.getTransform();
+        spawnerTransform = et.getByName("gasCloudSpawner").transform;
 
-        rigidBody.isGravitational = false;
+        movableWorldRigidBody.isGravitational = false;
     }
 
     @Override
     public void update(CloudEmitter cloudEmitter, final float deltaTime) {
         boolean moving = false;
 
-        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
-            rigidBody.addImpulseToMassCenter(0f, -deltaTime * 2, 0f);
-            moving = true;
-        }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
-            rigidBody.addImpulseToMassCenter(0f, deltaTime * 2, 0f);
-            moving = true;
-        }
+        float accelerationSpeed = 16;
+        float rotationSpeed = 6;
+        float rotationIncrement = deltaTime * rotationSpeed;
+        float accelerationIncrement = deltaTime * accelerationSpeed;
+        float angle = spaceshipTransform.rotation.z();
+
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            rigidBody.addImpulseToMassCenter(-deltaTime * 2, 0f, 0f);
-            moving = true;
+            angle = (spaceshipTransform.rotation.z - rotationIncrement) % twoPi;
         }
         if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            rigidBody.addImpulseToMassCenter(deltaTime * 2, 0f, 0f);
-            moving = true;
+            angle = (spaceshipTransform.rotation.z + rotationIncrement) % twoPi;
         }
 
+        spaceshipTransform.rotation.set(0, 0, angle);
 
-        if (moving) {
-            if (acc > 1) {
-                Entity gasCloudEntity = em.create("gas_cloud_" + gasCloudEntityNumber++);
+        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
+            moving = true;
+            movableWorldRigidBody.addImpulseToMassCenter(
+                    accelerationIncrement * (float) sin(angle),
+                    -accelerationIncrement * (float) cos(angle),
+                    0f
+            );
+        }
 
-                cm.take(gasCloudEntity)
-                        .add(Transform.class, MeshRenderer.class, GasCloud.class);
+        if (moving && acc > 1) {
+            Entity gasCloudEntity = et.create("gas_cloud_" + gasCloudEntityNumber++);
 
-                gasCloudEntity.setParent(world);
+            cm.take(gasCloudEntity)
+                    .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
-                Transform transform = gasCloudEntity.get(Transform.class);
-                MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
+            et.add(world, gasCloudEntity);
 
-                transform.position.set(emittingPosition.sub(worldTransform.position, new Vector3f()));
-                transform.scale.set(emittingScale);
+            Transform transform = gasCloudEntity.get(Transform.class);
+            Vector3f worldPosition = worldTransform.getGlobalPosition(new Vector3f());
+            worldPosition.set(-worldPosition.x / 5, -worldPosition.y / 5, worldPosition.z);//.add(emittingPosition);
+            transform.position.set(worldPosition);
+            transform.scale.set(emittingScale);
 
-                renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
-                renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+            MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
+            renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
+            renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
 
-                gasCloudCount++;
-                acc = 0;
-            }
+            acc = 0;
         }
 
         acc += deltaTime * 6;
-
-        if (Input.isPressed(GLFW.GLFW_KEY_K)) {
-            if (!serialized) {
-                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("transform_temp.txt"))) {
-                    cloudEmitter.entity.serializeObject(out);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                serialized = true;
-            } else {
-                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("transform_temp.txt"))) {
-                    cloudEmitter.entity.deserializeObject(in);
-                } catch (IOException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                         InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-                serialized = false;
-            }
-        }
-
     }
 }

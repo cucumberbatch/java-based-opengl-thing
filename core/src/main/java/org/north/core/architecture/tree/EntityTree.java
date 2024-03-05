@@ -3,11 +3,82 @@ package org.north.core.architecture.tree;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Component;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.*;
 
-public class EntityTree extends AbstractCollection<Entity> implements Tree<Entity> {
+public class EntityTree extends AbstractCollection<Entity> implements Tree<Entity>, Externalizable {
+    public static final Entity EMPTY_ENTITY;
+
+    static {
+        EMPTY_ENTITY = new Entity();
+        EMPTY_ENTITY.setId(new UUID(0, 0));
+    }
+
     private Entity root;
     private int size;
+
+    @Override
+    public boolean add(Entity entity) {
+        if (root == null) {
+            root = entity;
+        } else {
+            entity.setParent(root);
+        }
+        int count = 0;
+        Iterator<Entity> iterator = new EntityTreeIterator(entity);
+        while (iterator.hasNext()) {
+            iterator.next();
+            count++;
+        }
+        this.size += count;
+        return true;
+    }
+
+    public boolean add(Entity parent, Entity daughter) {
+        if (root == null) {
+            return false;
+        }
+        if (daughter == null) {
+            return false;
+        }
+        if (!root.isAncestorOf(parent)) {
+            return false;
+        }
+        daughter.setParent(parent);
+        int count = 0;
+        Iterator<Entity> iterator = new EntityTreeIterator(daughter);
+        while (iterator.hasNext()) {
+            iterator.next();
+            count++;
+        }
+        this.size += count;
+        return true;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        if (!(o instanceof Entity)) {
+            return false;
+        }
+        if (root == null) {
+            return false;
+        }
+        Entity entity = (Entity) o;
+        if (entity.equals(root)) {
+            root = null;
+            size = 0;
+            return true;
+        }
+        Entity parent = entity.getParent();
+        if (parent != null) {
+            entity.setParent(null);
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public Entity create() {
@@ -28,14 +99,29 @@ public class EntityTree extends AbstractCollection<Entity> implements Tree<Entit
     public Entity create(Entity parent, String name) {
         Entity entity = new Entity(name);
 
-        if (this.root == null) {
-            this.root = entity;
+        if (root == null) {
+            root = entity;
         } else {
             entity.setParent((parent == null) ? this.root : parent);
         }
-        size++;
+
+        int count = 0;
+        for (Entity value : this) {
+            count++;
+        }
+        this.size = count;
 
         return entity;
+    }
+
+    public void updateFrom(EntityTree tree) {
+        this.root = tree.root;
+        this.size = tree.size;
+    }
+
+    @Override
+    public Entity getRoot() {
+        return root;
     }
 
     @Override
@@ -59,29 +145,24 @@ public class EntityTree extends AbstractCollection<Entity> implements Tree<Entit
         if (id.equals(parent.id)) {
             return parent;
         }
-        Entity target;
-        List<Entity> daughters = parent.getDaughters();
-        if (!daughters.isEmpty()) {
-            for (Entity daughter: daughters) {
-                target = this.getByIdFromParent(daughter, id);
-                if (target != null) return target;
-            }
+        for (Entity daughter: parent.getDaughters()) {
+            Entity target = this.getByIdFromParent(daughter, id);
+            if (target != null) return target;
         }
         return null;
     }
 
     @Override
     public Entity getByNameFromParent(Entity parent, String name) {
+        if (parent == null) {
+            return null;
+        }
         if (name.equals(parent.name)) {
             return parent;
         }
-        Entity target;
-        List<Entity> daughters = parent.getDaughters();
-        if (!daughters.isEmpty()) {
-            for (Entity daughter: daughters) {
-                target = this.getByNameFromParent(daughter, name);
-                if (target != null) return target;
-            }
+        for (Entity daughter: parent.getDaughters()) {
+            Entity target = this.getByNameFromParent(daughter, name);
+            if (target != null) return target;
         }
         return null;
     }
@@ -92,7 +173,7 @@ public class EntityTree extends AbstractCollection<Entity> implements Tree<Entit
         if (parent == null) {
             return entities;
         }
-        List<Entity> daughters = parent.getDaughters();
+        Collection<Entity> daughters = parent.getDaughters();
         if (!daughters.isEmpty()) {
             for (Entity daughter: daughters) {
                 this.getByComponentsFromParent(entities, daughter, componentTypes);
@@ -106,7 +187,15 @@ public class EntityTree extends AbstractCollection<Entity> implements Tree<Entit
 
     @Override
     public Iterator<Entity> iterator() {
-        return new EntityTreeIterator(this.root, size);
+        return new EntityTreeIterator(this.root);
+    }
+
+    @Override
+    public String toString() {
+        return "EntityTree{" +
+                "root=" + root +
+                ", size=" + size +
+                '}';
     }
 
     @Override
@@ -114,38 +203,46 @@ public class EntityTree extends AbstractCollection<Entity> implements Tree<Entit
         return size;
     }
 
-    public static class EntityTreeIterator implements Iterator<Entity> {
-        private final Entity[] entities;
-        private int index;
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(root);
+        out.writeInt(size);
+    }
 
-        EntityTreeIterator(Entity entity, int count) {
-            entities = new Entity[count];
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        root = (Entity) in.readObject();
+        size = in.readInt();
+    }
+
+    public static class EntityTreeIterator implements Iterator<Entity> {
+        private final List<Entity> entities;
+        private int count;
+
+        EntityTreeIterator(Entity entity) {
+            entities = new ArrayList<>();
             traverseTree(entity);
-            index = 0;
+            count = entities.size();
         }
 
-        private Entity traverseTree(Entity parent) {
-            if (parent.getDaughters().isEmpty()) {
-                return parent;
+        private void traverseTree(Entity parent) {
+            if (parent == null) return;
+            List<Entity> daughters = (List<Entity>) parent.getDaughters();
+            for (int i = 0; i < daughters.size(); i++) {
+                Entity daughter = daughters.get(i);
+                traverseTree(daughter);
             }
-            for (Entity daughter : parent.getDaughters()) {
-                Entity target = traverseTree(daughter);
-                if (target != null) {
-                    entities[index++] = target;
-                }
-            }
-            entities[index++] = parent;
-            return null;
+            entities.add(parent);
         }
 
         @Override
         public boolean hasNext() {
-            return index < entities.length;
+            return count > 0;
         }
 
         @Override
         public Entity next() {
-            return entities[index++];
+            return entities.get(entities.size() - (count--));
         }
     }
 

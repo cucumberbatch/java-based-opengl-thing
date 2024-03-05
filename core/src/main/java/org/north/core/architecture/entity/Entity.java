@@ -3,17 +3,10 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.TreeNode;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
-import org.north.core.component.serialization.Serializable;
 import org.north.core.physics.collision.Collidable;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
+import java.io.*;
 import java.util.*;
-
-import static org.north.core.utils.SerializationUtils.readUUID;
-import static org.north.core.utils.SerializationUtils.writeUUID;
 
 /**
  * Entity is an object that contains a bunch of components
@@ -21,7 +14,7 @@ import static org.north.core.utils.SerializationUtils.writeUUID;
  *
  * @author cucumberbatch
  */
-public class Entity extends TreeNode<Entity> implements Collidable, Serializable<ObjectOutputStream, ObjectInputStream> {
+public class Entity extends TreeNode<Entity> implements Collidable, Externalizable {
     public UUID id;
     public String name;
 
@@ -83,29 +76,31 @@ public class Entity extends TreeNode<Entity> implements Collidable, Serializable
     }
 
     @Override
-    public void serializeObject(ObjectOutputStream out) throws IOException {
-        writeUUID(out, id);
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(id);
         out.writeUTF(name);
-        out.writeByte(components.size());
-
-        for (Class<? extends Component> componentClass: components.keySet()) {
-            out.writeObject(componentClass);
-            Component component = components.get(componentClass);
-            component.serializeObject(out);
-        }
+        out.writeObject(transform);
+        out.writeObject(components);
+        out.writeObject(parent);
+        out.writeObject(daughters);
     }
 
     @Override
-    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        id = readUUID(in);
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        id = (UUID) in.readObject();
         name = in.readUTF();
-        byte componentsCount = in.readByte();
+        transform = (Transform) in.readObject();
+        components = (Map<Class<? extends Component>, Component>) in.readObject();
+        parent = (Entity) in.readObject();
+        daughters = (List<Entity>) in.readObject();
+    }
 
-        for (byte i = 0; i < componentsCount; i++) {
-            Class<? extends Component> componentClass = (Class<? extends Component>) in.readObject();
-            Component component = componentClass.getConstructor().newInstance();
-            component.deserializeObject(in);
-        }
+    @Override
+    public String toString() {
+        return "Entity{" +
+                "name='" + name + '\'' +
+                ", daughters=" + daughters +
+                '}';
     }
 
     @Override

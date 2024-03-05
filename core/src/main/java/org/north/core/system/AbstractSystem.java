@@ -1,6 +1,7 @@
 package org.north.core.system;
 
 import org.north.core.architecture.entity.Entity;
+import org.north.core.architecture.tree.EntityTree;
 import org.north.core.architecture.tree.Tree;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.component.Camera;
@@ -21,11 +22,11 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
-    protected final Tree<Entity> em;
+    protected final EntityTree et;
 
     public AbstractSystem(ApplicationContext context) {
         this.cm = context.getComponentManager();
-        this.em = context.getEntityTree();
+        this.et = (EntityTree) context.getEntityTree();
         this.vector3fPool = context.getDependency(Vector3fPool.class);
     }
 
@@ -71,6 +72,11 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     @Override
     public final E removeComponent(Class<E> componentClass) {
         return null;//componentMap.
+    }
+
+    @Override
+    public void reset() {
+        componentMap.clear();
     }
 
 

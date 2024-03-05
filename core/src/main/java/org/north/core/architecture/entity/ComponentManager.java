@@ -112,11 +112,11 @@ public class ComponentManager {
     }
 
     public static class ManagedEntity {
-        private final ComponentManager em;
+        private final ComponentManager cm;
         private Entity entity;
 
-        public ManagedEntity(ComponentManager em, Entity entity) {
-            this.em = em;
+        public ManagedEntity(ComponentManager cm, Entity entity) {
+            this.cm = cm;
             this.entity = entity;
         }
 
@@ -125,36 +125,36 @@ public class ComponentManager {
         }
 
         public synchronized <E extends Component> E add(Class<E> componentClass) {
-            em.pushManagedEntity(this);
-            return em.add(entity, componentClass);
+            cm.pushManagedEntity(this);
+            return cm.add(entity, componentClass);
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> add(Class<? extends Component>... componentClasses) {
-            em.pushManagedEntity(this);
-            return em.add(entity, componentClasses);
+            cm.pushManagedEntity(this);
+            return cm.add(entity, componentClasses);
         }
 
         public synchronized <E extends Component> E get(Class<E> componentClass) {
-            em.pushManagedEntity(this);
+            cm.pushManagedEntity(this);
             return entity.get(componentClass);
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> get(Class<? extends Component>... componentClasses) {
-            em.pushManagedEntity(this);
-            return em.get(entity, componentClasses);
+            cm.pushManagedEntity(this);
+            return cm.get(entity, componentClasses);
         }
 
         public synchronized <E extends Component> void remove(Class<E> componentClass) {
-            em.pushManagedEntity(this);
-            em.remove(entity, componentClass);
+            cm.pushManagedEntity(this);
+            cm.remove(entity, componentClass);
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> remove(Class<? extends Component>... componentClasses) {
-            em.pushManagedEntity(this);
-            return em.remove(entity, componentClasses);
+            cm.pushManagedEntity(this);
+            return cm.remove(entity, componentClasses);
         }
 
     }

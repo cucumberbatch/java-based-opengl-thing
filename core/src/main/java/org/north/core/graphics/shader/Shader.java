@@ -10,5 +10,5 @@ public interface Shader {
     void disable();
     boolean isEnabled();
 
-    void prepareShader(Graphics graphics, MeshRenderer renderer);
+    void updateUniforms(Graphics graphics, MeshRenderer renderer);
 }

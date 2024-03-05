@@ -25,7 +25,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
 
     @Override
     public void init(PlayerControls playerControls) {
-        physicalBody = em.getByName("referenceBox");
+        physicalBody = et.getByName("referenceBox");
         rigidBody = physicalBody.get(RigidBody.class);
     }
 

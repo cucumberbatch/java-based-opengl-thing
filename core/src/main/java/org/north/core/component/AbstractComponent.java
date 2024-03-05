@@ -2,9 +2,7 @@ package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.UUID;
 
 import static org.north.core.utils.SerializationUtils.readUUID;
@@ -115,17 +113,19 @@ public abstract class AbstractComponent implements Component, Cloneable {
     }
 
     @Override
-    public void serializeObject(ObjectOutputStream out) throws IOException {
-        writeUUID(out, id);
-        out.writeBoolean(this.isActive);
-        out.writeObject(this.state);
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(id);
+        out.writeObject(entity);
+        out.writeBoolean(isActive);
+//        out.writeObject(this.state);
     }
 
     @Override
-    public void deserializeObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.id = readUUID(in);
-        this.isActive = in.readBoolean();
-        this.state = (ComponentState) in.readObject();
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        id = (UUID) in.readObject();
+        entity = (Entity) in.readObject();
+        isActive = in.readBoolean();
+//        this.state = (ComponentState) in.readObject();
     }
 
 }
