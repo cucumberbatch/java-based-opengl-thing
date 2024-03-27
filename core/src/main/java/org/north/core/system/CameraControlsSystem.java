@@ -1,5 +1,6 @@
 package org.north.core.system;
 
+import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Camera;
 import org.north.core.component.CameraControls;
 import org.north.core.component.Transform;
@@ -9,6 +10,7 @@ import org.north.core.graphics.Window;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InitProcess;
+import org.north.core.system.process.RenderProcess;
 import org.north.core.system.process.UpdateProcess;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -21,7 +23,8 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 @ComponentHandler(CameraControls.class)
-public class CameraControlsSystem extends AbstractSystem<CameraControls> implements InitProcess<CameraControls>, UpdateProcess<CameraControls> {
+public class CameraControlsSystem extends AbstractSystem<CameraControls>
+        implements InitProcess<CameraControls>, UpdateProcess<CameraControls>, RenderProcess<CameraControls> {
 
     private static final int PERSPECTIVE_VIEW_STATE = 0;
     private static final int PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE = 1;
@@ -57,6 +60,21 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
         updateCameraMovement(cameraControls, deltaTime);
         updateCameraProjection();
         updateScreenCapture(graphics);
+//
+//        if (!mouseCaptured) {
+//            Vector2f cursorPosition = Input.getCursorPosition();
+//            Vector3f rayOrigin = camera.eye;
+//            Vector3f rayDirection = camera.at;
+//
+//
+//            Entity cube = et.getByName("right");
+//            cube.transform.moveTo(rayDirection.mul(2, new Vector3f()));
+//        }
+//    }
+//
+//    @Override
+//    public void render(CameraControls cameraControls, Graphics graphics) {
+
     }
 
     private void updateScreenCapture(Graphics graphics) {
@@ -118,6 +136,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
 
         Vector2f cursorPosition = Input.getCursorPosition();
 
+        java.lang.System.out.println(cursorPosition);
+
         float verticalAngle = cursorPosition.y / (Window.width / 256f) - 180;
         float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
 
@@ -170,7 +190,11 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls> impleme
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
-        camera.viewMatrix.identity().lookAt(componentTransform.position, point.add(componentTransform.position), temp2.set(0f, 1f, 0f));
+
+        camera.eye.set(componentTransform.position);
+        camera.at.set(point.add(componentTransform.position));
+
+        camera.viewMatrix.identity().lookAt(camera.eye, camera.at, temp2.set(0f, 1f, 0f));
         graphics.view = camera.viewMatrix;
 
         vector3fPool.put(temp2);

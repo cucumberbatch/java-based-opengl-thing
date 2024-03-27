@@ -31,11 +31,11 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         Entity root = et.create("root");
         Transform rootTransform = cm.take(root).add(Transform.class);
 
-//        initSingleButtonScene();
-//        initCubeAndCamera();
-//        initReferenceScene();
+        initSingleButtonScene();
+        initCubeAndCamera();
+        initReferenceScene();
 //        initSpaceshipOnScreen();
-        initSprites();
+//        initSprites();
 //        initScene1();
 //        initScene4();
     }

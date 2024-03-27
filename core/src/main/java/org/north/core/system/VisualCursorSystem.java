@@ -18,7 +18,8 @@ import org.north.core.system.process.UpdateProcess;
 import org.joml.Vector4f;
 import org.joml.Vector2f;
 
-// todo: cursor movement needs to be related on entity transform data, not local vectors
+// todo: cursor movement needs to be related on entity transform data,
+//  not local vectors
 @ComponentHandler(VisualCursor.class)
 public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         implements InitProcess<VisualCursor>, UpdateProcess<VisualCursor>, CollisionHandlingProcess<VisualCursor> {
@@ -34,12 +35,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     public float transitionTimeLimit       = 0.2f;
     public float transitionTimeAccumulator = 0.0f;
 
-    public Vector4f cursorColor            = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    public Vector4f cursorDefaultColor     = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
-    public Vector4f cursorOnHoverColor     = new Vector4f(0.6f, 0.9f, 1.0f, 1.0f);
+    public Vector4f cursorColor        = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public Vector4f cursorDefaultColor = new Vector4f(0.4f, 0.4f, 0.4f, 1.0f);
+    public Vector4f cursorOnHoverColor = new Vector4f(0.6f, 0.9f, 1.0f, 1.0f);
 
-    public Vector2f cursorIdleTopLeft      = new Vector2f(-20f, -20f);
-    public Vector2f cursorIdleBottomRight  = new Vector2f(+20f, +20f);
+    public Vector2f cursorIdleTopLeft     = new Vector2f(-20f, -20f);
+    public Vector2f cursorIdleBottomRight = new Vector2f(+20f, +20f);
 
 //    private Vector2f savedCursorPosition   = new Vector2f();
 
@@ -49,13 +50,16 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 //    private Vector2f cursorVelocity        = new Vector2f(1, 1);
 //    private Vector2f restoringForce        = new Vector2f(1, 1);
 
-    private Vector2f displacement          = new Vector2f(1, 1);
-    private float    springFactor          = 12.0f;
-    private float    mass                  = 0.01f;
+    private Vector2f displacement = new Vector2f(1, 1);
+    private float    springFactor = 12.0f;
+    private float    mass         = 0.01f;
 
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
 
-    private Rectangle imaginaryCursorShape = new Rectangle(Input.getCursorPosition().add(cursorIdleTopLeft), Input.getCursorPosition().add(cursorIdleBottomRight));
+    private Rectangle imaginaryCursorShape = new Rectangle(
+            Input.getCursorPosition().add(cursorIdleTopLeft),
+            Input.getCursorPosition().add(cursorIdleBottomRight)
+    );
 
     private Entity selectedEntity = null;
 
@@ -67,8 +71,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     @Override
     public void init(VisualCursor visualCursor) throws RuntimeException {
 
-        visualCursor.cursor  = new Rectangle(new Vector2f(0, 0).add(cursorIdleTopLeft), new Vector2f(0, 0).add(cursorIdleBottomRight));
-        visualCursor.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        visualCursor.cursor  = new Rectangle(
+                new Vector2f(0, 0).add(cursorIdleTopLeft),
+                new Vector2f(0, 0).add(cursorIdleBottomRight)
+        );
+        visualCursor.texture =
+                new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
 
@@ -87,7 +95,11 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
         MeshRenderer renderer = visualCursor.entity.get(MeshRenderer.class);
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-        renderer.mesh = new Mesh(visualCursorShape.toVertices(), visualCursor.indices, visualCursor.uv);
+        renderer.mesh = new Mesh(
+                visualCursorShape.toVertices(),
+                visualCursor.indices,
+                visualCursor.uv
+        );
         renderer.shader = new SimpleColorShader();
     }
 
@@ -116,10 +128,17 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
                         // Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
                     } else {
                         transitionTimeAccumulator += deltaTime;
-                        float ratio = transitionTimeAccumulator / transitionTimeLimit;
-                        cursor.topLeft     = new Vector2f(cursor.topLeft).lerp(button.topLeft, ratio);
-                        cursor.bottomRight = new Vector2f(cursor.bottomRight).lerp(button.bottomRight, ratio);
-                        cursorColor        = new Vector4f(cursorDefaultColor).lerp(cursorOnHoverColor, ratio);
+                        float ratio = transitionTimeAccumulator
+                                / transitionTimeLimit;
+                        cursor.topLeft =
+                                new Vector2f(cursor.topLeft)
+                                        .lerp(button.topLeft, ratio);
+                        cursor.bottomRight =
+                                new Vector2f(cursor.bottomRight)
+                                        .lerp(button.bottomRight, ratio);
+                        cursorColor =
+                                new Vector4f(cursorDefaultColor)
+                                        .lerp(cursorOnHoverColor, ratio);
                     }
                     break;
 

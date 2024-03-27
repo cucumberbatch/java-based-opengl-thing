@@ -11,19 +11,17 @@ import org.north.core.scene.Scene;
 import org.north.core.system.Pipeline;
 
 public class Engine {
-    public final EngineConfig config;
     public final Window window;
     public final Pipeline pipeline;
     public final ApplicationContext context;
 
-    public Engine(EngineConfig engineConfig) throws Exception {
+    public Engine() throws Exception {
         // Logger.info("Initializing engine..");
 
-        config = engineConfig;
-        context = new ApplicationContext(engineConfig);
+        context = new ApplicationContext();
 
         context.addDependencies(new Class[]{
-                Window.class, EntityTree.class, SystemManager.class,
+                EngineConfig.class, Window.class, EntityTree.class, SystemManager.class,
                 ComponentManager.class,  Graphics.class, Pipeline.class
         });
 

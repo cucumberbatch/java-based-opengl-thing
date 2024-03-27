@@ -13,7 +13,7 @@ public class MainThread {
         initComponent.entity = entity;
         entity.addComponent(initComponent);
         scene.addEntity(entity);
-        Engine engine = new Engine(EngineConfig.instance);
+        Engine engine = new Engine();
         engine.setScene(scene);
         engine.run();
     }

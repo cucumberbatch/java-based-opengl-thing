@@ -6,23 +6,16 @@ import org.north.core.architecture.tree.EntityTree;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.config.EngineConfig;
 import org.north.core.managment.SystemManager;
-import org.north.core.reflection.di.Inject;
 import org.north.core.reflection.di.registerer.DependencyRegisterer;
 import org.north.core.utils.ResourceManager;
 
 public class ApplicationContext {
-    private final EngineConfig engineConfig;
     private final DependencyRegisterer dependencyRegisterer;
 
-    @Inject
-    public ApplicationContext(EngineConfig engineConfig) {
-        this.engineConfig = engineConfig;
-
+    public ApplicationContext() {
         this.dependencyRegisterer = new DependencyRegisterer();
         this.dependencyRegisterer.registerDependency(ApplicationContext.class, this);
-        this.dependencyRegisterer.registerDependency(EngineConfig.class, engineConfig);
     }
-
 
     public <T> T getDependency(Class<T> dependencyClass) {
         return getDependencyInternal(dependencyClass);
@@ -36,8 +29,8 @@ public class ApplicationContext {
         return dependencyRegisterer.registerDependency(dependencyClass, dependency);
     }
 
-    public Object[] addDependencies(Class<?>[] classes) throws ReflectiveOperationException {
-        return dependencyRegisterer.registerDependencies(classes);
+    public Object[] addDependencies(Class<?>[] classArray) throws ReflectiveOperationException {
+        return dependencyRegisterer.registerDependencies(classArray);
     }
 
     public Tree<Entity> getEntityTree() {
@@ -57,7 +50,7 @@ public class ApplicationContext {
     }
 
     public EngineConfig getEngineConfig() {
-        return engineConfig;
+        return getDependencyInternal(EngineConfig.class);
     }
 
     public DependencyRegisterer getDependencyRegisterer() {
