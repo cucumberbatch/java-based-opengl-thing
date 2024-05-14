@@ -1,6 +1,5 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Camera;
 import org.north.core.component.CameraControls;
 import org.north.core.component.Transform;
@@ -22,6 +21,8 @@ import org.joml.Vector3f;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import static java.lang.Math.PI;
+
 @ComponentHandler(CameraControls.class)
 public class CameraControlsSystem extends AbstractSystem<CameraControls>
         implements InitProcess<CameraControls>, UpdateProcess<CameraControls>, RenderProcess<CameraControls> {
@@ -35,7 +36,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
     private static int projectionState = ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE;
     private static Camera camera;
-    private static Graphics graphics;
+    private final Graphics graphics;
+    private final Window window;
 
     private final Queue<Vector3f> cameraTrace = new ArrayDeque<>();
     private float projectionProgress = 0;
@@ -47,7 +49,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     @Inject
     public CameraControlsSystem(ApplicationContext context) throws ReflectiveOperationException {
         super(context);
-        graphics = context.getDependency(Graphics.class);
+        this.graphics = context.getDependency(Graphics.class);
+        this.window = context.getDependency(Window.class);
     }
 
     @Override
@@ -91,12 +94,16 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         }
     }
 
+    private static final float PROJECTION_PROGRESS_STEP = 0.06f;
+    private static final double HALF_PI = PI / 2;
+    private static final double SIN_OF_HALF_PI = Math.sin(HALF_PI);
+
     private void updateCameraProjection() {
         switch (projectionState) {
             case PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE: {
-                projectionProgress += 0.05f;
-                camera.projectionMatrix = new Matrix4f(CameraSystem.PERSPECTIVE_MATRIX).lerp(CameraSystem.ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
-                if (projectionProgress > 1) {
+                projectionProgress += PROJECTION_PROGRESS_STEP;
+                camera.projectionMatrix = new Matrix4f(CameraSystem.PERSPECTIVE_MATRIX).lerp(CameraSystem.ORTHOGRAPHIC_MATRIX, (float) (Math.sin(projectionProgress) / SIN_OF_HALF_PI));
+                if (projectionProgress > HALF_PI) {
                     projectionProgress = 0;
                     projectionState = ORTHOGRAPHIC_VIEW_STATE;
                 }
@@ -104,9 +111,9 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 break;
             }
             case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE: {
-                projectionProgress += 0.05f;
-                camera.projectionMatrix = new Matrix4f(CameraSystem.ORTHOGRAPHIC_MATRIX).lerp(CameraSystem.PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / Math.sin(1)));
-                if (projectionProgress > 1) {
+                projectionProgress += PROJECTION_PROGRESS_STEP;
+                camera.projectionMatrix = new Matrix4f(CameraSystem.ORTHOGRAPHIC_MATRIX).lerp(CameraSystem.PERSPECTIVE_MATRIX, (float) (Math.sin(projectionProgress) / SIN_OF_HALF_PI));
+                if (projectionProgress > HALF_PI) {
                     projectionProgress = 0;
                     projectionState = PERSPECTIVE_VIEW_STATE;
                 }
@@ -136,10 +143,10 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         Vector2f cursorPosition = Input.getCursorPosition();
 
-        java.lang.System.out.println(cursorPosition);
+//        java.lang.System.out.println(cursorPosition);
 
-        float verticalAngle = cursorPosition.y / (Window.width / 256f) - 180;
-        float horizontalAngle = -cursorPosition.x / (Window.width / 256f) - 180;
+        float verticalAngle = cursorPosition.y / (window.getWidth() / 256f) - 180;
+        float horizontalAngle = -cursorPosition.x / (window.getWidth() / 256f) - 180;
 
         verticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
@@ -149,11 +156,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        if (Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-            cameraMovementSpeed = cameraMovementSpeed + deltaTime * 1.3f;
-        } else {
-            cameraMovementSpeed = 1f;
-        }
+        cameraMovementSpeed = Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT) ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
 
@@ -206,6 +209,11 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     }
 
     public static class WindowSizeCallback implements GLFWWindowSizeCallbackI {
+        private final Graphics graphics;
+
+        public WindowSizeCallback(Graphics graphics) {
+            this.graphics = graphics;
+        }
 
         @Override
         public void invoke(long window, int width, int height) {

@@ -55,7 +55,7 @@ public class TerminalUtils {
         ANSI_UNDERLINE("\u001b[4m", "<underline>"),
         ANSI_REVERSED("\u001b[7m", "<reversed>");
 
-        private String ansiCode;
+        private final String ansiCode;
         private String formatterCommand = "<empty>";
 
         private static final Map<String, String> ansiCommandMap = new HashMap<>();
@@ -96,6 +96,11 @@ public class TerminalUtils {
             }
 
             return resultString.toString();
+        }
+
+        @Override
+        public String toString() {
+            return ansiCode;
         }
     }
 

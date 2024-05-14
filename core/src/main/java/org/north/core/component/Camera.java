@@ -28,6 +28,7 @@ public class Camera extends AbstractComponent {
         return destination.set(this.getTransform().position);
     }
 
+    /*
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -55,6 +56,8 @@ public class Camera extends AbstractComponent {
         viewMatrix = (Matrix4f) in.readObject();
         projectionMatrix = (Matrix4f) in.readObject();
     }
+
+     */
 
     @Override
     public String toString() {

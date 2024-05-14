@@ -33,14 +33,7 @@ public class RigidBody extends AbstractComponent {
         this.velocity.add(x, y, z);
     }
 
-    @Override
-    public void reset() {
-        super.reset();
-        mass = 1.0f;
-        isGravitational = true;
-        frictionFactor = 0.0f;
-    }
-
+    /*
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -66,6 +59,8 @@ public class RigidBody extends AbstractComponent {
         isGravitational = in.readBoolean();
         frictionFactor = in.readFloat();
     }
+
+     */
 
     @Override
     public String toString() {

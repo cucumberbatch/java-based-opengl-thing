@@ -1,0 +1,255 @@
+package org.north.core.scene;
+
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
+import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.architecture.entity.Entity;
+import org.north.core.architecture.tree.v2.TreeNode;
+import org.north.core.component.*;
+import org.north.core.graphics.Mesh;
+import org.north.core.graphics.PredefinedMeshes;
+import org.north.core.graphics.Texture;
+import org.north.core.graphics.shader.SimpleColorShader;
+import org.north.core.graphics.shader.TextureShader;
+import org.north.core.system.CameraSystem;
+
+import java.util.List;
+
+public class DefaultSceneComposer implements SceneComposer {
+    @Override
+    public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
+//        initSingleButtonScene(sceneRoot, cm);
+//        initCubeAndCamera(sceneRoot, cm);
+//        initReferenceScene(sceneRoot, cm);
+//        testScene(sceneRoot, cm);
+        initSpaceshipOnScreen(sceneRoot, cm);
+    }
+
+    private void testScene(TreeNode<Entity> root, ComponentManager cm) {
+        Entity e1 = new Entity("object");
+        root.add(e1);
+
+        List<? extends Component> components = cm.take(e1).add(Transform.class, MeshRenderer.class);
+
+        Transform transform = (Transform) components.get(0);
+        transform.position.set(0.5f, 0.5f, 0.5f);
+        transform.scale.set(0.8f, 0.8f, 0.8f);
+
+        MeshRenderer meshRenderer = (MeshRenderer) components.get(1);
+        meshRenderer.shader = new SimpleColorShader();
+//        meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        meshRenderer.mesh = PredefinedMeshes.CUBE;
+        meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
+
+        Entity camera = new Entity("camera");
+        root.add(camera);
+
+        components = cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
+
+//        transform = (Transform) components.get(0);
+//        transform.position.set(0.5f, 0.5f, 0.5f);
+//        transform.scale.set(0.8f, 0.8f, 0.8f);
+
+    }
+
+
+    private void initCubeAndCamera(TreeNode<Entity> root, ComponentManager cm) {
+        Entity camera = new Entity("camera");
+        Entity center = new Entity("center");
+        Entity left = new Entity("left");
+        Entity right = new Entity("right");
+
+        root.add(camera);
+        root.add(center);
+        root.add(left);
+        root.add(right);
+
+        List<? extends Component> components;
+        Transform transform;
+        MeshRenderer renderer;
+
+        components = cm.take(camera)
+                .add(Transform.class, Camera.class, CameraControls.class);
+
+        components.get(0).getTransform().moveTo(0, 0, 1);
+
+
+        components = cm.take(center).add(Transform.class, MeshRenderer.class);
+
+        renderer = (MeshRenderer) components.get(1);
+        renderer.mesh = PredefinedMeshes.QUAD;
+        renderer.color = new Vector4f(1, 1, 1, 1);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/Capture001.png");
+        renderer.renderType = GL11.GL_TRIANGLES;
+
+
+        components = cm.take(left).add(Transform.class, MeshRenderer.class);
+
+        transform = (Transform) components.get(0);
+        transform.moveTo(-2f, 0f, 0f);
+        //        transform.scale = new Vector3f(0.5f, 0.2f, 0.2f);
+
+        renderer = (MeshRenderer) components.get(1);
+        renderer.mesh = PredefinedMeshes.QUAD;
+        renderer.color = new Vector4f(1, 1, 1, 1);
+        renderer.shader = new TextureShader();
+        //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        //        renderer.texture = new Texture("core/src/main/resources/assets/textures/Capture001.png");
+        renderer.renderType = GL11.GL_TRIANGLES;
+
+
+        components = cm.take(right).add(Transform.class, MeshRenderer.class);
+
+        transform = (Transform) components.get(0);
+        transform.moveTo(2f, 0f, 0f);
+        //        transform.rotation = new Vector3f(0f, -5f, 0f);
+        //        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = (MeshRenderer) components.get(1);
+        renderer.mesh = PredefinedMeshes.CUBE;
+        renderer.shader = new SimpleColorShader();
+        renderer.color = new Vector4f(1, 0, 0, 1);
+        //        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.renderType = GL11.GL_TRIANGLES;
+
+    }
+
+    private void initSingleButtonScene(TreeNode<Entity> root, ComponentManager cm) {
+        Entity eCamera = new Entity("camera");
+        Entity eButton = new Entity("button");
+
+        root.add(eCamera);
+        root.add(eButton);
+
+        List<? extends Component> components;
+        Transform transform;
+        Button button;
+        MeshRenderer renderer;
+        Camera camera;
+
+        components = cm.take(eButton)
+                .add(Transform.class, Button.class, MeshRenderer.class);
+
+        transform = ((Transform) components.get(0));
+        transform.moveTo(0, 0, 1);
+
+        renderer = ((MeshRenderer) components.get(2));
+        renderer.mesh = new Mesh();
+        renderer.shader = new SimpleColorShader();
+        renderer.color = new Vector4f(0.4f, 0.7f, 0.3f, 1f);
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+
+        transform = cm.take(eCamera).add(Transform.class);
+        camera = cm.take(eCamera).add(Camera.class);
+
+        transform.moveTo(0, 0, 0);
+        camera.projectionMatrix = CameraSystem.PERSPECTIVE_MATRIX;
+    }
+
+    private void initReferenceScene(TreeNode<Entity> root, ComponentManager cm) {
+        Entity referenceBox = new Entity("referenceBox");
+        Entity camera = new Entity("camera");
+
+        root.add(referenceBox);
+
+        referenceBox.add(camera);
+
+        cm.take(camera)
+                .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
+
+        List<? extends Component> componentList = cm.take(referenceBox)
+                .add(Transform.class, MeshRenderer.class, RigidBody.class);
+
+        MeshRenderer renderer = (MeshRenderer) componentList.get(1);
+        renderer.shader = new SimpleColorShader();
+        renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
+        renderer.mesh = PredefinedMeshes.QUAD;
+    }
+
+    private void initSpaceshipOnScreen(TreeNode<Entity> root, ComponentManager cm) {
+        Transform transform;
+        MeshRenderer renderer;
+
+        // TV Screen object
+        Entity tvScreen = new Entity("tvScreen");
+        transform = cm.take(tvScreen).add(Transform.class);
+        transform.scale = new Vector3f(2, 2, 2);
+
+        renderer = cm.take(tvScreen).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+
+        // Player spaceship in the middle of the screen
+        Entity player = new Entity("player");
+        transform = cm.take(player).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 1f);
+        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = cm.take(player).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+
+        cm.take(player).add(CloudEmitter.class);
+
+
+        Entity gasCloudSpawner = new Entity("gasCloudSpawner");
+        transform = cm.take(gasCloudSpawner).add(Transform.class);
+        transform.position = new Vector3f(0f, -0.225f, 0.5f);
+
+
+        /*
+
+        // Spaceship gas clouds
+        Entity cloud = em.create("cloud");
+        transform = cm.take(cloud).add(Transform.class);
+        transform.position = new Vector3f(0f, -0.25f, 1f);
+        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+
+        renderer = cm.take(cloud).add(MeshRenderer.class);
+        renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+
+        GasCloud animation = cm.take(cloud).add(GasCloud.class);
+
+         */
+
+        // Background texture behind tv screen, player and other gameplay objects
+        Entity background = new Entity("background");
+        transform = cm.take(background).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 2f);
+        transform.scale = new Vector3f(2, 2, 2);
+
+        renderer = cm.take(background).add(MeshRenderer.class);
+        renderer.shader = new TextureShader();
+        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
+
+        // Camera
+        Entity camera = new Entity("camera");
+        transform = cm.take(camera).add(Transform.class);
+        transform.position = new Vector3f(0f, 0f, 0f);
+
+        cm.take(camera).add(Camera.class);
+
+        // World that moves when player is "moving"
+        Entity movableWorld = new Entity("movableWorld");
+        cm.take(movableWorld).add(RigidBody.class);
+        transform = cm.take(movableWorld).add(Transform.class);
+        //        transform.scale = new Vector3f(5, 5, 5);
+
+        root.add(camera);
+        root.add(movableWorld);
+
+        camera.add(tvScreen);
+
+        tvScreen.add(background);
+        tvScreen.add(player);
+
+        player.add(gasCloudSpawner);
+    }
+
+
+}

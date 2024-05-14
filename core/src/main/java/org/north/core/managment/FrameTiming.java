@@ -3,6 +3,7 @@ package org.north.core.managment;
 public class FrameTiming {
     private static final int  NANO_TIME_STEP = 100;
     private static final long NANO_SECONDS_IN_SECOND = 1_000_000_000L;
+    private static final int DEFAULT_FRAME_RATE = 60;
 
     private long previousNanoTime;
     private long loopStartTimeInNano;
@@ -13,7 +14,11 @@ public class FrameTiming {
     private int  actualFrameRate;
 
     public FrameTiming() {
-        setTargetFrameRate(60);
+        this(DEFAULT_FRAME_RATE);
+    }
+
+    public FrameTiming(int targetFrameRate) {
+        setTargetFrameRate(targetFrameRate);
         previousNanoTime = getCurrentNanoTime();
     }
 
@@ -40,7 +45,7 @@ public class FrameTiming {
     }
 
     public float getElapsedTime() {
-        return (float) this.elapsedTimeInNano / 1_000_000_000L;
+        return (float) this.elapsedTimeInNano / NANO_SECONDS_IN_SECOND;
     }
 
     public void setTargetFrameRate(int targetFrameRate) {

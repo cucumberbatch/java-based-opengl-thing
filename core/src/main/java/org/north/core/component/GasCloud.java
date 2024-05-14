@@ -17,6 +17,7 @@ public class GasCloud extends AbstractComponent {
     public Vector4f color = new Vector4f();
     public float acc = 0;
 
+    /*
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -36,4 +37,6 @@ public class GasCloud extends AbstractComponent {
         color = (Vector4f) in.readObject();
         acc = in.readFloat();
     }
+
+     */
 }

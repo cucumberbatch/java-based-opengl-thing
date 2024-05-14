@@ -16,11 +16,6 @@ import static org.joml.Math.*;
 
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
-
-    private final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
-    private final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
-    private final float twoPi = (float) (2 * PI);
-
     private float acc = 0;
     private long gasCloudEntityNumber = 0;
 
@@ -30,6 +25,10 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     private Transform spaceshipTransform;
     private Transform spawnerTransform;
 
+    private static final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
+    private static final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
+    private static final float twoPi = (float) (2 * PI);
+
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
         super(context);
@@ -37,11 +36,11 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
 
     @Override
     public void init(CloudEmitter cloudEmitter) {
-        world = et.getByName("movableWorld");
-        worldTransform = world.transform;
-        movableWorldRigidBody = world.get(RigidBody.class);
         spaceshipTransform = cloudEmitter.getTransform();
-        spawnerTransform = et.getByName("gasCloudSpawner").transform;
+        spawnerTransform = sceneRoot.getByName("gasCloudSpawner").getTransform();
+        world = sceneRoot.getByName("movableWorld");
+        worldTransform = world.getTransform();
+        movableWorldRigidBody = world.get(RigidBody.class);
 
         movableWorldRigidBody.isGravitational = false;
     }
@@ -50,11 +49,11 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     public void update(CloudEmitter cloudEmitter, final float deltaTime) {
         boolean moving = false;
 
-        float accelerationSpeed = 16;
+        float accelerationSpeed = 3;
         float rotationSpeed = 6;
         float rotationIncrement = deltaTime * rotationSpeed;
         float accelerationIncrement = deltaTime * accelerationSpeed;
-        float angle = spaceshipTransform.rotation.z();
+        float angle = spaceshipTransform.rotation.z;
 
         if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
             angle = (spaceshipTransform.rotation.z - rotationIncrement) % twoPi;
@@ -75,17 +74,16 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
         }
 
         if (moving && acc > 1) {
-            Entity gasCloudEntity = et.create("gas_cloud_" + gasCloudEntityNumber++);
+            Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++);
+
+            world.add(gasCloudEntity);
 
             cm.take(gasCloudEntity)
                     .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
-            et.add(world, gasCloudEntity);
-
-            Transform transform = gasCloudEntity.get(Transform.class);
-            Vector3f worldPosition = worldTransform.getGlobalPosition(new Vector3f());
-            worldPosition.set(-worldPosition.x / 5, -worldPosition.y / 5, worldPosition.z);//.add(emittingPosition);
-            transform.position.set(worldPosition);
+            Transform transform = gasCloudEntity.getTransform();
+            Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
+            transform.position.set(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
             transform.scale.set(emittingScale);
 
             MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);

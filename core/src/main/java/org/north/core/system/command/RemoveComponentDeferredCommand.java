@@ -2,6 +2,7 @@ package org.north.core.system.command;
 
 import org.north.core.component.Component;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.managment.SystemManager;
 
 public class RemoveComponentDeferredCommand implements DeferredCommand {
     public final Entity entity;
@@ -10,6 +11,12 @@ public class RemoveComponentDeferredCommand implements DeferredCommand {
     public RemoveComponentDeferredCommand(Entity entity, Component component) {
         this.entity = entity;
         this.component = component;
+    }
+
+    @Override
+    public void execute(SystemManager systemManager) {
+        component.setActivity(false);
+        systemManager.getSystem(component.getClass()).removeComponent(component.getId());
     }
 
     @Override

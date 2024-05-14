@@ -25,7 +25,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
 
     @Override
     public void init(PlayerControls playerControls) {
-        physicalBody = et.getByName("referenceBox");
+        physicalBody = sceneRoot.getByName("referenceBox");
         rigidBody = physicalBody.get(RigidBody.class);
     }
 
@@ -36,7 +36,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
             rigidBody.isGravitational = gravitationalState;
             rigidBody.velocity.set(0);
             rigidBody.acceleration.set(0);
-            physicalBody.transform.moveTo(0f, 0f, 0f);
+            physicalBody.getTransform().moveTo(0f, 0f, 0f);
         }
     }
 }

@@ -37,6 +37,9 @@ public class Input {
 //            pressedKeys[key]    = action == GLFW_PRESS;
 //            holdenKeys[key]     = action == GLFW_REPEAT;
 //
+            if (key < 0)
+                return;
+
             releasedKeys.set(key, action == GLFW_RELEASE);
             pressedKeys.set(key, action == GLFW_PRESS);
             holdenKeys.set(key, action == GLFW_REPEAT);

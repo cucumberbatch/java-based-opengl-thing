@@ -66,7 +66,7 @@ public class ComponentHandlerScanner {
                         if (Objects.isNull(componentHandlerAnnotation)) continue;
                         Class<? extends Component> componentClass = componentHandlerAnnotation.value();
 
-                        @SuppressWarnings("rawtypes") Pair componentSystemPair = new Pair<>(systemClass, componentClass);
+                        @SuppressWarnings({"rawtypes", "unchecked"}) Pair componentSystemPair = new Pair<>(systemClass, componentClass);
 
                         classes.add(componentSystemPair);
                         // Logger.trace("Component system pair registered: " + componentSystemPair);

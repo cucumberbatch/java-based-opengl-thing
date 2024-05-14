@@ -19,6 +19,7 @@ public class MeshRenderer extends AbstractComponent {
     public Vector4f color = new Vector4f(1f, 1f, 1f, 1f);
     public int renderType = GL_TRIANGLES;
 
+    /*
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -40,4 +41,6 @@ public class MeshRenderer extends AbstractComponent {
         color = (Vector4f) in.readObject();
         renderType = in.readInt();
     }
+
+     */
 }

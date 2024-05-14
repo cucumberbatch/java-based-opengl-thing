@@ -5,7 +5,7 @@ public enum Layer {
     DEFAULT(100),
     INNER(200);
 
-    private int index;
+    private final int index;
 
     Layer(int index) {
         this.index = index;

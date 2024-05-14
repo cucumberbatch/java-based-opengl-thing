@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
+import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.reflection.di.Inject;
@@ -26,31 +27,31 @@ public class SystemManager {
     public final List<InitProcess<? extends Component>> listOfSystemsForInit;
     public final List<UpdateProcess<? extends Component>> listOfSystemsForUpdate;
     public final List<RenderProcess<? extends Component>> listOfSystemsForRender;
-    public final List<System<? extends Component>> listOfSystemsForCollision;
     public final List<CollisionHandlingProcess<? extends Component>> listOfSystemsForCollisionHandling;
+    public final List<System<?>> listOfSystemsForCollision;
 
     public final List<Collision> collisions;
 
-    private final Map<Class<? extends Component>, System<? extends Component>> systemMap;
-    private final List<System<? extends Component>> systemList;
+    private final Map<Class<? extends Component>, System<?>> systemMap;
+    private final List<System<?>> systemList;
     private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
-    private final List<DeferredCommand> deferredCommands;
+    private final Queue<DeferredCommand> deferredCommands;
     private final ComponentHandlerScanner scanner;
-    private final DependencyRegisterer dependencyRegisterer;
+    private final ApplicationContext applicationContext;
     private final EntityDistanceToCameraComparator cameraDistanceComparator;
 
     private Camera camera;
 
     @Inject
     public SystemManager(ApplicationContext context) {
-        dependencyRegisterer = context.getDependencyRegisterer();
+        applicationContext = context;
         scanner = new ComponentHandlerScanner();
         deferredCommands = new LinkedList<>();
         componentToSystemAssociations = new HashMap<>();
         systemList = new ArrayList<>();
         systemMap = new HashMap<>();
 
-        loadComponentSystemsFromPackage("org/north/core/system");
+        loadComponentSystemsFromPackage(ApplicationProperties.getProperty("system.package"));
         cameraDistanceComparator = new EntityDistanceToCameraComparator();
         collisions = new ArrayList<>();
         listOfSystemsForCollisionHandling = new LinkedList<>();
@@ -77,7 +78,7 @@ public class SystemManager {
         }
     }
 
-    private void attachToSystemLists(System<? extends Component> system) {
+    private void attachToSystemLists(System<?> system) {
         Class<?> clazz = system.getClass();
         if (InitProcess.class.isAssignableFrom(clazz)) {
             this.listOfSystemsForInit.add((InitProcess<? extends Component>) system);
@@ -100,7 +101,7 @@ public class SystemManager {
         this.camera = camera;
     }
 
-    public System<? extends Component> getSystem(Class<? extends Component> componentClass) {
+    public System<?> getSystem(Class<? extends Component> componentClass) {
         return systemMap.get(componentClass);
     }
 
@@ -113,7 +114,7 @@ public class SystemManager {
 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
                 if (systemClass == null) return;
-                System<?> system = dependencyRegisterer.registerDependency(systemClass);
+                System<?> system = applicationContext.addDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
                 attachToSystemLists(system);
@@ -137,7 +138,7 @@ public class SystemManager {
         int systemCount = systemList.size();
         for (int i = 0; i < systemCount; i++) {
 //        for (System<? extends Component> system: systemMap.values()) {
-            System<? extends Component> system = systemList.get(i);
+            System<?> system = systemList.get(i);
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
@@ -165,24 +166,9 @@ public class SystemManager {
     }
 
     public void applyDeferredCommands() {
-        for (DeferredCommand command : deferredCommands) {
-            switch (command.getType()) {
-                case ADD_COMPONENT: {
-                    AddComponentDeferredCommand addComponentCommand = (AddComponentDeferredCommand) command;
-                    addComponent(addComponentCommand.component);
-                    break;
-                }
-                case REMOVE_COMPONENT: {
-                    RemoveComponentDeferredCommand removeComponentCommand = (RemoveComponentDeferredCommand) command;
-                    Component component = removeComponentCommand.component;
-                    component.setActivity(false);
-                    systemMap.get(component.getClass()).removeComponent(component.getId());
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        for (DeferredCommand command : deferredCommands)
+            command.execute(this);
+
         deferredCommands.clear();
     }
 

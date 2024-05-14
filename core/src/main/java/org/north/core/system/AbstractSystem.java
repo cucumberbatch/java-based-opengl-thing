@@ -1,17 +1,16 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.Entity;
-import org.north.core.architecture.tree.EntityTree;
-import org.north.core.architecture.tree.Tree;
+import org.joml.Vector3f;
 import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.architecture.entity.Entity;
+import org.north.core.architecture.tree.v2.TreeNode;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
-import org.north.core.managment.memory.Vector3fPool;
 import org.north.core.managment.memory.Pool;
-import org.joml.Vector3f;
+import org.north.core.managment.memory.Vector3fPool;
 
 import java.util.*;
 
@@ -22,11 +21,11 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
-    protected final EntityTree et;
+    protected final Entity sceneRoot;
 
     public AbstractSystem(ApplicationContext context) {
-        this.cm = context.getComponentManager();
-        this.et = (EntityTree) context.getEntityTree();
+        this.cm = context.getDependency(ComponentManager.class);
+        this.sceneRoot = context.getDependency(Entity.class);
         this.vector3fPool = context.getDependency(Vector3fPool.class);
     }
 

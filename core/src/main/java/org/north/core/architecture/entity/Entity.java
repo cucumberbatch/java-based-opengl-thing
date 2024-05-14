@@ -1,12 +1,17 @@
 package org.north.core.architecture.entity;
 
-import org.north.core.architecture.tree.TreeNode;
+import org.north.core.architecture.tree.v2.LinkedTreeNode;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.physics.collision.Collidable;
 
-import java.io.*;
-import java.util.*;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Entity is an object that contains a bunch of components
@@ -14,7 +19,7 @@ import java.util.*;
  *
  * @author cucumberbatch
  */
-public class Entity extends TreeNode<Entity> implements Collidable, Externalizable {
+public class Entity extends LinkedTreeNode<Entity> implements ComponentContainer, Collidable, Externalizable {
     public UUID id;
     public String name;
 
@@ -28,7 +33,7 @@ public class Entity extends TreeNode<Entity> implements Collidable, Externalizab
     public Entity(String name) {
         UUID id = UUID.randomUUID();
         this.id = id;
-        this.name = Objects.requireNonNullElse(name, id.toString());
+        this.name = name != null ? name : id.toString();
         this.components = new HashMap<>(4, 1.0f);
     }
 
@@ -36,70 +41,73 @@ public class Entity extends TreeNode<Entity> implements Collidable, Externalizab
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Entity getByName(String name) {
+        return super.find(node -> node.getName().equals(name));
     }
 
-    public void addComponent(Component component) {
-        components.put(component.getClass(), component);
-        component.setEntity(this);
-
-        // link transform if necessary
-        if (this.transform == null && component instanceof Transform) {
-            this.transform = (Transform) component;
+    @Override
+    public boolean add(Entity entity) {
+        if (super.add(entity) && parent != null && parent.transform != null) {
+            transform.parent = parent.transform;
+            return true;
         }
+        return false;
     }
 
-    @SuppressWarnings("unchecked")
-    public <E extends Component> E get(Class<E> clazz) {
-        return (E) components.get(clazz);
-    }
-
-    public Set<Class<? extends Component>> getComponentClassSet() {
-        return Collections.unmodifiableSet(components.keySet());
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E extends Component> E removeComponent(Class<E> clazz) {
-        if (Transform.class.isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("Transform component cannot be removed from entity!");
+    @Override
+    public boolean remove(Entity entity) {
+        if (super.remove(entity)) {
+            transform.parent = null;
+            return true;
         }
-        return (E) components.remove(clazz);
+        return false;
+    }
+
+    @Override
+    public Map<Class<? extends Component>, Component> getComponentMap() {
+        return components;
+    }
+
+    @Override
+    public Transform getTransform() {
+        return transform;
+    }
+
+    @Override
+    public void setTransform(Transform transform) {
+        this.transform = transform;
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(id);
         out.writeUTF(name);
-        out.writeObject(transform);
+        out.writeObject(getTransform());
         out.writeObject(components);
         out.writeObject(parent);
-        out.writeObject(daughters);
+        //        out.writeObject(daughters);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         id = (UUID) in.readObject();
         name = in.readUTF();
         transform = (Transform) in.readObject();
         components = (Map<Class<? extends Component>, Component>) in.readObject();
         parent = (Entity) in.readObject();
-        daughters = (List<Entity>) in.readObject();
+        //        daughters = (List<Entity>) in.readObject();
     }
 
     @Override
     public String toString() {
         return "Entity{" +
                 "name='" + name + '\'' +
-                ", daughters=" + daughters +
+                ", daughters=" + getSubtrees() +
                 '}';
     }
 
@@ -107,9 +115,7 @@ public class Entity extends TreeNode<Entity> implements Collidable, Externalizab
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Entity entity = (Entity) o;
-
         return id.equals(entity.id);
     }
 

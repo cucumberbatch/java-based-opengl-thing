@@ -63,9 +63,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     private Entity selectedEntity = null;
 
+    private final Window window;
+
     @Inject
     public VisualCursorSystem(ApplicationContext context) {
         super(context);
+        this.window = context.getDependency(Window.class);
     }
 
     @Override
@@ -195,8 +198,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         transform.moveTo(
 //                -(Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
 //                -(Input.getCursorPosition().y - Window.height / 2f) / Window.height,
-                -Input.getCursorX() / (float) Window.width * 2 + 2f,
-                -Input.getCursorY() / (float) Window.height * 2,
+                -Input.getCursorX() / (float) window.getWidth() * 2 + 2f,
+                -Input.getCursorY() / (float) window.getHeight() * 2,
                 0f
         );
 

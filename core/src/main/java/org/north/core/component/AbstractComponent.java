@@ -2,13 +2,9 @@ package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
 
-import java.io.*;
 import java.util.UUID;
 
-import static org.north.core.utils.SerializationUtils.readUUID;
-import static org.north.core.utils.SerializationUtils.writeUUID;
-
-public abstract class AbstractComponent implements Component, Cloneable {
+public abstract class AbstractComponent implements Component {
 
     public UUID id;
 
@@ -21,11 +17,6 @@ public abstract class AbstractComponent implements Component, Cloneable {
     /* State of component lifecycle */
     private ComponentState state = ComponentState.READY_TO_INIT_STATE;
 
-
-    @Override
-    public void reset() {
-        entity = null;
-    }
 
     /*
      Getters and setters implementation by an abstract component class
@@ -46,13 +37,9 @@ public abstract class AbstractComponent implements Component, Cloneable {
     }
 
     @Override
-    public void setEntity(Entity entity) {
+    public void attachToEntity(Entity entity) {
+        entity.add(this);
         this.entity = entity;
-    }
-
-    @Override
-    public Transform getTransform() {
-        return entity.transform;
     }
 
     @Override
@@ -66,11 +53,6 @@ public abstract class AbstractComponent implements Component, Cloneable {
     }
 
     @Override
-    public void switchActivity() {
-        isActive = !isActive;
-    }
-
-    @Override
     public ComponentState getState() {
         return state;
     }
@@ -79,28 +61,7 @@ public abstract class AbstractComponent implements Component, Cloneable {
     public void setState(ComponentState state) {
         if (state == null) throw new NullPointerException("Component state cannot be null!");
         if (this.state == state) return;
-        // Logger.debug(String.format("Component state changed [id=%d type=%s]\n\tfrom:\t<yellow>%s</>\n\t  to:\t%s",
-//                getId(), getClass().getSimpleName(), this.state.name(), state.name()));
         this.state = state;
-    }
-
-    @Override
-    public boolean inState(ComponentState state) {
-        return this.state.equals(state);
-    }
-
-    @Override
-    public AbstractComponent clone() {
-        try {
-            AbstractComponent clone = (AbstractComponent) super.clone();
-            clone.id = this.id;
-            clone.entity = this.entity;
-            clone.isActive = this.isActive;
-            clone.state = this.state;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
     }
 
     @Override
@@ -110,22 +71,6 @@ public abstract class AbstractComponent implements Component, Cloneable {
                 ", isActive=" + isActive +
                 ", state=" + state.name() +
                 '}';
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(id);
-        out.writeObject(entity);
-        out.writeBoolean(isActive);
-//        out.writeObject(this.state);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        id = (UUID) in.readObject();
-        entity = (Entity) in.readObject();
-        isActive = in.readBoolean();
-//        this.state = (ComponentState) in.readObject();
     }
 
 }

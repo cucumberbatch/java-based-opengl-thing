@@ -48,7 +48,8 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
         button.vertexBuffer = new VertexArray(
                 button.buttonShape.toVertices(),
                 button.indices,
-                button.uv);
+                button.uv
+        );
 
         GL30.glClearColor(0f, 0f, 0f, 1f);
     }
@@ -58,9 +59,7 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
         float transitionTimeLimit = button.transitionTimeLimit;
 
         switch (button.buttonState) {
-            case IDLE_BUTTON_STATE:
-                break;
-            case HOVER_BUTTON_STATE:
+            case IDLE_BUTTON_STATE | HOVER_BUTTON_STATE:
                 break;
             case IDLE_TO_HOVER_BUTTON_STATE: {
                 if (button.transitionTimeAccumulator > transitionTimeLimit) {

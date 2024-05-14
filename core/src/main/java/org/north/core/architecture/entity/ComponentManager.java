@@ -19,7 +19,7 @@ public class ComponentManager {
 
     @Inject
     public ComponentManager(ApplicationContext context) {
-        this.systemManager = context.getSystemManager();
+        this.systemManager = context.getDependency(SystemManager.class);
         this.managedEntityPool = new ManagedEntityPool(this);
     }
 
@@ -43,21 +43,24 @@ public class ComponentManager {
         return UUID.randomUUID();
     }
 
-    public final <E extends Component> E add(Entity entity, Class<E> componentClass) {
+    public final <ComponentInstance extends Component> ComponentInstance add(Entity entity,
+                                                                             Class<ComponentInstance> componentClass) {
         if (entity == null || componentClass == null) {
             throw new IllegalArgumentException("Entity or component class must not be null");
         }
 
-        E component = instantiateComponent(componentClass);
+        ComponentInstance component = instantiateComponent(componentClass);
         component.setId(nextId());
+        component.attachToEntity(entity);
+//        entity.add(component);
         systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
-        entity.addComponent(component);
 
         return component;
     }
 
     @SafeVarargs
-    public final List<? extends Component> add(Entity entity, Class<? extends Component>... classes) {
+    public final List<? extends Component> add(Entity entity,
+                                               Class<? extends Component>... classes) {
         if (entity == null || classes == null) {
             throw new IllegalArgumentException("Entity or component classes must not be null or empty");
         }
@@ -67,15 +70,16 @@ public class ComponentManager {
         for (Class<? extends Component> componentClass: classes) {
             Component component = instantiateComponent(componentClass);
             component.setId(nextId());
-            systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
-            entity.addComponent(component);
+            component.attachToEntity(entity);
             components.add(component);
+            systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
         }
 
         return components;
     }
 
-    public final <E extends Component> E get(Entity entity, Class<E> componentClass) {
+    public final <ComponentInstance extends Component> ComponentInstance get(Entity entity,
+                                                                             Class<ComponentInstance> componentClass) {
         return entity.get(componentClass);
     }
 
@@ -86,12 +90,13 @@ public class ComponentManager {
                 .collect(Collectors.toList());
     }
 
-    public final <E extends Component> E remove(Entity entity, Class<E> componentClass) {
+    public final <ComponentInstance extends Component> ComponentInstance remove(Entity entity,
+                                                                                Class<ComponentInstance> componentClass) {
         if (componentClass.isAssignableFrom(Transform.class)) {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
 
-        E component = entity.get(componentClass);
+        ComponentInstance component = entity.get(componentClass);
         systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
         return component;
     }
@@ -103,7 +108,7 @@ public class ComponentManager {
                 .collect(Collectors.toList());
     }
 
-    private <E extends Component> E instantiateComponent(Class<E> componentClass) {
+    private <ComponentInstance extends Component> ComponentInstance instantiateComponent(Class<ComponentInstance> componentClass) {
         try {
             return componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -120,11 +125,11 @@ public class ComponentManager {
             this.entity = entity;
         }
 
-        private void setEntity(Entity entity) {
+        private void setEntityNode(Entity entity) {
             this.entity = entity;
         }
 
-        public synchronized <E extends Component> E add(Class<E> componentClass) {
+        public synchronized <ComponentInstance extends Component> ComponentInstance add(Class<ComponentInstance> componentClass) {
             cm.pushManagedEntity(this);
             return cm.add(entity, componentClass);
         }
@@ -135,7 +140,7 @@ public class ComponentManager {
             return cm.add(entity, componentClasses);
         }
 
-        public synchronized <E extends Component> E get(Class<E> componentClass) {
+        public synchronized <ComponentInstance extends Component> ComponentInstance get(Class<ComponentInstance> componentClass) {
             cm.pushManagedEntity(this);
             return entity.get(componentClass);
         }
@@ -146,7 +151,7 @@ public class ComponentManager {
             return cm.get(entity, componentClasses);
         }
 
-        public synchronized <E extends Component> void remove(Class<E> componentClass) {
+        public synchronized <ComponentInstance extends Component> void remove(Class<ComponentInstance> componentClass) {
             cm.pushManagedEntity(this);
             cm.remove(entity, componentClass);
         }
@@ -170,18 +175,14 @@ public class ComponentManager {
 
         private void push(ManagedEntity managedEntity) {
             this.managedEntityDeque.push(managedEntity);
-            // Logger.debug("Push ManagedEntity instance [" + managedEntity + "] from pool. Pool size: " + this.managedEntityDeque.size());
         }
 
         private ManagedEntity pop(Entity entity) {
             if (this.managedEntityDeque.isEmpty()) {
-                ManagedEntity managedEntity = new ManagedEntity(entityManager, entity);
-                // Logger.debug("Created ManagedEntity instance [" + managedEntity + "] for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
-                return managedEntity;
+                return new ManagedEntity(entityManager, entity);
             }
             ManagedEntity managedEntity = this.managedEntityDeque.pop();
-            managedEntity.setEntity(entity);
-            // Logger.debug("Pop ManagedEntity instance [" + managedEntity + "] from pool for entity: " + entity.getName() + ". Pool size: " + this.managedEntityDeque.size());
+            managedEntity.setEntityNode(entity);
             return managedEntity;
         }
 

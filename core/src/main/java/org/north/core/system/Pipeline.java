@@ -1,36 +1,42 @@
 package org.north.core.system;
 
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.entity.ComponentManager;
-import org.north.core.architecture.tree.EntityTree;
+import org.north.core.architecture.entity.Entity;
+import org.north.core.architecture.tree.v2.TreeNode;
+import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
 import org.north.core.component.MeshCollider;
+import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
-import org.north.core.exception.ShaderUniformNotFoundException;
-import org.north.core.physics.collision.Collision;
-import org.north.core.physics.collision.CollisionPair;
-import org.north.core.reflection.di.Inject;
-import org.north.core.scene.Scene;
-import org.north.core.scene.SceneInitializer;
-import org.north.core.component.Component;
-import org.north.core.architecture.entity.Entity;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
 import org.north.core.physics.collision.Collidable;
+import org.north.core.physics.collision.Collision;
+import org.north.core.physics.collision.CollisionPair;
+import org.north.core.reflection.di.Inject;
+import org.north.core.scene.DefaultSceneComposer;
+import org.north.core.scene.Scene;
+import org.north.core.scene.SceneComposer;
 import org.north.core.system.process.*;
-import org.north.core.utils.Stopwatch;
-import org.joml.Vector3f;
+import org.north.core.utils.logger.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Pipeline implements ISystem, Runnable {
@@ -38,13 +44,17 @@ public class Pipeline implements ISystem, Runnable {
     private final Graphics graphics;
     private final ComponentManager componentManager;
     private final SystemManager systemManager;
-    private final EntityTree et;
+    private final FrameTiming timingContext;
+
+    private final TreeNode<Entity> rootNode;
 
     private Scene scene;
 
     private boolean isUpdatePaused = false;
     private boolean load = false;
+    private boolean stopped = false;
 
+    private static final Logger log = LoggerFactory.createLogger(Pipeline.class);
 
     @Inject
     public Pipeline(ApplicationContext context) {
@@ -52,7 +62,13 @@ public class Pipeline implements ISystem, Runnable {
         this.graphics = context.getDependency(Graphics.class);
         this.componentManager = context.getDependency(ComponentManager.class);
         this.systemManager = context.getDependency(SystemManager.class);
-        this.et = (EntityTree) context.getEntityTree();
+        this.timingContext = new FrameTiming(65);
+
+        try {
+            this.rootNode = context.addDependency(Entity.class, new Entity("root"));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setScene(Scene scene) {
@@ -63,75 +79,42 @@ public class Pipeline implements ISystem, Runnable {
     public void run() {
         // Logger.info("Game loop started");
 
-        final FrameTiming timingContext = new FrameTiming();
-
         // todo: load scene from file (game data deserialization)
-//        if (!load) {
-        loadScene(scene);
-//        }
+        composeScene(new DefaultSceneComposer());
 
-        while (window.shouldNotClose()) {
+        while (window.shouldNotClose() && !stopped) {
             try {
-                timingContext.updateTiming();
-                final float elapsedTime = timingContext.getElapsedTime();
-
-                //test
-                updateScene();
-
-                updateInput();
-                init();
-                update(elapsedTime);
-                registerCollisions();
-                handleCollisions();
-
-                applyDeferredCommands();
-
-                render(window);
-
-                timingContext.sync();
+                tick();
             } catch (RuntimeException e) {
-                e.printStackTrace();
-                // Logger.error("Exiting game loop in case of thrown exception: " + e.getMessage(), e);
+                log.log(Level.SEVERE, "Exiting game loop in case of thrown exception", e);
                 break;
             }
         }
-
         // Logger.info("Game loop ended");
     }
 
-    private void updateScene() {
-        if (Input.isPressed(GLFW_KEY_M)) {
-            String fileName = "transform_temp.txt";
-            if (load) {
-                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName))) {
-                    et.updateFrom((EntityTree) in.readObject());
-                    for (Entity e: et) {
-                        for (Component component : e.components.values()) {
-                            systemManager.addComponent(component);
-                        }
-                    }
-                    load = false;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileName))) {
-                    out.writeObject(et);
-                    systemManager.reset();
-                    et.remove(et.getRoot());
-                    load = true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public void tick() {
+        timingContext.updateTiming();
+        final float elapsedTime = timingContext.getElapsedTime();
+
+        updateInput();
+        init();
+        update(elapsedTime);
+        registerCollisions();
+        handleCollisions();
+        applyDeferredCommands();
+        render(window);
+
+        timingContext.sync();
     }
 
-    private void loadScene(Scene scene) {
-        SceneInitializer sceneInitializer = new SceneInitializer(scene);
-        sceneInitializer.readSceneFromFile("transform_temp.txt");
-        sceneInitializer.initSceneInUpdater(componentManager);
-//        sceneInitializer.readSceneFromFile("transform_temp");
+    public void stop() {
+        stopped = true;
+    }
+
+    private void composeScene(SceneComposer composer) {
+        componentManager.take((Entity) rootNode).add(Transform.class);
+        composer.compose(rootNode, componentManager);
     }
 
     @Override
@@ -149,13 +132,8 @@ public class Pipeline implements ISystem, Runnable {
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    // Logger.trace(String.format(
-//                            "Handling init component [%s: %s]",
-//                            system.getClass().getName(),
-//                            component.getEntity().getName())
-//                    );
+                    log.log(Level.INFO, "Handling init component [%s: %s]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
                     try {
-//                        system.setCurrentComponent(component);
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
                     } catch (ComponentNotFoundException | NullPointerException e) {
@@ -185,7 +163,7 @@ public class Pipeline implements ISystem, Runnable {
     public void registerCollisions() {
         if (systemManager.listOfSystemsForCollision.isEmpty()) return;
 
-        Stopwatch.start();
+//        Stopwatch.start();
 
         List<MeshCollider> componentList;
         CollisionPair pair;
@@ -219,8 +197,8 @@ public class Pipeline implements ISystem, Runnable {
                     if (that.isStatic && other.isStatic) continue;
                     if (that.body == null || other.body == null) continue;
                     if (that.body.isIntersects(other.body)) {
-                        positionA = A.transform.position;
-                        positionB = B.transform.position;
+                        positionA = A.getTransform().position;
+                        positionB = B.getTransform().position;
                         isCollisionFound = false;
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = systemManager.collisions.get(cindex);
@@ -290,7 +268,7 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Collision register systems handling ended!");
+//        Stopwatch.stop("Collision register systems handling ended!");
     }
 
     private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Collidable A, Collidable B) {
@@ -302,7 +280,7 @@ public class Pipeline implements ISystem, Runnable {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void update(final float deltaTime) {
-        Stopwatch.start();
+//        Stopwatch.start();
         glfwPollEvents();
 
         for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
@@ -318,7 +296,6 @@ public class Pipeline implements ISystem, Runnable {
 //                            component.getEntity().getName())
 //                    );
                     try {
-//                        system.setCurrentComponent(component);
                         process.update(component, deltaTime);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
@@ -328,20 +305,19 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Update systems handling ended!");
+//        Stopwatch.stop("Update systems handling ended!");
     }
 
     //todo: performance
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void handleCollisionEnter() {
-        Stopwatch.start();
+//        Stopwatch.start();
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
-//                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
                     if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
@@ -353,20 +329,19 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Collision enter handling ended!");
+//        Stopwatch.stop("Collision enter handling ended!");
     }
 
     //todo: performance
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void handleCollisionHold() {
-        Stopwatch.start();
+//        Stopwatch.start();
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
-//                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
@@ -378,20 +353,19 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Collision hold handling ended!");
+//        Stopwatch.stop("Collision hold handling ended!");
     }
 
     //todo: performance
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void handleCollisionExit() {
-        Stopwatch.start();
+//        Stopwatch.start();
 
         for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
-//                system.setCurrentComponent(component);
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
@@ -403,7 +377,7 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Collision exit handling ended!");
+//        Stopwatch.stop("Collision exit handling ended!");
     }
 
     private void swapCollisionEntities(Collision collision) {
@@ -422,7 +396,7 @@ public class Pipeline implements ISystem, Runnable {
     public void render(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Stopwatch.start();
+//        Stopwatch.start();
 
         for (RenderProcess process : systemManager.listOfSystemsForRender) {
             System<? extends Component> system = (System<? extends Component>) process;
@@ -439,7 +413,6 @@ public class Pipeline implements ISystem, Runnable {
 //                            component.getEntity().getName())
 //                    );
                     try {
-//                        system.setCurrentComponent(component);
                         process.render(component, graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
@@ -453,11 +426,11 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        Stopwatch.stop("Graphics systems handling ended!");
+//        Stopwatch.stop("Graphics systems handling ended!");
 
-        Stopwatch.start();
+//        Stopwatch.start();
         glfwSwapBuffers(window.getWindow());
-        Stopwatch.stop("Graphics buffer swap ended!");
+//        Stopwatch.stop("Graphics buffer swap ended!");
     }
 
 

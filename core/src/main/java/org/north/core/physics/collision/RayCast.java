@@ -15,7 +15,7 @@ public class RayCast {
     }
 
     public boolean isIntersects(Entity entity) {
-        Transform gTransform = entity.transform.getGlobalTransform();
+        Transform gTransform = entity.getTransform().getGlobalTransform();
         Vector3f gPosition = gTransform.position;
         float gSize = gTransform.scale.length();
 

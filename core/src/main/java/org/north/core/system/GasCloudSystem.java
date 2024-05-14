@@ -26,7 +26,7 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
 
         if (shader.spriteIndex > 4) {
             cm.take(entity).remove(MeshRenderer.class);
-//            et.remove(entity);
+            entity.remove(entity);
         }
 
         if (gasCloud.acc > 1) {

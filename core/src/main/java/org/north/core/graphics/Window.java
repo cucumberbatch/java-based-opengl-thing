@@ -1,7 +1,6 @@
 package org.north.core.graphics;
 
 import org.north.core.config.EngineConfig;
-import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.MeshTransformListener;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.CameraControlsSystem;
@@ -13,16 +12,19 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import org.joml.Vector2f;
+import org.north.core.utils.logger.LoggerFactory;
 
 import java.nio.IntBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
     public final String title;
-    public static int width;
-    public static int height;
+    private static int width;
+    private static int height;
 
     public int getWidth() { return width; }
     public int getHeight() { return height; }
@@ -30,13 +32,11 @@ public class Window {
     private long window = -1;
     private final boolean vSync;
 
+    private static final Logger log = LoggerFactory.createLogger(Window.class);
+
     @Inject
-    public Window(ApplicationContext context) throws ReflectiveOperationException {
-        EngineConfig config = context.getDependency(EngineConfig.class);
-        this.width = config.windowWidth;
-        this.height = config.windowHeight;
-        this.title = config.windowTitle;
-        this.vSync = config.vsync;
+    public Window(EngineConfig config) {
+        this(config.windowTitle, config.windowWidth, config.windowHeight, config.vsync);
     }
 
     public Window(String title, int width, int height, boolean vSync) {
@@ -47,12 +47,10 @@ public class Window {
     }
 
     public void init() {
-        // Logger.info("Window initialization started");
+        log.info("Window initialization started");
         if (window != -1) return;
 
-        GLFW.glfwSetErrorCallback((code, message) -> {
-            // Logger.error(String.format("err_code 0x%08X: %s ", code, message));
-        });
+        GLFW.glfwSetErrorCallback((code, message) -> log.log(Level.SEVERE, "err_code 0x%08X: %s ", new Object[]{code, message}));
 
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
@@ -76,14 +74,14 @@ public class Window {
         GLFW.glfwSetKeyCallback(window, new Input.KeyboardInput());
         GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
         GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
-        GLFW.glfwSetWindowSizeCallback(window, (window, width, height) -> new CameraControlsSystem.WindowSizeCallback());
+        GLFW.glfwSetWindowSizeCallback(window, (window, width, height) -> new CameraControlsSystem.WindowSizeCallback(null));
 
 
-        //
+
 //        GLFW.glfwSetWindowRefreshCallback(window, new GLFWWindowRefreshCallback() {
 //            @Override
 //            public void invoke(long l) {
-//                // Logger.info(String.format("Refreshed window[%s] value[%s]", window, l));
+//                 log.info(String.format("Refreshed window[%s] value[%s]", window, l));
 //            }
 //        });
 
@@ -94,13 +92,16 @@ public class Window {
             GLFW.glfwGetWindowSize(window, pWidth, pHeight);
 
             // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+            GLFWVidMode videoMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+
+            if (videoMode == null)
+                throw new RuntimeException("Video mode is not found!");
 
             // Center the window
             GLFW.glfwSetWindowPos(
                     window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
+                    (videoMode.width() - pWidth.get(0)) / 2,
+                    (videoMode.height() - pHeight.get(0)) / 2
             );
         }
         // the stack frame is popped automatically
@@ -125,11 +126,11 @@ public class Window {
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // Logger.info("Window initialization ended");
+        log.info("Window initialization ended");
     }
 
     public void destroy() {
-        // Logger.info("Window destruction process started");
+        log.info("Window destruction process started");
 
         if (window == -1) return;
 
@@ -142,7 +143,7 @@ public class Window {
         // when we hit an exit button in application we need to stop all threads
         MeshTransformListener.shutdownThreadExecution();
 
-        // Logger.info("Window destruction process ended");
+        log.info("Window destruction process ended");
     }
 
     public static Vector2f translatePointToWindow(Vector2f point) {

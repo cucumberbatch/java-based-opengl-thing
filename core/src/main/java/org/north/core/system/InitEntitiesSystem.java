@@ -28,7 +28,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
 
     @Override
     public void init(InitEntities initEntities) throws RuntimeException {
-        Entity root = et.create("root");
+        Entity root = new Entity("root");
         Transform rootTransform = cm.take(root).add(Transform.class);
 
         initSingleButtonScene();
@@ -41,10 +41,10 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     }
 
     private void initReferenceScene() {
-        Entity referenceBox = et.create("referenceBox");
-        Entity camera = et.create("camera");
+        Entity referenceBox = new Entity("referenceBox");
+        Entity camera = new Entity("camera");
 
-        camera.setParent(referenceBox);
+        referenceBox.add(camera);
 
         cm.take(camera)
                 .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
@@ -63,7 +63,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         MeshRenderer renderer;
 
         // TV Screen object
-        Entity tvScreen = et.create("tvScreen");
+        Entity tvScreen = new Entity("tvScreen");
         transform = cm.take(tvScreen).add(Transform.class);
         renderer = cm.take(tvScreen).add(MeshRenderer.class);
 
@@ -74,7 +74,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         // Player spaceship in the middle of the screen
-        Entity player = et.create("player");
+        Entity player = new Entity("player");
         transform = cm.take(player).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, 1f);
         transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
@@ -84,7 +84,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
 
         // Background texture behind tv screen, player and other gameplay objects
-        Entity background = et.create("background");
+        Entity background = new Entity("background");
         transform = cm.take(background).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, 2f);
         transform.scale = new Vector3f(2, 2, 2);
@@ -94,7 +94,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
 
         // Camera
-        Entity camera = et.create("camera");
+        Entity camera = new Entity("camera");
         transform = cm.take(camera).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, -1f);
 
@@ -106,7 +106,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         MeshRenderer renderer;
 
         // TV Screen object
-        Entity tvScreen = et.create("tvScreen");
+        Entity tvScreen = new Entity("tvScreen");
         transform = cm.take(tvScreen).add(Transform.class);
         transform.scale = new Vector3f(2, 2, 2);
 
@@ -115,7 +115,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         // Player spaceship in the middle of the screen
-        Entity player = et.create("player");
+        Entity player = new Entity("player");
         transform = cm.take(player).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, 1f);
         transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
@@ -127,7 +127,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         cm.take(player).add(CloudEmitter.class);
 
 
-        Entity gasCloudSpawner = et.create("gasCloudSpawner");
+        Entity gasCloudSpawner = new Entity("gasCloudSpawner");
         transform = cm.take(gasCloudSpawner).add(Transform.class);
         transform.position = new Vector3f(0f, -0.225f, 0.5f);
 
@@ -149,7 +149,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
          */
 
         // Background texture behind tv screen, player and other gameplay objects
-        Entity background = et.create("background");
+        Entity background = new Entity("background");
         transform = cm.take(background).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, 2f);
         transform.scale = new Vector3f(2, 2, 2);
@@ -159,23 +159,24 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
 
         // Camera
-        Entity camera = et.create("camera");
+        Entity camera = new Entity("camera");
         transform = cm.take(camera).add(Transform.class);
         transform.position = new Vector3f(0f, 0f, 0f);
 
         cm.take(camera).add(Camera.class);
 
         // World that moves when player is "moving"
-        Entity movableWorld = et.create("movableWorld");
+        Entity movableWorld = new Entity("movableWorld");
         cm.take(movableWorld).add(RigidBody.class);
         transform = cm.take(movableWorld).add(Transform.class);
 //        transform.scale = new Vector3f(5, 5, 5);
 
-        tvScreen.setParent(camera);
-        background.setParent(tvScreen);
-        player.setParent(tvScreen);
-        gasCloudSpawner.setParent(player);
-
+        camera.add(tvScreen);
+        
+        tvScreen.add(background);
+        tvScreen.add(player);
+        
+        player.add(gasCloudSpawner);
     }
 
     private void initCubeAndCamera() {
@@ -183,13 +184,13 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         Transform transform;
         MeshRenderer renderer;
 
-        components = cm.take(et.create("camera"))
+        components = cm.take(new Entity("camera"))
                 .add(Transform.class, Camera.class, CameraControls.class);
 
         components.get(0).getTransform().moveTo(0, 0, 1);
 
 
-        components = cm.take(et.create("center")).add(Transform.class, MeshRenderer.class);
+        components = cm.take(new Entity("center")).add(Transform.class, MeshRenderer.class);
 
         renderer = (MeshRenderer) components.get(1);
         renderer.mesh = PredefinedMeshes.QUAD;
@@ -200,7 +201,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.renderType = GL11.GL_TRIANGLES;
 
 
-        components = cm.take(et.create("left")).add(Transform.class, MeshRenderer.class);
+        components = cm.take(new Entity("left")).add(Transform.class, MeshRenderer.class);
 
         transform = (Transform) components.get(0);
         transform.moveTo(-2f, 0f, 0f);
@@ -216,7 +217,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         renderer.renderType = GL11.GL_TRIANGLES;
 
 
-        components = cm.take(et.create("right")).add(Transform.class, MeshRenderer.class);
+        components = cm.take(new Entity("right")).add(Transform.class, MeshRenderer.class);
 
         transform = (Transform) components.get(0);
         transform.moveTo(2f, 0f, 0f);
@@ -233,8 +234,8 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     }
 
     private void initSingleButtonScene() {
-        Entity eCamera = et.create("camera");
-        Entity eButton = et.create("button");
+        Entity eCamera = new Entity("camera");
+        Entity eButton = new Entity("button");
 
         List<? extends Component> components;
         Transform transform;
@@ -262,9 +263,9 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
     }
 
     private void initScene1() {
-        Entity cursor = et.create("cursor");
-        Entity camera = et.create("camera");
-        Entity parentEntity = et.create("parentEntity");
+        Entity cursor = new Entity("cursor");
+        Entity camera = new Entity("camera");
+        Entity parentEntity = new Entity("parentEntity");
 
         cm.take(camera).add(Transform.class, Camera.class);
 
@@ -281,7 +282,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
         int widthStep   = width  / wCount;
         for (int h = 0; h < height; h += heightStep) {
             for (int w = 0; w < width; w += widthStep) {
-                Entity generatedButton = et.create("g_button_" + h + "_" + w);
+                Entity generatedButton = new Entity("g_button_" + h + "_" + w);
 
                 List<? extends Component> componentList = cm.take(generatedButton)
                         .add(Transform.class, MeshCollider.class, Button.class, MeshRenderer.class);
@@ -301,7 +302,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                generatedButton.setParent(parentEntity);
+                parentEntity.add(generatedButton);
             }
         }
 
@@ -351,7 +352,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 transform.entity = generatedButton;
                 collider.entity  = generatedButton;
                 generatedButton.transform = transform;
-                generatedButton.transform.moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
+                generatedButton.getTransform().moveTo(w + (float) widthStep / 2, 0f, h + (float) heightStep / 2);
 
                 collider.body.topLeft.set(transform.position.x - xOffsetLeft, transform.position.z - zOffsetUp);
                 collider.body.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
@@ -360,7 +361,7 @@ public class InitEntitiesSystem extends AbstractSystem<InitEntities>
                 button.buttonShape.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.z + zOffsetUp);
 
 
-                generatedButton.setParent(parentEntity);
+                parentEntity.add(generatedButton);
             }
         }
 
