@@ -1,6 +1,7 @@
 package org.north.core.managment;
 
 import org.joml.Vector3f;
+import org.north.core.component.AbstractComponent;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
@@ -23,7 +24,7 @@ import org.north.core.physics.collision.Collision;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SystemManager {
+public class SystemManager implements Resettable {
     public final List<InitProcess<? extends Component>> listOfSystemsForInit;
     public final List<UpdateProcess<? extends Component>> listOfSystemsForUpdate;
     public final List<RenderProcess<? extends Component>> listOfSystemsForRender;
@@ -105,7 +106,8 @@ public class SystemManager {
         return systemMap.get(componentClass);
     }
 
-    public void addComponent(Component component) {
+    @SuppressWarnings("unchecked")
+    public <ComponentInstance extends Component> ComponentInstance addComponent(ComponentInstance component) {
         Class<? extends Component> componentClass = component.getClass();
 
         // initialize system if it is not
@@ -113,7 +115,7 @@ public class SystemManager {
             try {
 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
-                if (systemClass == null) return;
+                if (systemClass == null) return null;
                 System<?> system = applicationContext.addDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
@@ -130,28 +132,17 @@ public class SystemManager {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
 
-        systemMap.get(componentClass).addComponent(component);
+        return (ComponentInstance) systemMap.get(componentClass).addComponent(component);
     }
 
     @SuppressWarnings("unchecked")
     public <E extends Component> E getComponent(UUID componentId) {
-        int systemCount = systemList.size();
-        for (int i = 0; i < systemCount; i++) {
-//        for (System<? extends Component> system: systemMap.values()) {
-            System<?> system = systemList.get(i);
-            Iterator<? extends Component> iterator = system.getComponentIterator();
-            while (iterator.hasNext()) {
-                Component component = iterator.next();
-                if (component.getId().equals(componentId)) {
-                    return (E) component;
-                }
-            }
+        for (System<?> system : systemList) {
+            Component component = system.getComponent(componentId);
+            if (component != null)
+                return (E) component;
         }
         throw new ComponentNotFoundException(componentId);
-    }
-
-    public <E extends Component> E removeComponent(Class<E> componentClass) {
-        return null;//systemMap.get(componentClass).removeComponent(componentClass);
     }
 
     public void sortComponentsByDistanceToCamera(List<? extends Component> components) {
@@ -172,10 +163,10 @@ public class SystemManager {
         deferredCommands.clear();
     }
 
+    @Override
     public void reset() {
-        for (System<?> system: systemList) {
+        for (System<?> system : systemList)
             system.reset();
-        }
     }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {

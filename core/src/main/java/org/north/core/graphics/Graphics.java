@@ -4,13 +4,16 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.north.core.component.MeshRenderer;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.shader.Shader;
 import org.north.core.reflection.di.Inject;
 import org.north.core.utils.BufferUtils;
 
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +35,34 @@ public class Graphics {
         this.window = window;
     }
 
+    public int generateLineVertexBuffer() {
+        // Create a vertex buffer
+        int vertexBuffer = GL30.glGenBuffers();
+        GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vertexBuffer);
+        FloatBuffer buffer = org.lwjgl.BufferUtils.createFloatBuffer(6);
+        buffer.put(new float[] {0, 0, 1, 0, 0, 1});
+        buffer.flip();
+        GL20.glBufferData(GL20.GL_ARRAY_BUFFER, buffer, GL20.GL_STATIC_DRAW);
+
+        // Set the vertex buffer as the current vertex array
+        GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+
+        return vertexBuffer;
+    }
+
+    public void drawLine(int vertexBuffer, int vertexCount) {
+        // Enable the vertex array
+        GL20.glEnableVertexAttribArray(vertexBuffer);
+
+        // Set the vertex array to the vertex buffer
+        GL20.glVertexAttribPointer(0, 2, GL20.GL_FLOAT, false, 0, 0);
+
+        // Draw the lines
+        GL11.glDrawArrays(GL11.GL_LINES, 0, vertexCount);
+
+        // Disable the vertex array
+        GL20.glDisableVertexAttribArray(vertexBuffer);
+    }
 
     public void prepareShader(Shader shader, MeshRenderer renderer) {
         activeTextureCount = GL20.GL_TEXTURE0;

@@ -12,10 +12,15 @@ public interface ComponentContainer {
     Map<Class<? extends Component>, Component> getComponentMap();
 
     Transform getTransform();
+
     void setTransform(Transform transform);
 
+    default boolean has(Class<? extends Component> type) {
+        return getComponentMap().containsKey(type);
+    }
+
     @SuppressWarnings("unchecked")
-    default  <ComponentInstance extends Component> ComponentInstance get(Class<ComponentInstance> type) {
+    default <ComponentInstance extends Component> ComponentInstance get(Class<ComponentInstance> type) {
         return (ComponentInstance) getComponentMap().get(type);
     }
 
@@ -35,7 +40,7 @@ public interface ComponentContainer {
     }
 
     @SuppressWarnings("unchecked")
-    default  <ComponentInstance extends Component> ComponentInstance remove(Class<ComponentInstance> type) {
+    default <ComponentInstance extends Component> ComponentInstance remove(Class<ComponentInstance> type) {
         if (Transform.class.isAssignableFrom(type)) {
             throw new IllegalArgumentException("Transform component cannot be removed from entity!");
         }

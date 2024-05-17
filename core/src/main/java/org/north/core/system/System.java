@@ -1,19 +1,19 @@
 package org.north.core.system;
 
 import org.north.core.component.Component;
+import org.north.core.managment.Resettable;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 // todo: automate "component-to-system" association with annotation processors and reflections
-public interface System<E extends Component> {
+public interface System<E extends Component> extends Resettable {
     Iterator<E> getComponentIterator();
     List<E> getComponentList();
+    Collection<E> getComponentUnmodifiableCollection();
     E getComponent(UUID componentId);
-    void addComponent(Component component);
+    E addComponent(Component component);
     E removeComponent(UUID componentId);
-    E removeComponent(Class<E> componentClass);
-
-    void reset();
 }

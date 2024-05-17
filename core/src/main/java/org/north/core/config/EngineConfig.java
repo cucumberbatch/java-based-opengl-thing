@@ -14,6 +14,6 @@ public class EngineConfig {
     public final int windowWidth = 512;
     public final int windowHeight = 512;
     public final boolean vsync = false;
-    public final String windowTitle = "test_engine";
+    public final String windowTitle = "Scene view";
 
 }

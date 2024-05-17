@@ -15,6 +15,7 @@ public class CameraSystem extends AbstractSystem<Camera>
         implements InitProcess<Camera>, RenderProcess<Camera> {
 
     public static Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
+    public static Matrix4f INTERMEDIATE_MATRIX = new Matrix4f();
     public static Matrix4f ORTHOGRAPHIC_MATRIX = new Matrix4f();
 
     @Inject
@@ -25,6 +26,7 @@ public class CameraSystem extends AbstractSystem<Camera>
     @Override
     public void init(Camera camera) throws RuntimeException {
         PERSPECTIVE_MATRIX  = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
+        INTERMEDIATE_MATRIX  = new Matrix4f().perspective(camera.angle * 1.125f, camera.ratio, camera.near, camera.far);
         ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-1, 1, -1, 1, -1, 1);
 
         camera.eye.set(0f, -1f, 0f);

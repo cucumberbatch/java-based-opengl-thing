@@ -11,6 +11,7 @@ import org.north.core.system.command.RemoveComponentDeferredCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ComponentManager {
@@ -125,13 +126,21 @@ public class ComponentManager {
             this.entity = entity;
         }
 
-        private void setEntityNode(Entity entity) {
+        private void setEntity(Entity entity) {
             this.entity = entity;
         }
 
         public synchronized <ComponentInstance extends Component> ComponentInstance add(Class<ComponentInstance> componentClass) {
             cm.pushManagedEntity(this);
             return cm.add(entity, componentClass);
+        }
+
+        public synchronized <ComponentInstance extends Component> ComponentInstance addAndPerform(Class<ComponentInstance> componentClass,
+                                                                                                  Consumer<ComponentInstance> action) {
+            cm.pushManagedEntity(this);
+            ComponentInstance component = cm.add(entity, componentClass);
+            action.accept(component);
+            return component;
         }
 
         @SafeVarargs
@@ -182,7 +191,7 @@ public class ComponentManager {
                 return new ManagedEntity(entityManager, entity);
             }
             ManagedEntity managedEntity = this.managedEntityDeque.pop();
-            managedEntity.setEntityNode(entity);
+            managedEntity.setEntity(entity);
             return managedEntity;
         }
 

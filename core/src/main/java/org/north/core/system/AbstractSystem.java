@@ -3,7 +3,6 @@ package org.north.core.system;
 import org.joml.Vector3f;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
-import org.north.core.architecture.tree.v2.TreeNode;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.context.ApplicationContext;
@@ -44,33 +43,32 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
+    public Collection<E> getComponentUnmodifiableCollection() {
+        return Collections.unmodifiableCollection(componentMap.values());
+    }
+
+    @Override
     public final E getComponent(UUID componentId) {
-        E component = componentMap.get(componentId);
-        if (component == null) {
-            throw new ComponentNotFoundException(componentId);
-        }
-        return component;
+//        if (component == null) {
+//            throw new ComponentNotFoundException(componentId);
+//        }
+        return componentMap.get(componentId);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public final void addComponent(Component component)
+    public final E addComponent(Component component)
             throws IllegalArgumentException, ClassCastException, ComponentAlreadyExistsException {
         if (componentMap.containsKey(component.getId())) {
             throw new ComponentAlreadyExistsException(component.getClass());
         }
-        componentMap.put(component.getId(), (E) component);
+        return componentMap.put(component.getId(), (E) component);
         // Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
     }
 
     @Override
     public final E removeComponent(UUID componentId) {
         return componentMap.remove(componentId);
-    }
-
-    @Override
-    public final E removeComponent(Class<E> componentClass) {
-        return null;//componentMap.
     }
 
     @Override

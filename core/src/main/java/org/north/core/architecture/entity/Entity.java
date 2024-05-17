@@ -105,10 +105,11 @@ public class Entity extends LinkedTreeNode<Entity> implements ComponentContainer
 
     @Override
     public String toString() {
-        return "Entity{" +
-                "name='" + name + '\'' +
-                ", daughters=" + getSubtrees() +
-                '}';
+        return name;
+//        return "Entity{" +
+//                "name='" + name + '\'' +
+//                ", daughters=" + getSubtrees() +
+//                '}';
     }
 
     @Override

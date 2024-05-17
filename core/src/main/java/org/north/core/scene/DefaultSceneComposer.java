@@ -19,40 +19,38 @@ import java.util.List;
 public class DefaultSceneComposer implements SceneComposer {
     @Override
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
-//        initSingleButtonScene(sceneRoot, cm);
 //        initCubeAndCamera(sceneRoot, cm);
 //        initReferenceScene(sceneRoot, cm);
-//        testScene(sceneRoot, cm);
-        initSpaceshipOnScreen(sceneRoot, cm);
+        testScene(sceneRoot, cm);
+//        initSpaceshipOnScreen(sceneRoot, cm);
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
-        Entity e1 = new Entity("object");
-        root.add(e1);
+        Entity testCube = new Entity("object");
+        root.add(testCube);
 
-        List<? extends Component> components = cm.take(e1).add(Transform.class, MeshRenderer.class);
+        cm.take(testCube).addAndPerform(Transform.class, transform -> {
+            transform.position.set(0.5f, 0.5f, 0.5f);
+            transform.scale.set(0.8f, 0.8f, 0.8f);
+        });
 
-        Transform transform = (Transform) components.get(0);
-        transform.position.set(0.5f, 0.5f, 0.5f);
-        transform.scale.set(0.8f, 0.8f, 0.8f);
-
-        MeshRenderer meshRenderer = (MeshRenderer) components.get(1);
-        meshRenderer.shader = new SimpleColorShader();
-//        meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-        meshRenderer.mesh = PredefinedMeshes.CUBE;
-        meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
+        cm.take(testCube).addAndPerform(MeshRenderer.class, meshRenderer -> {
+            meshRenderer.shader = new SimpleColorShader();
+//            meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+            meshRenderer.mesh = PredefinedMeshes.CUBE;
+            meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
+        });
 
         Entity camera = new Entity("camera");
         root.add(camera);
 
-        components = cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
+        cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
 
 //        transform = (Transform) components.get(0);
 //        transform.position.set(0.5f, 0.5f, 0.5f);
 //        transform.scale.set(0.8f, 0.8f, 0.8f);
 
     }
-
 
     private void initCubeAndCamera(TreeNode<Entity> root, ComponentManager cm) {
         Entity camera = new Entity("camera");
@@ -118,48 +116,8 @@ public class DefaultSceneComposer implements SceneComposer {
 
     }
 
-    private void initSingleButtonScene(TreeNode<Entity> root, ComponentManager cm) {
-        Entity eCamera = new Entity("camera");
-        Entity eButton = new Entity("button");
-
-        root.add(eCamera);
-        root.add(eButton);
-
-        List<? extends Component> components;
-        Transform transform;
-        Button button;
-        MeshRenderer renderer;
-        Camera camera;
-
-        components = cm.take(eButton)
-                .add(Transform.class, Button.class, MeshRenderer.class);
-
-        transform = ((Transform) components.get(0));
-        transform.moveTo(0, 0, 1);
-
-        renderer = ((MeshRenderer) components.get(2));
-        renderer.mesh = new Mesh();
-        renderer.shader = new SimpleColorShader();
-        renderer.color = new Vector4f(0.4f, 0.7f, 0.3f, 1f);
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-
-        transform = cm.take(eCamera).add(Transform.class);
-        camera = cm.take(eCamera).add(Camera.class);
-
-        transform.moveTo(0, 0, 0);
-        camera.projectionMatrix = CameraSystem.PERSPECTIVE_MATRIX;
-    }
-
     private void initReferenceScene(TreeNode<Entity> root, ComponentManager cm) {
         Entity referenceBox = new Entity("referenceBox");
-        Entity camera = new Entity("camera");
-
-        root.add(referenceBox);
-
-        referenceBox.add(camera);
-
-        cm.take(camera)
-                .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
 
         List<? extends Component> componentList = cm.take(referenceBox)
                 .add(Transform.class, MeshRenderer.class, RigidBody.class);
@@ -168,6 +126,17 @@ public class DefaultSceneComposer implements SceneComposer {
         renderer.shader = new SimpleColorShader();
         renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
         renderer.mesh = PredefinedMeshes.QUAD;
+
+        root.add(referenceBox);
+
+        if (root.find(entity -> entity.has(Camera.class)) == null) {
+            Entity camera = new Entity("camera");
+
+            cm.take(camera)
+                    .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
+
+            referenceBox.add(camera);
+        }
     }
 
     private void initSpaceshipOnScreen(TreeNode<Entity> root, ComponentManager cm) {

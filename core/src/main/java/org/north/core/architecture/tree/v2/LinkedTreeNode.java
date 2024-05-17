@@ -121,7 +121,8 @@ public abstract class LinkedTreeNode<Node extends LinkedTreeNode<Node>> implemen
         }
 
         private int countSubtrees(Node parentNode) {
-            int count = 0;
+            if (parentNode.isLeaf()) return 0;
+            int count = 1;
             for (Node daughter = parentNode.getLeftMostDaughter(); daughter.hasNextSibling(); daughter = daughter.getNextSibling()) {
                 count++;
             }

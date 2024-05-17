@@ -2,6 +2,8 @@ package org.north.core.system;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.MemoryStack;
+import org.north.core.Engine;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.architecture.tree.v2.TreeNode;
@@ -9,7 +11,10 @@ import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
 import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
+import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
+import org.north.core.editor.ComponentInspector;
+import org.north.core.editor.EditorUtils;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
@@ -27,9 +32,16 @@ import org.north.core.system.process.*;
 import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -82,6 +94,10 @@ public class Pipeline implements ISystem, Runnable {
         // todo: load scene from file (game data deserialization)
         composeScene(new DefaultSceneComposer());
 
+        if (ApplicationProperties.getBoolean("application.editor.enabled")) {
+            createEditorWindow();
+        }
+
         while (window.shouldNotClose() && !stopped) {
             try {
                 tick();
@@ -93,7 +109,18 @@ public class Pipeline implements ISystem, Runnable {
         // Logger.info("Game loop ended");
     }
 
-    public void tick() {
+    private void createEditorWindow() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                new ComponentInspector("North component inspector", (Entity) rootNode);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public synchronized void tick() {
         timingContext.updateTiming();
         final float elapsedTime = timingContext.getElapsedTime();
 
@@ -136,9 +163,13 @@ public class Pipeline implements ISystem, Runnable {
                     try {
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
-                    } catch (ComponentNotFoundException | NullPointerException e) {
+                    } catch (ComponentNotFoundException e) {
                         // Logger.error(e);
-                        e.printStackTrace();
+                        log.log(Level.WARNING, "Component not found", e);
+                        component.setState(ComponentState.LATE_INIT_STATE);
+                    } catch (NullPointerException e) {
+                        // Logger.error(e);
+                        log.log(Level.WARNING, "Null pointer exception", e);
                         component.setState(ComponentState.LATE_INIT_STATE);
                     }
                 } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
