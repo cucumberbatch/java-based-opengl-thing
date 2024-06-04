@@ -21,13 +21,12 @@ public class DefaultSceneComposer implements SceneComposer {
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
 //        initCubeAndCamera(sceneRoot, cm);
 //        initReferenceScene(sceneRoot, cm);
-        testScene(sceneRoot, cm);
-//        initSpaceshipOnScreen(sceneRoot, cm);
+//        testScene(sceneRoot, cm);
+        initSpaceshipOnScreen(sceneRoot, cm);
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
-        Entity testCube = new Entity("object");
-        root.add(testCube);
+        Entity testCube = new Entity("test_cube");
 
         cm.take(testCube).addAndPerform(Transform.class, transform -> {
             transform.position.set(0.5f, 0.5f, 0.5f);
@@ -42,13 +41,15 @@ public class DefaultSceneComposer implements SceneComposer {
         });
 
         Entity camera = new Entity("camera");
-        root.add(camera);
 
         cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
 
 //        transform = (Transform) components.get(0);
 //        transform.position.set(0.5f, 0.5f, 0.5f);
 //        transform.scale.set(0.8f, 0.8f, 0.8f);
+
+        root.add(testCube);
+        root.add(camera);
 
     }
 
