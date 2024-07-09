@@ -16,8 +16,8 @@ public class RayCast {
 
     public boolean isIntersects(Entity entity) {
         Transform gTransform = entity.getTransform().getGlobalTransform();
-        Vector3f gPosition = gTransform.position;
-        float gSize = gTransform.scale.length();
+        Vector3f gPosition = gTransform.getPosition();
+        float gSize = gTransform.getScale().length();
 
         Sphere sphere = new Sphere(gPosition.x, gPosition.y, gPosition.z, gSize);
         return this.isIntersects(sphere);

@@ -16,10 +16,14 @@
 .idea/
 target/
 
-# Idea files #
+# Idea files
 *.iml
 
-# Package Files #
+# Sublime files
+*.sublime-project
+*.sublime-workspace
+
+# Package Files
 *.jar
 *.war
 *.nar

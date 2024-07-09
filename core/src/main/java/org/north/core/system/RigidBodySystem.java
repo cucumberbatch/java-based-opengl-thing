@@ -53,7 +53,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
     }
 
     private void updateRotation(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {
-        transform.rotation.add(that.angularVelocity.mul(deltaTime, temp));
+        transform.getRotation().add(that.angularVelocity.mul(deltaTime, temp));
     }
 
     private void updatePosition(Transform transform, RigidBody that, float deltaTime, Vector3f temp) {

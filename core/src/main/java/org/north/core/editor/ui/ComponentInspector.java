@@ -1,7 +1,8 @@
-package org.north.core.editor;
+package org.north.core.editor.ui;
 
 import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Component;
+import org.north.core.editor.EditorUtils;
 import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.*;

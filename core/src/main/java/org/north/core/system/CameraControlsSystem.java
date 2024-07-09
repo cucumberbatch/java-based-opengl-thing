@@ -8,6 +8,7 @@ import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
+import org.north.core.system.process.InputHandleProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.RenderProcess;
 import org.north.core.system.process.UpdateProcess;
@@ -25,7 +26,7 @@ import static java.lang.Math.PI;
 
 @ComponentHandler(CameraControls.class)
 public class CameraControlsSystem extends AbstractSystem<CameraControls>
-        implements InitProcess<CameraControls>, UpdateProcess<CameraControls>, RenderProcess<CameraControls> {
+        implements InitProcess<CameraControls>, InputHandleProcess<CameraControls>, UpdateProcess<CameraControls>, RenderProcess<CameraControls> {
 
     private static final float MAX_CAMERA_ANGLE = 89.986f;
 
@@ -43,6 +44,19 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private float verticalMousePosition = 0f;
 
     private boolean mouseCaptured = false;
+
+    private boolean escapeIsPressed = false;
+    private boolean mouseLeftButtonIsPressed = false;
+    private boolean key1IsPressed = false;
+    private boolean leftShiftKeyIsHolded = false;
+    private boolean keyQIsHolded = false;
+    private boolean keyEIsHolded = false;
+    private boolean keyWIsHolded = false;
+    private boolean keySIsHolded = false;
+    private boolean keyAIsHolded = false;
+    private boolean keyDIsHolded = false;
+
+    private Vector2f lastCursorPosition;
 
     public enum ProjectionState {
         PERSPECTIVE_VIEW_STATE,
@@ -70,6 +84,24 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     }
 
     @Override
+    public void handleInput(CameraControls component, Input input) {
+        escapeIsPressed = input.isPressed(GLFW.GLFW_KEY_ESCAPE);
+        mouseLeftButtonIsPressed = input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+        key1IsPressed = input.isPressed(GLFW.GLFW_KEY_1);
+        leftShiftKeyIsHolded = input.isHolded(GLFW.GLFW_KEY_LEFT_SHIFT);
+
+        keyQIsHolded = input.isHolded(GLFW.GLFW_KEY_Q);
+        keyEIsHolded = input.isHolded(GLFW.GLFW_KEY_E);
+
+        keyWIsHolded = input.isHolded(GLFW.GLFW_KEY_W);
+        keySIsHolded = input.isHolded(GLFW.GLFW_KEY_S);
+        keyAIsHolded = input.isHolded(GLFW.GLFW_KEY_A);
+        keyDIsHolded = input.isHolded(GLFW.GLFW_KEY_D);
+
+        lastCursorPosition = input.getCursorPosition();
+    }
+
+    @Override
     public void update(CameraControls cameraControls, float deltaTime) {
         updateScreenCapture(graphics);
         updateCameraProjection(graphics, deltaTime);
@@ -84,7 +116,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private ProjectionState lastProjectionStateBeforeFocusLoss = ProjectionState.PERSPECTIVE_VIEW_STATE;
 
     private void updateScreenCapture(Graphics graphics) {
-        if (Input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
+        if (escapeIsPressed) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
 
             if (intermediateCameraStateOnFocusLossEnabled) {
@@ -108,7 +140,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
             mouseCaptured = false;
         }
 
-        if (Input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT) && !mouseCaptured) {
+        if (mouseLeftButtonIsPressed && !mouseCaptured) {
             GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 
             if (intermediateCameraStateOnFocusLossEnabled) {
@@ -126,7 +158,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 }
             }
 
-            previousCursorPosition = Input.getCursorPosition();
+            previousCursorPosition = lastCursorPosition;
             cursorPositionDifference = new Vector2f();
             mouseCaptured = true;
         }
@@ -137,7 +169,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private final double SIN_OF_HALF_PI = Math.sin(HALF_PI);
 
     private void updateCameraProjection(Graphics graphics, float deltaTime) {
-        if (Input.isPressed(GLFW.GLFW_KEY_1)) {
+        if (key1IsPressed) {
             switch (projectionState) {
                 case ORTHOGRAPHIC_VIEW_STATE:
                 case INTERMEDIATE_TO_ORTHOGRAPHIC_VIEW_STATE:
@@ -202,7 +234,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         Vector3f temp = vector3fPool.get();
         Vector3f temp2 = vector3fPool.get();
 
-        Vector2f cursorPosition = Input.getCursorPosition();
+        Vector2f cursorPosition = lastCursorPosition;
         cursorPositionDifference = new Vector2f(cursorPosition).sub(previousCursorPosition);
         virtualCursorPosition = new Vector2f(virtualCursorPosition).add(cursorPositionDifference);
         previousCursorPosition = cursorPosition;
@@ -218,40 +250,40 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        cameraMovementSpeed = Input.isHeldDown(GLFW.GLFW_KEY_LEFT_SHIFT) ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
+        cameraMovementSpeed = leftShiftKeyIsHolded ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
 
         // up-down movement
         // note: incorrect
-        if (Input.isHeldDown(GLFW.GLFW_KEY_Q)) {
+        if (keyQIsHolded) {
             componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
         }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_E)) {
+        if (keyEIsHolded) {
             componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
         }
 
         // left-right movement
-        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
+        if (keyDIsHolded) {
             componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
         }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
+        if (keyAIsHolded) {
             componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
         }
 
         // forward-backward movement
-        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
+        if (keyWIsHolded) {
             componentTransform.moveRel(temp2.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
         }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_S)) {
+        if (keySIsHolded) {
             componentTransform.moveRel(temp2.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
         //  needs to fix
 
-        camera.eye.set(componentTransform.position);
-        camera.at.set(point.add(componentTransform.position));
+        camera.eye.set(componentTransform.getPosition());
+        camera.at.set(point.add(componentTransform.getPosition()));
 
         camera.viewMatrix.identity().lookAt(camera.eye, camera.at, temp2.set(0f, 1f, 0f));
 
@@ -274,6 +306,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         @Override
         public void invoke(long window, int width, int height) {
+            log.info("window size: " + window + " : " + height);
+
             camera.ratio = (float) width / height;
             CameraSystem.PERSPECTIVE_MATRIX = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
             CameraSystem.ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1, 1, -1, 1);

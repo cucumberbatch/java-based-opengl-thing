@@ -1,38 +1,26 @@
 package org.north.core.managment;
 
 import org.joml.Vector3f;
-import org.north.core.component.AbstractComponent;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.di.Inject;
-import org.north.core.reflection.di.registerer.DependencyRegisterer;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
-import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.DeferredCommand;
-import org.north.core.system.command.RemoveComponentDeferredCommand;
-import org.north.core.system.process.CollisionHandlingProcess;
 import org.north.core.system.process.InitProcess;
-import org.north.core.system.process.RenderProcess;
-import org.north.core.system.process.UpdateProcess;
-import org.north.core.physics.collision.Collision;
+import org.north.core.system.process.Process;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager implements Resettable {
-    public final List<InitProcess<? extends Component>> listOfSystemsForInit;
-    public final List<UpdateProcess<? extends Component>> listOfSystemsForUpdate;
-    public final List<RenderProcess<? extends Component>> listOfSystemsForRender;
-    public final List<CollisionHandlingProcess<? extends Component>> listOfSystemsForCollisionHandling;
-    public final List<System<?>> listOfSystemsForCollision;
-
     public final List<Collision> collisions;
-
+    private final Map<Class<? extends Process>, List<Process>> processMap;
     private final Map<Class<? extends Component>, System<?>> systemMap;
     private final List<System<?>> systemList;
     private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
@@ -47,19 +35,24 @@ public class SystemManager implements Resettable {
     public SystemManager(ApplicationContext context) {
         applicationContext = context;
         scanner = new ComponentHandlerScanner();
+        cameraDistanceComparator = new EntityDistanceToCameraComparator();
         deferredCommands = new LinkedList<>();
         componentToSystemAssociations = new HashMap<>();
+        collisions = new ArrayList<>();
         systemList = new ArrayList<>();
         systemMap = new HashMap<>();
+        processMap = new HashMap<>();
 
+        initProcessMap(ApplicationProperties.getProperty("process.package"));
         loadComponentSystemsFromPackage(ApplicationProperties.getProperty("system.package"));
-        cameraDistanceComparator = new EntityDistanceToCameraComparator();
-        collisions = new ArrayList<>();
-        listOfSystemsForCollisionHandling = new LinkedList<>();
-        listOfSystemsForCollision = new LinkedList<>();
-        listOfSystemsForRender = new LinkedList<>();
-        listOfSystemsForUpdate = new LinkedList<>();
-        listOfSystemsForInit = new LinkedList<>();
+    }
+
+    public <ProcessType extends Process> List<ProcessType> getProcessList(Class<ProcessType> processTypeClass) {
+        List<ProcessType> processList = new ArrayList<>();
+        for (Process process : processMap.get(processTypeClass)) {
+            processList.add(processTypeClass.cast(process));
+        }
+        return processList;
     }
 
     private void loadComponentSystemsFromPackage(String packagePath) {
@@ -79,22 +72,23 @@ public class SystemManager implements Resettable {
         }
     }
 
+    private void initProcessMap(String processPackageName) {
+        try {
+            List<Class<? extends Process>> processClasses = scanner.getAllProcessClasses(processPackageName);
+            for (Class<? extends Process> processClass : processClasses) {
+                processMap.put(processClass, new ArrayList<>());
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void attachToSystemLists(System<?> system) {
         Class<?> clazz = system.getClass();
-        if (InitProcess.class.isAssignableFrom(clazz)) {
-            this.listOfSystemsForInit.add((InitProcess<? extends Component>) system);
-        }
-        if (UpdateProcess.class.isAssignableFrom(clazz)) {
-            this.listOfSystemsForUpdate.add((UpdateProcess<? extends Component>) system);
-        }
-        if (RenderProcess.class.isAssignableFrom(clazz)) {
-            this.listOfSystemsForRender.add((RenderProcess<? extends Component>) system);
-        }
-//        if (CollisionProcess.class.isAssignableFrom(clazz)) {
-//            this.listOfSystemsForCollision.add(system);
-//        }
-        if (CollisionHandlingProcess.class.isAssignableFrom(clazz)) {
-            this.listOfSystemsForCollisionHandling.add((CollisionHandlingProcess<? extends Component>) system);
+        for (Class<? extends Process> processClass : processMap.keySet()) {
+            if (processClass.isAssignableFrom(clazz)) {
+                processMap.get(processClass).add((Process) system);
+            }
         }
     }
 
@@ -113,7 +107,7 @@ public class SystemManager implements Resettable {
         // initialize system if it is not
         if (systemMap.get(componentClass) == null) {
             try {
-//                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
+                //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
                 if (systemClass == null) return null;
                 System<?> system = applicationContext.addDependency(systemClass);
@@ -139,8 +133,9 @@ public class SystemManager implements Resettable {
     public <E extends Component> E getComponent(UUID componentId) {
         for (System<?> system : systemList) {
             Component component = system.getComponent(componentId);
-            if (component != null)
+            if (component != null) {
                 return (E) component;
+            }
         }
         throw new ComponentNotFoundException(componentId);
     }
@@ -157,16 +152,17 @@ public class SystemManager implements Resettable {
     }
 
     public void applyDeferredCommands() {
-        for (DeferredCommand command : deferredCommands)
+        for (DeferredCommand command : deferredCommands) {
             command.execute(this);
-
+        }
         deferredCommands.clear();
     }
 
     @Override
     public void reset() {
-        for (System<?> system : systemList)
+        for (System<?> system : systemList) {
             system.reset();
+        }
     }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {

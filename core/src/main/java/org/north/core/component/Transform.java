@@ -2,58 +2,84 @@ package org.north.core.component;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.north.core.physics.collision.TransformListener;
+import org.north.core.physics.collision.MovementListener;
 
 import java.util.Iterator;
 
 /**
- * The main component of each game object that tells
- * you about its position, rotation and scale
+ * The main component of each game object that tells about its position, rotation and scale
  *
  * @author cucumberbatch
  */
 public class Transform extends AbstractComponent {
     public Transform parent;
 
-    public Vector3f position = new Vector3f(0, 0, 0);
-    public Vector3f rotation = new Vector3f(0, 0, 0);
-    public Vector3f scale    = new Vector3f(1, 1, 1);
+    private Vector3f position = new Vector3f(0, 0, 0);
+    private Vector3f rotation = new Vector3f(0, 0, 0);
+    private Vector3f scale    = new Vector3f(1, 1, 1);
 
-    private static final TransformListener EMPTY_TRANSFORM_LISTENER = (e, p1, p2) -> {};
+    private static final MovementListener EMPTY_MOVEMENT_LISTENER = (e, p1, p2) -> {};
 
-    private TransformListener transformListener = EMPTY_TRANSFORM_LISTENER;
+    private MovementListener movementListener = EMPTY_MOVEMENT_LISTENER;
 
+    public Vector3f getPosition() {
+        return position;
+    }
+
+    public Vector3f getRotation() {
+        return rotation;
+    }
+
+    public Vector3f getScale() {
+        return scale;
+    }
 
     public void moveTo(Vector3f position) {
-        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
-            transformListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position));
+        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
+            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position));
         }
         this.position.set(position);
     }
 
     public void moveTo(float x, float y, float z) {
-        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
-            transformListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z));
+        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
+            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z));
         }
         this.position.set(x, y, z);
     }
 
     public void moveRel(Vector3f position) {
-        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
-            transformListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position).add(this.position));
+        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
+            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position).add(this.position));
         }
         this.position.add(position);
     }
 
     public void moveRel(float x, float y, float z) {
-        if (EMPTY_TRANSFORM_LISTENER != transformListener) {
-            transformListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
+        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
+            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
         }
         this.position.add(x, y, z);
     }
 
-    public void setTransformListener(TransformListener transformListener) {
-        this.transformListener = transformListener;
+    public void rescaleTo(Vector3f scale) {
+        this.scale.set(scale);
+    }
+
+    public void rescaleTo(float x, float y, float z) {
+        this.scale.set(x, y, z);
+    }
+
+    public void rescaleRel(Vector3f scale) {
+        this.scale.add(scale);
+    }
+
+    public void rescaleRel(float x, float y, float z) {
+        this.scale.add(x, y, z);
+    }
+
+    public void setTransformListener(MovementListener movementListener) {
+        this.movementListener = movementListener;
     }
 
     /**

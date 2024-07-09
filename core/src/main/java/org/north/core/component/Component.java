@@ -1,22 +1,16 @@
 package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
+import org.north.core.managment.data.Stateful;
 
 import java.util.UUID;
 
-public interface Component {
+public interface Component extends Stateful<ComponentState> {
     UUID getId();
     void setId(UUID id);
 
     Entity getEntity();
     void attachToEntity(Entity entity);
-
-    ComponentState getState();
-    void setState(ComponentState state);
-
-    default boolean inState(ComponentState state) {
-        return getState().equals(state);
-    }
 
     boolean isActive();
     void setActivity(boolean activity);

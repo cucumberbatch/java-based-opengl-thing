@@ -1,25 +1,23 @@
 package org.north.core.physics.collision;
 
-public class Collision {
+import org.north.core.managment.data.Stateful;
+
+public class Collision implements Stateful<CollisionState> {
     public Collidable A;
     public Collidable B;
     public CollisionPair pair;
-    public byte state;
+    public CollisionState state;
     public boolean isModified;
 
-    public static final byte ENTERED = 0;
-    public static final byte HOLD    = 1;
-    public static final byte EXITED  = 2;
-
-    public Collision(Collidable A, Collidable B, CollisionPair pair, byte state) {
-        register(A, B, pair, state);
+    public Collision(CollisionState state, Collidable A, Collidable B, CollisionPair pair) {
+        register(state, A, B, pair);
     }
 
-    public Collision register(Collidable A, Collidable B, CollisionPair pair, byte state) {
+    public Collision register(CollisionState state, Collidable A, Collidable B, CollisionPair pair) {
+        this.state = state;
         this.A = A;
         this.B = B;
         this.pair = pair;
-        this.state = state;
         return this;
     }
 
@@ -40,5 +38,15 @@ public class Collision {
         result = 31 * result + (B != null ? B.hashCode() : 0);
         result = 31 * result + (pair != null ? pair.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public CollisionState getState() {
+        return state;
+    }
+
+    @Override
+    public void setState(CollisionState collisionState) {
+        this.state = collisionState;
     }
 }

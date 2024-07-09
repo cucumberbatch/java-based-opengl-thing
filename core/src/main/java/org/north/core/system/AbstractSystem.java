@@ -8,12 +8,17 @@ import org.north.core.component.Component;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.graphics.Window;
 import org.north.core.managment.memory.Pool;
 import org.north.core.managment.memory.Vector3fPool;
+import org.north.core.utils.logger.LoggerFactory;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
+
+    protected static final Logger log = LoggerFactory.createLogger(AbstractSystem.class);
 
     // map for storing componentId-to-component pair
     private final Map<UUID, E> componentMap = new HashMap<>();

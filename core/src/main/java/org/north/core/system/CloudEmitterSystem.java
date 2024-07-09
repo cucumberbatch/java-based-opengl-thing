@@ -9,13 +9,15 @@ import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
+import org.north.core.system.process.InputHandleProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
 import static org.joml.Math.*;
 
 @ComponentHandler(CloudEmitter.class)
-public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements InitProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
+public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
+        implements InitProcess<CloudEmitter>, InputHandleProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
     private float acc = 0;
     private long gasCloudEntityNumber = 0;
 
@@ -28,6 +30,9 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     private static final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
     private static final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
     private static final float twoPi = (float) (2 * PI);
+    private boolean keyAIsHolded;
+    private boolean keyDIsHolded;
+    private boolean keyWIsHolded;
 
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
@@ -46,25 +51,32 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
     }
 
     @Override
+    public void handleInput(CloudEmitter component, Input input) {
+        keyAIsHolded = input.isHolded(GLFW.GLFW_KEY_A);
+        keyDIsHolded = input.isHolded(GLFW.GLFW_KEY_D);
+        keyWIsHolded = input.isHolded(GLFW.GLFW_KEY_W);
+    }
+
+    @Override
     public void update(CloudEmitter cloudEmitter, final float deltaTime) {
         boolean moving = false;
 
-        float accelerationSpeed = 3;
+        float accelerationSpeed = 15;
         float rotationSpeed = 6;
         float rotationIncrement = deltaTime * rotationSpeed;
         float accelerationIncrement = deltaTime * accelerationSpeed;
-        float angle = spaceshipTransform.rotation.z;
+        float angle = spaceshipTransform.getRotation().z;
 
-        if (Input.isHeldDown(GLFW.GLFW_KEY_A)) {
-            angle = (spaceshipTransform.rotation.z - rotationIncrement) % twoPi;
+        if (keyAIsHolded) {
+            angle = (spaceshipTransform.getRotation().z - rotationIncrement) % twoPi;
         }
-        if (Input.isHeldDown(GLFW.GLFW_KEY_D)) {
-            angle = (spaceshipTransform.rotation.z + rotationIncrement) % twoPi;
+        if (keyDIsHolded) {
+            angle = (spaceshipTransform.getRotation().z + rotationIncrement) % twoPi;
         }
 
-        spaceshipTransform.rotation.set(0, 0, angle);
+        spaceshipTransform.getRotation().set(0, 0, angle);
 
-        if (Input.isHeldDown(GLFW.GLFW_KEY_W)) {
+        if (keyWIsHolded) {
             moving = true;
             movableWorldRigidBody.addImpulseToMassCenter(
                     accelerationIncrement * (float) sin(angle),
@@ -83,8 +95,8 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter> implements 
 
             Transform transform = gasCloudEntity.getTransform();
             Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
-            transform.position.set(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
-            transform.scale.set(emittingScale);
+            transform.moveTo(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
+            transform.rescaleTo(emittingScale);
 
             MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
             renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);

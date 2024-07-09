@@ -2,8 +2,6 @@ package org.north.core.system;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.system.MemoryStack;
-import org.north.core.Engine;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.architecture.tree.v2.TreeNode;
@@ -13,8 +11,7 @@ import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
-import org.north.core.editor.ComponentInspector;
-import org.north.core.editor.EditorUtils;
+import org.north.core.editor.ui.ComponentInspector;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
@@ -24,6 +21,7 @@ import org.north.core.managment.SystemManager;
 import org.north.core.physics.collision.Collidable;
 import org.north.core.physics.collision.Collision;
 import org.north.core.physics.collision.CollisionPair;
+import org.north.core.physics.collision.CollisionState;
 import org.north.core.reflection.di.Inject;
 import org.north.core.scene.DefaultSceneComposer;
 import org.north.core.scene.Scene;
@@ -32,16 +30,6 @@ import org.north.core.system.process.*;
 import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -57,6 +45,7 @@ public class Pipeline implements ISystem, Runnable {
     private final ComponentManager componentManager;
     private final SystemManager systemManager;
     private final FrameTiming timingContext;
+    private final Input input;
 
     private final TreeNode<Entity> rootNode;
 
@@ -75,6 +64,7 @@ public class Pipeline implements ISystem, Runnable {
         this.componentManager = context.getDependency(ComponentManager.class);
         this.systemManager = context.getDependency(SystemManager.class);
         this.timingContext = new FrameTiming(65);
+        this.input = context.getDependency(Input.class);
 
         try {
             this.rootNode = context.addDependency(Entity.class, new Entity("root"));
@@ -124,12 +114,18 @@ public class Pipeline implements ISystem, Runnable {
         timingContext.updateTiming();
         final float elapsedTime = timingContext.getElapsedTime();
 
-        updateInput();
         init();
+
+        handleInput();
+        updateInput();
+
         update(elapsedTime);
+
         registerCollisions();
         handleCollisions();
+
         applyDeferredCommands();
+
         render(window);
 
         timingContext.sync();
@@ -153,13 +149,13 @@ public class Pipeline implements ISystem, Runnable {
         //    if (systemManager.hasNoComponentsToInit()) return;
         //
 
-        for (InitProcess process : systemManager.listOfSystemsForInit) {
+        for (InitProcess process : systemManager.getProcessList(InitProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    log.log(Level.INFO, "Handling init component [%s: %s]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
+//                    log.log(Level.INFO, "Handling init component [%s: %s]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
                     try {
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
@@ -180,22 +176,40 @@ public class Pipeline implements ISystem, Runnable {
     }
 
     public void updateInput() {
-        Input.updateInput();
+        input.updateInput();
 
-        if (Input.isHeldDown(GLFW.GLFW_KEY_P)) {
+        if (input.isHolded(GLFW.GLFW_KEY_P)) {
             isUpdatePaused = !isUpdatePaused;
-//            Input.holdenKeys[GLFW.GLFW_KEY_P] = false;
-            Input.holdenKeys.set(GLFW.GLFW_KEY_P, false);
+            input.holdedKeys.set(GLFW.GLFW_KEY_P, false);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void handleInput() {
+        for (InputHandleProcess process : systemManager.getProcessList(InputHandleProcess.class)) {
+            System<? extends Component> system = (System<? extends Component>) process;
+            Iterator<? extends Component> iterator = system.getComponentIterator();
+            while (iterator.hasNext()) {
+                Component component = iterator.next();
+                if (component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
+                    try {
+                        process.handleInput(component, input);
+                    } catch (Exception e) {
+                        log.warning(e.getMessage());
+                    }
+                }
+            }
         }
     }
 
     //todo: performance
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
-        if (systemManager.listOfSystemsForCollision.isEmpty()) return;
+        if (systemManager.getProcessList(CollisionHandlingProcess.class).isEmpty()) return;
 
 //        Stopwatch.start();
 
+        List<Collision> collisions = systemManager.collisions;
         List<MeshCollider> componentList;
         CollisionPair pair;
         Collision collision;
@@ -206,7 +220,6 @@ public class Pipeline implements ISystem, Runnable {
         Entity B;
         Vector3f positionA;
         Vector3f positionB;
-        byte collisionState;
         int componentListSize;
         int collisionsListSize;
         boolean isCollisionFound;
@@ -214,10 +227,11 @@ public class Pipeline implements ISystem, Runnable {
         int rindex;
         int cindex;
 
-        collisionsListSize = systemManager.collisions.size();
+        collisionsListSize = collisions.size();
 
-        for (System<? extends Component> system: systemManager.listOfSystemsForCollision) {
-            componentList = (List<MeshCollider>) system.getComponentList();
+        for (CollisionHandlingProcess<? extends Component> process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
+            if (!MeshColliderSystem.class.isAssignableFrom(process.getClass())) continue;
+            componentList = ((MeshColliderSystem) process).getComponentList();
             componentListSize = componentList.size();
             for (lindex = 0; lindex < componentListSize - 1; lindex++) {
                 that = componentList.get(lindex);
@@ -228,17 +242,17 @@ public class Pipeline implements ISystem, Runnable {
                     if (that.isStatic && other.isStatic) continue;
                     if (that.body == null || other.body == null) continue;
                     if (that.body.isIntersects(other.body)) {
-                        positionA = A.getTransform().position;
-                        positionB = B.getTransform().position;
+                        positionA = A.getTransform().getPosition();
+                        positionB = B.getTransform().getPosition();
                         isCollisionFound = false;
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
-                            previousFrameCollision = systemManager.collisions.get(cindex);
+                            previousFrameCollision = collisions.get(cindex);
                             if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
                                 isCollisionFound = true;
-                                if (Collision.ENTERED == previousFrameCollision.state) {
+                                if (previousFrameCollision.inState(CollisionState.ENTERED)) {
                                     //todo: add collision pool
                                     previousFrameCollision.pair = new CollisionPair(positionA, positionB);
-                                    previousFrameCollision.state = Collision.HOLD;
+                                    previousFrameCollision.state = CollisionState.CONTINUED;
                                     previousFrameCollision.isModified = true;
                                     // Logger.info(String.format(
 //                                            "Collision modified! a1: %s\tstate: %s",
@@ -250,12 +264,11 @@ public class Pipeline implements ISystem, Runnable {
                             }
                         }
                         if (!isCollisionFound) {
-                            collisionState = Collision.ENTERED;
                             //todo: add collision pool
                             pair      = new CollisionPair(positionA, positionB);
-                            collision = new Collision(A, B, pair, collisionState);
+                            collision = new Collision(CollisionState.ENTERED, A, B, pair);
                             collision.isModified = true;
-                            systemManager.collisions.add(collision);
+                            collisions.add(collision);
                             collisionsListSize++;
                             // Logger.info(String.format(
 //                                    "Collision added! a1: %s\tstate: %s",
@@ -265,11 +278,11 @@ public class Pipeline implements ISystem, Runnable {
                         }
                     } else {
                         for (cindex = 0; cindex < collisionsListSize; cindex++) {
-                            previousFrameCollision = systemManager.collisions.get(cindex);
+                            previousFrameCollision = collisions.get(cindex);
                             if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
-                                if (Collision.EXITED != previousFrameCollision.state) {
+                                if (CollisionState.EXITED != previousFrameCollision.state) {
                                     previousFrameCollision.isModified = true;
-                                    previousFrameCollision.state = Collision.EXITED;
+                                    previousFrameCollision.state = CollisionState.EXITED;
                                     // Logger.info(String.format(
 //                                            "Collision modified! a1: %s\tstate: %s",
 //                                            previousFrameCollision,
@@ -287,9 +300,9 @@ public class Pipeline implements ISystem, Runnable {
         }
 
         for (cindex = collisionsListSize - 1; cindex >= 0; cindex--) {
-            collision = systemManager.collisions.get(cindex);
-            if (Collision.EXITED == collision.state && !collision.isModified) {
-                systemManager.collisions.remove(cindex);
+            collision = collisions.get(cindex);
+            if (collision.inState(CollisionState.EXITED) && !collision.isModified) {
+                collisions.remove(cindex);
                 collisionsListSize--;
                 // Logger.info(String.format(
 //                        "Collision removed! a1: %s\tstate: %s",
@@ -314,7 +327,7 @@ public class Pipeline implements ISystem, Runnable {
 //        Stopwatch.start();
         glfwPollEvents();
 
-        for (UpdateProcess process : systemManager.listOfSystemsForUpdate) {
+        for (UpdateProcess process : systemManager.getProcessList(UpdateProcess.class)) {
             if (isUpdatePaused && !CameraControlsSystem.class.isAssignableFrom(process.getClass())) continue;
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
@@ -344,17 +357,17 @@ public class Pipeline implements ISystem, Runnable {
     private void handleCollisionEnter() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
-                    if (collision.A != (component).getEntity() && collision.B != component.getEntity()) continue;
-                    if (Collision.ENTERED == collision.state) {
+                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
+                    if (collision.inState(CollisionState.ENTERED)) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        process.onCollisionStart(component, collision);
+                        process.onCollisionStarted(component, collision);
                     }
                 }
             }
@@ -368,7 +381,7 @@ public class Pipeline implements ISystem, Runnable {
     private void handleCollisionHold() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -376,9 +389,9 @@ public class Pipeline implements ISystem, Runnable {
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
-                    if (Collision.HOLD == collision.state) {
+                    if (collision.inState(CollisionState.CONTINUED)) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        process.onCollision(component, collision);
+                        process.onCollisionContinued(component, collision);
                     }
                 }
             }
@@ -392,7 +405,7 @@ public class Pipeline implements ISystem, Runnable {
     private void handleCollisionExit() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.listOfSystemsForCollisionHandling) {
+        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -400,9 +413,9 @@ public class Pipeline implements ISystem, Runnable {
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
                     if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
-                    if (Collision.EXITED == collision.state) {
+                    if (collision.inState(CollisionState.EXITED)) {
                         if (component.getEntity() == collision.A) swapCollisionEntities(collision);
-                        process.onCollisionEnd(component, collision);
+                        process.onCollisionEnded(component, collision);
                     }
                 }
             }
@@ -429,7 +442,7 @@ public class Pipeline implements ISystem, Runnable {
 
 //        Stopwatch.start();
 
-        for (RenderProcess process : systemManager.listOfSystemsForRender) {
+        for (RenderProcess process : systemManager.getProcessList(RenderProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             List<? extends Component> components = system.getComponentList();
             systemManager.sortComponentsByDistanceToCamera(components);

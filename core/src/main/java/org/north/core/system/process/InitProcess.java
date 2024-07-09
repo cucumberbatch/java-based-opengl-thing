@@ -2,7 +2,7 @@ package org.north.core.system.process;
 
 import org.north.core.component.Component;
 
-public interface InitProcess<ComponentInstance extends Component> {
+public interface InitProcess<ComponentInstance extends Component> extends Process {
 
     /**
      * An interface method that allows the executions of initialize
@@ -13,6 +13,6 @@ public interface InitProcess<ComponentInstance extends Component> {
      * @throws RuntimeException if a runtime exception occurs..
      * @author cucumberbatch
      */
-    default void init(ComponentInstance component) throws RuntimeException {};
+    void init(ComponentInstance component) throws RuntimeException;
 
 }

@@ -1,7 +1,7 @@
 package org.north.core.graphics;
 
 import org.north.core.config.EngineConfig;
-import org.north.core.physics.collision.MeshTransformListener;
+import org.north.core.physics.collision.MeshMovementListener;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.CameraControlsSystem;
 import org.north.core.system.Input;
@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import org.joml.Vector2f;
-import org.north.core.system.Pipeline;
 import org.north.core.utils.logger.LoggerFactory;
 
 import java.nio.IntBuffer;
@@ -141,7 +140,7 @@ public class Window {
         GLFW.glfwSetErrorCallback(null).free();
 
         // when we hit an exit button in application we need to stop all threads
-        MeshTransformListener.shutdownThreadExecution();
+        MeshMovementListener.shutdownThreadExecution();
 
         log.info("Window destruction process ended");
     }

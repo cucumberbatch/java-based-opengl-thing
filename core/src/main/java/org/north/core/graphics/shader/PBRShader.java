@@ -13,7 +13,7 @@ public class PBRShader extends AbstractGLShader {
 
     @Override
     public void updateUniforms(Graphics graphics, MeshRenderer renderer) {
-        graphics.setUniform(this, "u_camera_position", renderer.getTransform().position);
+        graphics.setUniform(this, "u_camera_position", renderer.getTransform().getPosition());
         graphics.setUniform(this, "u_albedo", renderer.color);
         graphics.setUniform(this, "u_metallic", renderer.color);
         graphics.setUniform(this, "u_roughness", renderer.color);

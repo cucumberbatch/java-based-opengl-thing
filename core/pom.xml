@@ -23,11 +23,11 @@
 
     <build>
         <filters>
-            <filter>src/main/resources/application.properties</filter>
+            <filter>src/main/resources/north.properties</filter>
         </filters>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>${basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>

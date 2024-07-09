@@ -7,7 +7,7 @@ import org.joml.Vector3f;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MeshTransformListener implements TransformListener {
+public class MeshMovementListener implements MovementListener {
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(8);
 

@@ -2,7 +2,7 @@ package org.north.core.system.process;
 
 import org.north.core.component.Component;
 
-public interface UpdateProcess<ComponentInstance extends Component> {
+public interface UpdateProcess<ComponentInstance extends Component> extends Process {
 
     /**
      * An interface method that updates all the component content
@@ -11,6 +11,6 @@ public interface UpdateProcess<ComponentInstance extends Component> {
      * @param deltaTime is a time interval between present and previous frames
      * @author cucumberbatch
      */
-    default void update(ComponentInstance component, float deltaTime) {}
+    void update(ComponentInstance component, float deltaTime);
 
 }

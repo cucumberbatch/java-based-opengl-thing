@@ -1,125 +1,118 @@
 package org.north.core.system;
 
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Input {
 
     public static final int KEYS_ARRAY_SIZE = 0xff;
 
-//    public static boolean[] pressedKeys     = new boolean[KEYS_ARRAY_SIZE];
-//    public static boolean[] releasedKeys    = new boolean[KEYS_ARRAY_SIZE];
-//    public static boolean[] holdenKeys      = new boolean[KEYS_ARRAY_SIZE];
+    private static Input instance;
 
-    public static BitSet pressedKeys     = new BitSet(KEYS_ARRAY_SIZE);
-    public static BitSet releasedKeys    = new BitSet(KEYS_ARRAY_SIZE);
-    public static BitSet holdenKeys      = new BitSet(KEYS_ARRAY_SIZE);
+    public BitSet pressedKeys = new BitSet(KEYS_ARRAY_SIZE);
+    public BitSet releasedKeys = new BitSet(KEYS_ARRAY_SIZE);
+    public BitSet holdedKeys = new BitSet(KEYS_ARRAY_SIZE);
 
-    public static List<Integer> lastPressedKeys = new ArrayList<>();
+    public List<Integer> lastPressedKeys = new ArrayList<>();
 
-    public static Vector2f  cursorPosition  = new Vector2f();
+    public Vector2f cursorPosition = new Vector2f();
 
+    public Input() {
+        Input.instance = this;
+    }
+
+    public static synchronized Input getInstance() {
+        if (Input.instance == null) {
+            Input.instance = new Input();
+        }
+        return Input.instance;
+    }
+
+    public void updateInput() {
+        for (Integer key : lastPressedKeys) {
+            if (pressedKeys.get(key)) {
+                pressedKeys.set(key, false);
+                holdedKeys.set(key, true);
+            }
+        }
+        lastPressedKeys.clear();
+    }
+
+    public boolean isHolded(int key) {
+        return holdedKeys.get(key);
+    }
+
+    public boolean isReleased(int key) {
+        return releasedKeys.get(key);
+    }
+
+    public boolean isPressed(int key) {
+        return pressedKeys.get(key);
+    }
+
+    public Vector2f getCursorPosition() {
+        return new Vector2f(cursorPosition);
+    }
+
+    public Vector2f getCursorPosition(Vector2f destination) {
+        return destination.set(cursorPosition);
+    }
+
+    public float getCursorX() {
+        return cursorPosition.x;
+    }
+
+    public float getCursorY() {
+        return cursorPosition.y;
+    }
 
     public static class KeyboardInput extends GLFWKeyCallback {
-
+        private final Input input = Input.getInstance();
 
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
-//            releasedKeys[key]   = action == GLFW_RELEASE;
-//            pressedKeys[key]    = action == GLFW_PRESS;
-//            holdenKeys[key]     = action == GLFW_REPEAT;
-//
-            if (key < 0)
-                return;
+            if (key < 0) return;
 
-            releasedKeys.set(key, action == GLFW_RELEASE);
-            pressedKeys.set(key, action == GLFW_PRESS);
-            holdenKeys.set(key, action == GLFW_REPEAT);
+            input.releasedKeys.set(key, action == GLFW_RELEASE);
+            input.pressedKeys.set(key, action == GLFW_PRESS);
+            input.holdedKeys.set(key, action == GLFW_REPEAT);
 
             if (action == GLFW_PRESS) {
-                lastPressedKeys.add(key);
+                input.lastPressedKeys.add(key);
             }
 
         }
     }
 
     public static class MouseInput extends GLFWMouseButtonCallback {
+        private final Input input = Input.getInstance();
+
         @Override
         public void invoke(long window, int button, int action, int mods) {
-//            releasedKeys[button]   = action == GLFW_RELEASE;
-//            pressedKeys[button]    = action == GLFW_PRESS;
-//            holdenKeys[button]     = action == GLFW_REPEAT;
-
-            releasedKeys.set(button, action == GLFW_RELEASE);
-            pressedKeys.set(button, action == GLFW_PRESS);
-            holdenKeys.set(button, action == GLFW_REPEAT);
+            input.releasedKeys.set(button, action == GLFW_RELEASE);
+            input.pressedKeys.set(button, action == GLFW_PRESS);
+            input.holdedKeys.set(button, action == GLFW_REPEAT);
 
             if (action == GLFW_PRESS) {
-                lastPressedKeys.add(button);
+                input.lastPressedKeys.add(button);
             }
         }
     }
 
     public static class CursorPositionInput extends GLFWCursorPosCallback {
+        private final Input input = Input.getInstance();
+
         @Override
         public void invoke(long window, double xpos, double ypos) {
-            cursorPosition.set((float) xpos, (float) ypos);
-            // System.out.printf("%f\t%f\n", xpos, ypos);
+            input.cursorPosition.set((float) xpos, (float) ypos);
         }
-    }
-
-    public static void updateInput() {
-        for (Integer key : lastPressedKeys) {
-//            if (pressedKeys[key]) {
-//                pressedKeys[key]    = false;
-//                holdenKeys[key]     = true;
-//            }
-
-            if (pressedKeys.get(key)) {
-                pressedKeys.set(key, false);
-                holdenKeys.set(key, true);
-            }
-        }
-        lastPressedKeys.clear();
-    }
-
-
-    public static boolean isHeldDown(int key) {
-//        return holdenKeys[key];
-        return holdenKeys.get(key);
-    }
-
-    public static boolean isReleased(int key) {
-//        return releasedKeys[key];
-        return releasedKeys.get(key);
-    }
-
-    public static boolean isPressed(int key) {
-//        return pressedKeys[key];
-        return pressedKeys.get(key);
-    }
-
-    public static Vector2f getCursorPosition() {
-        return new Vector2f(cursorPosition);
-    }
-
-    public static Vector2f getCursorPosition(Vector2f destination) {
-        return destination.set(cursorPosition);
-    }
-
-    public static float getCursorX() {
-        return cursorPosition.x;
-    }
-
-    public static float getCursorY() {
-        return cursorPosition.y;
     }
 }

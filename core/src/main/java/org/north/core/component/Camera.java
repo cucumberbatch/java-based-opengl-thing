@@ -21,11 +21,11 @@ public class Camera extends AbstractComponent {
     public Matrix4f projectionMatrix = new Matrix4f();
 
     public Vector3f getPosition() {
-        return new Vector3f(this.getTransform().position);
+        return new Vector3f(this.getTransform().getPosition());
     }
 
     public Vector3f getPosition(Vector3f destination) {
-        return destination.set(this.getTransform().position);
+        return destination.set(this.getTransform().getPosition());
     }
 
     /*

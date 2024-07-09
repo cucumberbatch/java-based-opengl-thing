@@ -17,7 +17,7 @@ public class MovementSystem extends AbstractSystem<MovementComponent> implements
 
     @Override
     public void init(MovementComponent movementComponent) {
-        movementComponent.initialZ = movementComponent.getTransform().position.z;
+        movementComponent.initialZ = movementComponent.getTransform().getPosition().z;
     }
 
     @Override
@@ -28,8 +28,8 @@ public class MovementSystem extends AbstractSystem<MovementComponent> implements
 
 
         movementComponent.getTransform().moveTo(
-                movementComponent.getTransform().position.x,
-                movementComponent.getTransform().position.y,
+                movementComponent.getTransform().getPosition().x,
+                movementComponent.getTransform().getPosition().y,
                 initialZ + (float) Math.sin(acc) * range
         );
 

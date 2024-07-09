@@ -7,12 +7,10 @@ import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.architecture.tree.v2.TreeNode;
 import org.north.core.component.*;
-import org.north.core.graphics.Mesh;
 import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.shader.SimpleColorShader;
 import org.north.core.graphics.shader.TextureShader;
-import org.north.core.system.CameraSystem;
 
 import java.util.List;
 
@@ -21,16 +19,16 @@ public class DefaultSceneComposer implements SceneComposer {
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
 //        initCubeAndCamera(sceneRoot, cm);
 //        initReferenceScene(sceneRoot, cm);
-//        testScene(sceneRoot, cm);
-        initSpaceshipOnScreen(sceneRoot, cm);
+        testScene(sceneRoot, cm);
+//        initSpaceshipOnScreen(sceneRoot, cm);
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
         Entity testCube = new Entity("test_cube");
 
         cm.take(testCube).addAndPerform(Transform.class, transform -> {
-            transform.position.set(0.5f, 0.5f, 0.5f);
-            transform.scale.set(0.8f, 0.8f, 0.8f);
+            transform.moveTo(0.5f, 0.5f, 0.5f);
+            transform.rescaleTo(0.8f, 0.8f, 0.8f);
         });
 
         cm.take(testCube).addAndPerform(MeshRenderer.class, meshRenderer -> {
@@ -45,7 +43,7 @@ public class DefaultSceneComposer implements SceneComposer {
         cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
 
 //        transform = (Transform) components.get(0);
-//        transform.position.set(0.5f, 0.5f, 0.5f);
+//        transform.getPosition().set(0.5f, 0.5f, 0.5f);
 //        transform.scale.set(0.8f, 0.8f, 0.8f);
 
         root.add(testCube);
@@ -147,7 +145,7 @@ public class DefaultSceneComposer implements SceneComposer {
         // TV Screen object
         Entity tvScreen = new Entity("tvScreen");
         transform = cm.take(tvScreen).add(Transform.class);
-        transform.scale = new Vector3f(2, 2, 2);
+        transform.rescaleTo(new Vector3f(2, 2, 2));
 
         renderer = cm.take(tvScreen).add(MeshRenderer.class);
         renderer.shader = new TextureShader();
@@ -156,8 +154,8 @@ public class DefaultSceneComposer implements SceneComposer {
         // Player spaceship in the middle of the screen
         Entity player = new Entity("player");
         transform = cm.take(player).add(Transform.class);
-        transform.position = new Vector3f(0f, 0f, 1f);
-        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
+        transform.moveTo(new Vector3f(0f, 0f, 1f));
+        transform.rescaleTo(0.2f, 0.2f, 0.2f);
 
         renderer = cm.take(player).add(MeshRenderer.class);
         renderer.shader = new TextureShader();
@@ -168,7 +166,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         Entity gasCloudSpawner = new Entity("gasCloudSpawner");
         transform = cm.take(gasCloudSpawner).add(Transform.class);
-        transform.position = new Vector3f(0f, -0.225f, 0.5f);
+        transform.moveTo( new Vector3f(0f, -0.225f, 0.5f));
 
 
         /*
@@ -176,7 +174,7 @@ public class DefaultSceneComposer implements SceneComposer {
         // Spaceship gas clouds
         Entity cloud = em.create("cloud");
         transform = cm.take(cloud).add(Transform.class);
-        transform.position = new Vector3f(0f, -0.25f, 1f);
+        transform.moveTo(new Vector3f(0f, -0.25f, 1f);
         transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
 
         renderer = cm.take(cloud).add(MeshRenderer.class);
@@ -190,8 +188,8 @@ public class DefaultSceneComposer implements SceneComposer {
         // Background texture behind tv screen, player and other gameplay objects
         Entity background = new Entity("background");
         transform = cm.take(background).add(Transform.class);
-        transform.position = new Vector3f(0f, 0f, 2f);
-        transform.scale = new Vector3f(2, 2, 2);
+        transform.moveTo(new Vector3f(0f, 0f, 2f));
+        transform.rescaleTo(new Vector3f(2, 2, 2));
 
         renderer = cm.take(background).add(MeshRenderer.class);
         renderer.shader = new TextureShader();
@@ -200,7 +198,7 @@ public class DefaultSceneComposer implements SceneComposer {
         // Camera
         Entity camera = new Entity("camera");
         transform = cm.take(camera).add(Transform.class);
-        transform.position = new Vector3f(0f, 0f, 0f);
+        transform.moveTo( new Vector3f(0f, 0f, 0f));
 
         cm.take(camera).add(Camera.class);
 

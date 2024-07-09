@@ -25,7 +25,7 @@ public class RigidBody2dSystem extends AbstractSystem<RigidBody2d>
         rigidBody.angularVelocity.add(rigidBody.angularAcceleration.x * deltaTime, rigidBody.angularAcceleration.y * deltaTime);
 
         transform.moveRel(rigidBody.velocity.x * deltaTime, rigidBody.velocity.y * deltaTime, 0.0f);
-        transform.rotation.add(rigidBody.angularVelocity.x * deltaTime, rigidBody.angularVelocity.y * deltaTime, 0.0f);
+        transform.getRotation().add(rigidBody.angularVelocity.x * deltaTime, rigidBody.angularVelocity.y * deltaTime, 0.0f);
 
         if (rigidBody.isGravitational) {
             rigidBody.velocity.set(Physics.gravityVector.x * deltaTime, Physics.gravityVector.y * deltaTime);

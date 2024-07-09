@@ -56,10 +56,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     private Vector2f previousPhysicalPosition = new Vector2f(1, 1);
 
-    private Rectangle imaginaryCursorShape = new Rectangle(
-            Input.getCursorPosition().add(cursorIdleTopLeft),
-            Input.getCursorPosition().add(cursorIdleBottomRight)
-    );
+    /*
+        private Rectangle imaginaryCursorShape = new Rectangle(
+                Input.getCursorPosition().add(cursorIdleTopLeft),
+                Input.getCursorPosition().add(cursorIdleBottomRight)
+        );
+     */
 
     private Entity selectedEntity = null;
 
@@ -74,147 +76,156 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     @Override
     public void init(VisualCursor visualCursor) throws RuntimeException {
 
-        visualCursor.cursor  = new Rectangle(
-                new Vector2f(0, 0).add(cursorIdleTopLeft),
-                new Vector2f(0, 0).add(cursorIdleBottomRight)
-        );
-        visualCursor.texture =
-                new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        /*
 
-        setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
+            visualCursor.cursor  = new Rectangle(
+                    new Vector2f(0, 0).add(cursorIdleTopLeft),
+                    new Vector2f(0, 0).add(cursorIdleBottomRight)
+            );
+            visualCursor.texture =
+                    new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
-        MeshCollider mesh = visualCursor.entity.get(MeshCollider.class);
-        mesh.body = imaginaryCursorShape;
+            setCursorPosition(imaginaryCursorShape, Input.getCursorPosition());
 
-        visualCursor.vertexBuffer = new VertexArray(
-                visualCursor.cursor.toVertices(),
-                visualCursor.indices,
-                visualCursor.uv);
+            MeshCollider mesh = visualCursor.entity.get(MeshCollider.class);
+            mesh.body = imaginaryCursorShape;
 
-        Rectangle visualCursorShape = new Rectangle(
-                new Vector2f(cursorIdleTopLeft),
-                new Vector2f(cursorIdleBottomRight)
-        );
+            visualCursor.vertexBuffer = new VertexArray(
+                    visualCursor.cursor.toVertices(),
+                    visualCursor.indices,
+                    visualCursor.uv);
 
-        MeshRenderer renderer = visualCursor.entity.get(MeshRenderer.class);
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-        renderer.mesh = new Mesh(
-                visualCursorShape.toVertices(),
-                visualCursor.indices,
-                visualCursor.uv
-        );
-        renderer.shader = new SimpleColorShader();
+            Rectangle visualCursorShape = new Rectangle(
+                    new Vector2f(cursorIdleTopLeft),
+                    new Vector2f(cursorIdleBottomRight)
+            );
+
+            MeshRenderer renderer = visualCursor.entity.get(MeshRenderer.class);
+            renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+            renderer.mesh = new Mesh(
+                    visualCursorShape.toVertices(),
+                    visualCursor.indices,
+                    visualCursor.uv
+            );
+            renderer.shader = new SimpleColorShader();
+
+         */
     }
 
     @Override
     public void update(VisualCursor visualCursor, float deltaTime) {
 
-        float xFactor = 1f;
-        float yFactor = 1f;
-        float zFactor = 1f;
+        /*
 
-//        Shader.BACKGROUND.setUniform("u_tex",      Shader.BACKGROUND.getId());
-//        Shader.BACKGROUND.setUniform("u_model", Matrix4f.translation(visualCursor.transform.position));
+            float xFactor = 1f;
+            float yFactor = 1f;
+            float zFactor = 1f;
 
-        // instead of cursor rectangle we must move whole entity using transform
-        Rectangle cursor = visualCursor.cursor;
+    //        Shader.BACKGROUND.setUniform("u_tex",      Shader.BACKGROUND.getId());
+    //        Shader.BACKGROUND.setUniform("u_model", Matrix4f.translation(visualCursor.transform.getPosition()));
 
-        Rectangle button = visualCursor.previouslySelectedButtonShape;
+            // instead of cursor rectangle we must move whole entity using transform
+            Rectangle cursor = visualCursor.cursor;
+
+            Rectangle button = visualCursor.previouslySelectedButtonShape;
 
 
-        if (visualCursor.isIntersects) {
-            switch (cursorState) {
-                case IDLE_TO_HOVER_CURSOR_STATE:
-                    if (transitionTimeAccumulator > transitionTimeLimit) {
-                        transitionTimeAccumulator = 0.0f;
-                        cursorState = HOVER_CURSOR_STATE;
-                        // Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
-                    } else {
-                        transitionTimeAccumulator += deltaTime;
-                        float ratio = transitionTimeAccumulator
-                                / transitionTimeLimit;
-                        cursor.topLeft =
-                                new Vector2f(cursor.topLeft)
-                                        .lerp(button.topLeft, ratio);
-                        cursor.bottomRight =
-                                new Vector2f(cursor.bottomRight)
-                                        .lerp(button.bottomRight, ratio);
-                        cursorColor =
-                                new Vector4f(cursorDefaultColor)
-                                        .lerp(cursorOnHoverColor, ratio);
-                    }
-                    break;
+            if (visualCursor.isIntersects) {
+                switch (cursorState) {
+                    case IDLE_TO_HOVER_CURSOR_STATE:
+                        if (transitionTimeAccumulator > transitionTimeLimit) {
+                            transitionTimeAccumulator = 0.0f;
+                            cursorState = HOVER_CURSOR_STATE;
+                            // Logger.debug("Cursor state change: HOVER_CURSOR_STATE");
+                        } else {
+                            transitionTimeAccumulator += deltaTime;
+                            float ratio = transitionTimeAccumulator
+                                    / transitionTimeLimit;
+                            cursor.topLeft =
+                                    new Vector2f(cursor.topLeft)
+                                            .lerp(button.topLeft, ratio);
+                            cursor.bottomRight =
+                                    new Vector2f(cursor.bottomRight)
+                                            .lerp(button.bottomRight, ratio);
+                            cursorColor =
+                                    new Vector4f(cursorDefaultColor)
+                                            .lerp(cursorOnHoverColor, ratio);
+                        }
+                        break;
 
-                case HOVER_TO_IDLE_CURSOR_STATE:
-                case IDLE_CURSOR_STATE:
-                    cursorState = IDLE_TO_HOVER_CURSOR_STATE;
-                    // Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
-                    break;
+                    case HOVER_TO_IDLE_CURSOR_STATE:
+                    case IDLE_CURSOR_STATE:
+                        cursorState = IDLE_TO_HOVER_CURSOR_STATE;
+                        // Logger.debug("Cursor state change: IDLE_TO_HOVER_CURSOR_STATE");
+                        break;
 
-                case HOVER_CURSOR_STATE:
+                    case HOVER_CURSOR_STATE:
+                }
+            } else {
+                displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
+                isCursorMoved = !displacement.equals(new Vector2f().zero());
+
+                Vector2f position = calculatePosition(
+                        getRectangleCenter(cursor), previousPhysicalPosition,
+                        displacement, springFactor, mass, deltaTime);
+
+                if (cursorState != HOVER_CURSOR_STATE) {
+                    setCursorPosition(cursor, position);
+                }
+
+                switch (cursorState) {
+                    case HOVER_TO_IDLE_CURSOR_STATE:
+                        if (transitionTimeAccumulator > transitionTimeLimit) {
+                            transitionTimeAccumulator = 0.0f;
+                            visualCursor.previouslySelectedButtonShape = null;
+                            cursorState = IDLE_CURSOR_STATE;
+                            // Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
+                        } else {
+                            transitionTimeAccumulator += deltaTime;
+                            float ratio = transitionTimeAccumulator / transitionTimeLimit;
+                            cursor.topLeft     = new Vector2f(button.topLeft).lerp(new Vector2f(position).add(cursorIdleTopLeft), ratio);
+                            cursor.bottomRight = new Vector2f(button.bottomRight).lerp(new Vector2f(position).add(cursorIdleBottomRight), ratio);
+                            cursorColor        = new Vector4f(cursorOnHoverColor).lerp(cursorDefaultColor, ratio);
+                        }
+                        break;
+
+                    case HOVER_CURSOR_STATE:
+                    case IDLE_TO_HOVER_CURSOR_STATE:
+                        cursorState = HOVER_TO_IDLE_CURSOR_STATE;
+                        // Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
+                        break;
+
+                    case IDLE_CURSOR_STATE:
+                }
             }
-        } else {
-            displacement  = getRectangleCenter(cursor).sub(Input.getCursorPosition());
+
+            displacement  = getRectangleCenter(imaginaryCursorShape).sub(Input.getCursorPosition());
             isCursorMoved = !displacement.equals(new Vector2f().zero());
 
-            Vector2f position = calculatePosition(
-                    getRectangleCenter(cursor), previousPhysicalPosition,
-                    displacement, springFactor, mass, deltaTime);
+            Transform transform = visualCursor.getTransform();
+            transform.moveTo(
+    //                -(Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
+    //                -(Input.getCursorPosition().y - Window.height / 2f) / Window.height,
+                    -Input.getCursorX() / (float) window.getWidth() * 2 + 2f,
+                    -Input.getCursorY() / (float) window.getHeight() * 2,
+                    0f
+            );
 
-            if (cursorState != HOVER_CURSOR_STATE) {
-                setCursorPosition(cursor, position);
-            }
+            previousPhysicalPosition = getRectangleCenter(cursor);
 
-            switch (cursorState) {
-                case HOVER_TO_IDLE_CURSOR_STATE:
-                    if (transitionTimeAccumulator > transitionTimeLimit) {
-                        transitionTimeAccumulator = 0.0f;
-                        visualCursor.previouslySelectedButtonShape = null;
-                        cursorState = IDLE_CURSOR_STATE;
-                        // Logger.debug("Cursor state change: IDLE_CURSOR_STATE");
-                    } else {
-                        transitionTimeAccumulator += deltaTime;
-                        float ratio = transitionTimeAccumulator / transitionTimeLimit;
-                        cursor.topLeft     = new Vector2f(button.topLeft).lerp(new Vector2f(position).add(cursorIdleTopLeft), ratio);
-                        cursor.bottomRight = new Vector2f(button.bottomRight).lerp(new Vector2f(position).add(cursorIdleBottomRight), ratio);
-                        cursorColor        = new Vector4f(cursorOnHoverColor).lerp(cursorDefaultColor, ratio);
-                    }
-                    break;
+            // cursor is transform dependent now!
+            setCursorPosition(imaginaryCursorShape, new Vector2f(transform.getPosition().x, transform.getPosition().y));
 
-                case HOVER_CURSOR_STATE:
-                case IDLE_TO_HOVER_CURSOR_STATE:
-                    cursorState = HOVER_TO_IDLE_CURSOR_STATE;
-                    // Logger.debug("Cursor state change: HOVER_TO_IDLE_CURSOR_STATE");
-                    break;
+            MeshRenderer renderer = visualCursor.entity.get(MeshRenderer.class);
+            renderer.color = cursorColor;
 
-                case IDLE_CURSOR_STATE:
-            }
-        }
 
-        displacement  = getRectangleCenter(imaginaryCursorShape).sub(Input.getCursorPosition());
-        isCursorMoved = !displacement.equals(new Vector2f().zero());
-
-        Transform transform = visualCursor.getTransform();
-        transform.moveTo(
-//                -(Input.getCursorPosition().x - Window.width  / 2f) / Window.width,
-//                -(Input.getCursorPosition().y - Window.height / 2f) / Window.height,
-                -Input.getCursorX() / (float) window.getWidth() * 2 + 2f,
-                -Input.getCursorY() / (float) window.getHeight() * 2,
-                0f
-        );
-
-        previousPhysicalPosition = getRectangleCenter(cursor);
-
-        // cursor is transform dependent now!
-        setCursorPosition(imaginaryCursorShape, new Vector2f(transform.position.x, transform.position.y));
-
-        MeshRenderer renderer = visualCursor.entity.get(MeshRenderer.class);
-        renderer.color = cursorColor;
+         */
 
     }
 
     @Override
-    public void onCollisionStart(VisualCursor visualCursor, Collision collision) {
+    public void onCollisionStarted(VisualCursor visualCursor, Collision collision) {
         selectedEntity = (Entity) collision.A;
         visualCursor.previouslySelectedButtonShape = selectedEntity.get(MeshCollider.class).body;
         visualCursor.isIntersects = true;
@@ -222,7 +233,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     }
 
     @Override
-    public void onCollisionEnd(VisualCursor visualCursor, Collision collision)  {
+    public void onCollisionEnded(VisualCursor visualCursor, Collision collision)  {
         if (collision.A == selectedEntity) {
             selectedEntity = null;
             visualCursor.isIntersects = false;
@@ -230,7 +241,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     }
 
     @Override
-    public void onCollision(VisualCursor visualCursor, Collision collision) {}
+    public void onCollisionContinued(VisualCursor visualCursor, Collision collision) {}
 
     private Vector2f calculatePosition(Vector2f center, Vector2f previousPhysicalPosition, Vector2f displacement, float springFactor, float mass, float deltaTime) {
         return center.mul(2f).sub(previousPhysicalPosition).sub(displacement.mul(springFactor * deltaTime * deltaTime / mass));

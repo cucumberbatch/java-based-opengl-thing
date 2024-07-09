@@ -3,7 +3,7 @@ package org.north.core.system;
 import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
-import org.north.core.physics.collision.MeshTransformListener;
+import org.north.core.physics.collision.MeshMovementListener;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InitProcess;
@@ -24,16 +24,16 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     @Override
     public void init(MeshCollider meshCollider) {
-        meshCollider.getEntity().getTransform().setTransformListener(new MeshTransformListener());
+        meshCollider.getEntity().getTransform().setTransformListener(new MeshMovementListener());
     }
 
     @Override
     public void update(MeshCollider meshCollider, float deltaTime) {
         Transform transform = meshCollider.getTransform();
-        Vector2f position = new Vector2f(transform.position.x, transform.position.y);
+        Vector2f position = new Vector2f(transform.getPosition().x, transform.getPosition().y);
         meshCollider.body.moveTo(position);
-//        component.mesh.topLeft.set(transform.position.x - xOffsetLeft, transform.position.y - yOffsetUp);
-//        component.mesh.bottomRight.set(transform.position.x + xOffsetLeft, transform.position.y + yOffsetUp);
+//        component.mesh.topLeft.set(transform.getPosition().x - xOffsetLeft, transform.getPosition().y - yOffsetUp);
+//        component.mesh.bottomRight.set(transform.getPosition().x + xOffsetLeft, transform.getPosition().y + yOffsetUp);
     }
 
 }
