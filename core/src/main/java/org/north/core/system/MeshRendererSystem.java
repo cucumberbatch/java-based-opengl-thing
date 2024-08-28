@@ -9,7 +9,9 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.RenderProcess;
 
 @ComponentHandler(MeshRenderer.class)
-public class MeshRendererSystem extends AbstractSystem<MeshRenderer> implements RenderProcess<MeshRenderer> {
+public class MeshRendererSystem
+        extends AbstractSystem<MeshRenderer>
+        implements RenderProcess<MeshRenderer> {
 
     @Inject
     public MeshRendererSystem(ApplicationContext context) {

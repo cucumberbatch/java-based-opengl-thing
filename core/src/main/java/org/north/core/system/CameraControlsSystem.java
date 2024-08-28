@@ -48,13 +48,13 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private boolean escapeIsPressed = false;
     private boolean mouseLeftButtonIsPressed = false;
     private boolean key1IsPressed = false;
-    private boolean leftShiftKeyIsHolded = false;
-    private boolean keyQIsHolded = false;
-    private boolean keyEIsHolded = false;
-    private boolean keyWIsHolded = false;
-    private boolean keySIsHolded = false;
-    private boolean keyAIsHolded = false;
-    private boolean keyDIsHolded = false;
+    private boolean leftShiftKeyIsHeld = false;
+    private boolean keyQIsHeld = false;
+    private boolean keyEIsHeld = false;
+    private boolean keyWIsHeld = false;
+    private boolean keySIsHeld = false;
+    private boolean keyAIsHeld = false;
+    private boolean keyDIsHeld = false;
 
     private Vector2f lastCursorPosition;
 
@@ -88,15 +88,15 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         escapeIsPressed = input.isPressed(GLFW.GLFW_KEY_ESCAPE);
         mouseLeftButtonIsPressed = input.isPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT);
         key1IsPressed = input.isPressed(GLFW.GLFW_KEY_1);
-        leftShiftKeyIsHolded = input.isHolded(GLFW.GLFW_KEY_LEFT_SHIFT);
+        leftShiftKeyIsHeld = input.isHeld(GLFW.GLFW_KEY_LEFT_SHIFT);
 
-        keyQIsHolded = input.isHolded(GLFW.GLFW_KEY_Q);
-        keyEIsHolded = input.isHolded(GLFW.GLFW_KEY_E);
+        keyQIsHeld = input.isHeld(GLFW.GLFW_KEY_Q);
+        keyEIsHeld = input.isHeld(GLFW.GLFW_KEY_E);
 
-        keyWIsHolded = input.isHolded(GLFW.GLFW_KEY_W);
-        keySIsHolded = input.isHolded(GLFW.GLFW_KEY_S);
-        keyAIsHolded = input.isHolded(GLFW.GLFW_KEY_A);
-        keyDIsHolded = input.isHolded(GLFW.GLFW_KEY_D);
+        keyWIsHeld = input.isHeld(GLFW.GLFW_KEY_W);
+        keySIsHeld = input.isHeld(GLFW.GLFW_KEY_S);
+        keyAIsHeld = input.isHeld(GLFW.GLFW_KEY_A);
+        keyDIsHeld = input.isHeld(GLFW.GLFW_KEY_D);
 
         lastCursorPosition = input.getCursorPosition();
     }
@@ -250,32 +250,32 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        cameraMovementSpeed = leftShiftKeyIsHolded ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
+        cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
 
         // up-down movement
         // note: incorrect
-        if (keyQIsHolded) {
+        if (keyQIsHeld) {
             componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
         }
-        if (keyEIsHolded) {
+        if (keyEIsHeld) {
             componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
         }
 
         // left-right movement
-        if (keyDIsHolded) {
+        if (keyDIsHeld) {
             componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
         }
-        if (keyAIsHolded) {
+        if (keyAIsHeld) {
             componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
         }
 
         // forward-backward movement
-        if (keyWIsHolded) {
+        if (keyWIsHeld) {
             componentTransform.moveRel(temp2.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
         }
-        if (keySIsHolded) {
+        if (keySIsHeld) {
             componentTransform.moveRel(temp2.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
         }
 

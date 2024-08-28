@@ -3,7 +3,8 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.v2.LinkedTreeNode;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
-import org.north.core.physics.collision.Collidable;
+import org.north.core.managment.data.Identifiable;
+import org.north.core.physics.collision.Colliding;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -14,12 +15,15 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Entity is an object that contains a bunch of components
+ * Entity is an object that contains a collection of components
  * that describes its nature
  *
  * @author cucumberbatch
  */
-public class Entity extends LinkedTreeNode<Entity> implements ComponentContainer, Collidable, Externalizable {
+public class Entity
+        extends LinkedTreeNode<Entity>
+        implements Identifiable<UUID>, ComponentContainer, Colliding, Externalizable {
+
     public UUID id;
     public String name;
 
@@ -37,8 +41,14 @@ public class Entity extends LinkedTreeNode<Entity> implements ComponentContainer
         this.components = new HashMap<>(4, 1.0f);
     }
 
+    @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -94,7 +104,8 @@ public class Entity extends LinkedTreeNode<Entity> implements ComponentContainer
 
     @Override
     @SuppressWarnings("unchecked")
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in)
+            throws IOException, ClassNotFoundException {
         id = (UUID) in.readObject();
         name = in.readUTF();
         transform = (Transform) in.readObject();

@@ -1,13 +1,13 @@
 package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
+import org.north.core.managment.data.Identifiable;
 import org.north.core.managment.data.Stateful;
 
 import java.util.UUID;
 
-public interface Component extends Stateful<ComponentState> {
-    UUID getId();
-    void setId(UUID id);
+public interface Component
+        extends Identifiable<UUID>, Stateful<ComponentState> {
 
     Entity getEntity();
     void attachToEntity(Entity entity);

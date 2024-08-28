@@ -139,11 +139,20 @@ public class Transform extends AbstractComponent {
 
     @Override
     public String toString() {
-        return  "\nposition: " + position +
-                "\nrotation: " + rotation +
-                "\nscale:    " + scale +
-                super.toString();
+        return "Transform{" +
+                "pos=" + position +
+                ", rot=" + rotation +
+                ", scl=" + scale +
+                '}';
     }
+
+    //    @Override
+//    public String toString() {
+//        return  "\nposition: " + position +
+//                "\nrotation: " + rotation +
+//                "\nscale:    " + scale +
+//                super.toString();
+//    }
 
     public Iterable<Transform> ascendantIterableTransform() {
         return new Iterable<>() {

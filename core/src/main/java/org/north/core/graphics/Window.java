@@ -123,7 +123,7 @@ public class Window {
 
         // enable blending
         GL30.glEnable(GL30.GL_BLEND);
-        GL30.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL30.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE);
 
         log.info("Window initialization ended");
     }

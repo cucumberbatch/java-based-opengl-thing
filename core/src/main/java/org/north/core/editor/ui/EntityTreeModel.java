@@ -6,6 +6,8 @@ import org.north.core.utils.logger.LoggerFactory;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import java.util.AbstractList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class EntityTreeModel implements TreeModel {
@@ -29,21 +31,21 @@ public class EntityTreeModel implements TreeModel {
         while (currentIndex++ != index) {
             child = child.getNextSibling();
         }
-        log.info("[TreeModel] getting child by index \'" + index + "\' from parent \'" + ((Entity) parent).getName() + "\'. Result: " + child.getName());
+        log.info("[TreeModel] getting child by index '" + index + "' from parent '" + ((Entity) parent).getName() + "'. Result: " + child.getName());
         return child;
     }
 
     @Override
     public int getChildCount(Object parent) {
         int size = ((Entity) parent).getSubtrees().size();
-        log.info("[TreeModel] getting child count from parent \'" + ((Entity) parent).getName() + "\'. Result: " + size);
+        log.info("[TreeModel] getting child count from parent '" + ((Entity) parent).getName() + "'. Result: " + size);
         return size;
     }
 
     @Override
     public boolean isLeaf(Object node) {
         boolean leaf = ((Entity) node).isLeaf();
-        log.info("[TreeModel] checking if node \'" + ((Entity) node).getName() + "\' is leaf. Result: " + leaf);
+        log.info("[TreeModel] checking if node '" + ((Entity) node).getName() + "' is leaf. Result: " + leaf);
         return leaf;
     }
 
@@ -60,7 +62,7 @@ public class EntityTreeModel implements TreeModel {
             entity = entity.getNextSibling();
             index++;
         }
-        log.info("[TreeModel] getting child index of \'" + ((Entity) child).getName() + "\'. Result: " + index);
+        log.info("[TreeModel] getting child index of '" + ((Entity) child).getName() + "'. Result: " + index);
         return index;
     }
 

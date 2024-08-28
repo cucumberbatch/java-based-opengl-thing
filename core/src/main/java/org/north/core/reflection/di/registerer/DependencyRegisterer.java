@@ -76,7 +76,6 @@ public class DependencyRegisterer {
         Collection<Object> initializedParams = new ArrayList<>();
         Constructor<T>[] declaredConstructors = (Constructor<T>[]) aClass.getDeclaredConstructors();
         Constructor<T> noArgsConstructor = null;
-        boolean hasInjectAnnotation = false;
 
         for (Constructor<T> constructor: declaredConstructors) {
             if (constructor.getParameterCount() == 0) {
@@ -85,7 +84,6 @@ public class DependencyRegisterer {
             }
             constructor.setAccessible(true);
             if (constructor.isAnnotationPresent(Inject.class)) {
-                hasInjectAnnotation = true;
                 Parameter[] constructorParameters = constructor.getParameters();
                 for (Parameter parameter : constructorParameters) {
                     Class<?> parameterType = parameter.getType();
@@ -101,12 +99,12 @@ public class DependencyRegisterer {
             }
         }
 
-        if (object == null && noArgsConstructor != null) {
-            object = noArgsConstructor.newInstance();
-        }
-
-        if (object == null && !hasInjectAnnotation) {
-            throw new RuntimeException("Inject annotation not found");
+        if (object == null) {
+            if (noArgsConstructor != null) {
+                object = noArgsConstructor.newInstance();
+            } else {
+                throw new RuntimeException("Inject annotation not found");
+            }
         }
 
         objects.put(aClass, object);

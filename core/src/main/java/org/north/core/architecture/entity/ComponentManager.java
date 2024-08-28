@@ -86,9 +86,12 @@ public class ComponentManager {
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... classes) {
-        return Arrays.stream(classes)
-                .map(entity::get)
-                .collect(Collectors.toList());
+        List<Component> components = new ArrayList<>();
+        for (Class<? extends Component> aClass : classes) {
+            Component component = entity.get(aClass);
+            components.add(component);
+        }
+        return components;
     }
 
     public final <ComponentInstance extends Component> ComponentInstance remove(Entity entity,
@@ -104,9 +107,12 @@ public class ComponentManager {
 
     @SafeVarargs
     public final List<? extends Component> remove(Entity entity, Class<? extends Component>... classes) {
-        return Arrays.stream(classes)
-                .map(componentClass -> remove(entity, componentClass))
-                .collect(Collectors.toList());
+        List<Component> components = new ArrayList<>();
+        for (Class<? extends Component> componentClass : classes) {
+            Component remove = remove(entity, componentClass);
+            components.add(remove);
+        }
+        return components;
     }
 
     private <ComponentInstance extends Component> ComponentInstance instantiateComponent(Class<ComponentInstance> componentClass) {

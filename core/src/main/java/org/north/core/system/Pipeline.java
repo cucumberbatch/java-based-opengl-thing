@@ -1,5 +1,6 @@
 package org.north.core.system;
 
+import org.apache.logging.log4j.LogManager;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.entity.ComponentManager;
@@ -18,7 +19,7 @@ import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.managment.FrameTiming;
 import org.north.core.managment.SystemManager;
-import org.north.core.physics.collision.Collidable;
+import org.north.core.physics.collision.Colliding;
 import org.north.core.physics.collision.Collision;
 import org.north.core.physics.collision.CollisionPair;
 import org.north.core.physics.collision.CollisionState;
@@ -56,6 +57,7 @@ public class Pipeline implements ISystem, Runnable {
     private boolean stopped = false;
 
     private static final Logger log = LoggerFactory.createLogger(Pipeline.class);
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(Pipeline.class);
 
     @Inject
     public Pipeline(ApplicationContext context) {
@@ -155,7 +157,7 @@ public class Pipeline implements ISystem, Runnable {
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-//                    log.log(Level.INFO, "Handling init component [%s: %s]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
+                    logger.info("Handling init component [{}: {}]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
                     try {
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
@@ -178,9 +180,9 @@ public class Pipeline implements ISystem, Runnable {
     public void updateInput() {
         input.updateInput();
 
-        if (input.isHolded(GLFW.GLFW_KEY_P)) {
+        if (input.isHeld(GLFW.GLFW_KEY_P)) {
             isUpdatePaused = !isUpdatePaused;
-            input.holdedKeys.set(GLFW.GLFW_KEY_P, false);
+            input.heldKeys.set(GLFW.GLFW_KEY_P, false);
         }
     }
 
@@ -315,7 +317,7 @@ public class Pipeline implements ISystem, Runnable {
 //        Stopwatch.stop("Collision register systems handling ended!");
     }
 
-    private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Collidable A, Collidable B) {
+    private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Colliding A, Colliding B) {
         return (previousFrameCollision.A == A && previousFrameCollision.B == B) ||
                (previousFrameCollision.A == B && previousFrameCollision.B == A);
     }
@@ -425,7 +427,7 @@ public class Pipeline implements ISystem, Runnable {
     }
 
     private void swapCollisionEntities(Collision collision) {
-        Collidable temp = collision.B;
+        Colliding temp = collision.B;
         collision.B = collision.A;
         collision.A = temp;
     }

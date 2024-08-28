@@ -3,17 +3,23 @@ package org.north.core.physics.collision;
 import org.north.core.managment.data.Stateful;
 
 public class Collision implements Stateful<CollisionState> {
-    public Collidable A;
-    public Collidable B;
+    public Colliding A;
+    public Colliding B;
     public CollisionPair pair;
     public CollisionState state;
     public boolean isModified;
 
-    public Collision(CollisionState state, Collidable A, Collidable B, CollisionPair pair) {
+    public Collision(CollisionState state,
+                     Colliding A,
+                     Colliding B,
+                     CollisionPair pair) {
         register(state, A, B, pair);
     }
 
-    public Collision register(CollisionState state, Collidable A, Collidable B, CollisionPair pair) {
+    public Collision register(CollisionState state,
+                              Colliding A,
+                              Colliding B,
+                              CollisionPair pair) {
         this.state = state;
         this.A = A;
         this.B = B;

@@ -52,9 +52,9 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
 
     @Override
     public void handleInput(CloudEmitter component, Input input) {
-        keyAIsHolded = input.isHolded(GLFW.GLFW_KEY_A);
-        keyDIsHolded = input.isHolded(GLFW.GLFW_KEY_D);
-        keyWIsHolded = input.isHolded(GLFW.GLFW_KEY_W);
+        keyAIsHolded = input.isHeld(GLFW.GLFW_KEY_A);
+        keyDIsHolded = input.isHeld(GLFW.GLFW_KEY_D);
+        keyWIsHolded = input.isHeld(GLFW.GLFW_KEY_W);
     }
 
     @Override

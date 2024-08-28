@@ -13,13 +13,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Input {
 
-    public static final int KEYS_ARRAY_SIZE = 0xff;
+    public static final int KEYS_ARRAY_SIZE = 0x100;
 
     private static Input instance;
 
     public BitSet pressedKeys = new BitSet(KEYS_ARRAY_SIZE);
     public BitSet releasedKeys = new BitSet(KEYS_ARRAY_SIZE);
-    public BitSet holdedKeys = new BitSet(KEYS_ARRAY_SIZE);
+    public BitSet heldKeys = new BitSet(KEYS_ARRAY_SIZE);
 
     public List<Integer> lastPressedKeys = new ArrayList<>();
 
@@ -40,14 +40,14 @@ public class Input {
         for (Integer key : lastPressedKeys) {
             if (pressedKeys.get(key)) {
                 pressedKeys.set(key, false);
-                holdedKeys.set(key, true);
+                heldKeys.set(key, true);
             }
         }
         lastPressedKeys.clear();
     }
 
-    public boolean isHolded(int key) {
-        return holdedKeys.get(key);
+    public boolean isHeld(int key) {
+        return heldKeys.get(key);
     }
 
     public boolean isReleased(int key) {
@@ -83,7 +83,7 @@ public class Input {
 
             input.releasedKeys.set(key, action == GLFW_RELEASE);
             input.pressedKeys.set(key, action == GLFW_PRESS);
-            input.holdedKeys.set(key, action == GLFW_REPEAT);
+            input.heldKeys.set(key, action == GLFW_REPEAT);
 
             if (action == GLFW_PRESS) {
                 input.lastPressedKeys.add(key);
@@ -99,7 +99,7 @@ public class Input {
         public void invoke(long window, int button, int action, int mods) {
             input.releasedKeys.set(button, action == GLFW_RELEASE);
             input.pressedKeys.set(button, action == GLFW_PRESS);
-            input.holdedKeys.set(button, action == GLFW_REPEAT);
+            input.heldKeys.set(button, action == GLFW_REPEAT);
 
             if (action == GLFW_PRESS) {
                 input.lastPressedKeys.add(button);
