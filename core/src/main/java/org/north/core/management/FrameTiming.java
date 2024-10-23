@@ -1,4 +1,4 @@
-package org.north.core.managment;
+package org.north.core.management;
 
 public class FrameTiming {
     private static final int  NANO_TIME_STEP = 100;

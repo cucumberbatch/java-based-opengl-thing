@@ -7,7 +7,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 
 public class DependencyRegisterer {
-    private final Map<Class<?>, Object> objects = new HashMap<>();
+    private final Map<Class<?>, Object> objects = new IdentityHashMap<>();
 
     public <T> T registerDependency(Class<T> aClass, T value) {
         if (objects.containsKey(aClass)) {
@@ -17,9 +17,9 @@ public class DependencyRegisterer {
         return value;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getDependency(Class<T> aClass) throws ReflectiveOperationException {
-        T object = (T) objects.get(aClass);
+    public <T> T getDependency(Class<T> aClass)
+            throws ClassCastException, ReflectiveOperationException {
+        T object = aClass.cast(objects.get(aClass));
         if (object == null) {
             object = registerDependency(aClass);
         }

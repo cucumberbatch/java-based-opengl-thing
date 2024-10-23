@@ -3,7 +3,8 @@ package org.north.core.architecture.entity;
 import org.north.core.architecture.tree.v2.LinkedTreeNode;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
-import org.north.core.managment.data.Identifiable;
+import org.north.core.management.data.Identifiable;
+import org.north.core.management.data.IdentifierAlreadySetException;
 import org.north.core.physics.collision.Colliding;
 
 import java.io.Externalizable;
@@ -47,7 +48,10 @@ public class Entity
     }
 
     @Override
-    public void setId(UUID id) {
+    public void setId(UUID id) throws IdentifierAlreadySetException {
+        if (this.id == null)
+            throw new IdentifierAlreadySetException();
+
         this.id = id;
     }
 

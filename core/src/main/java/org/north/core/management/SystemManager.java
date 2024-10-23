@@ -1,5 +1,7 @@
-package org.north.core.managment;
+package org.north.core.management;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
@@ -7,6 +9,7 @@ import org.north.core.component.ComponentState;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.graphics.Window;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.di.Inject;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
@@ -19,6 +22,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager implements Resettable {
+    private static final Logger log = LogManager.getLogger();
+
     public final List<Collision> collisions;
     private final Map<Class<? extends Process>, List<Process>> processMap;
     private final Map<Class<? extends Component>, System<?>> systemMap;
@@ -154,6 +159,7 @@ public class SystemManager implements Resettable {
     public void applyDeferredCommands() {
         for (DeferredCommand command : deferredCommands) {
             command.execute(this);
+            log.info("executed deferred command: {}", command);
         }
         deferredCommands.clear();
     }

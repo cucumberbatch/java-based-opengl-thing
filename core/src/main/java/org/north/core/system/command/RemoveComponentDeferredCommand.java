@@ -2,7 +2,7 @@ package org.north.core.system.command;
 
 import org.north.core.component.Component;
 import org.north.core.architecture.entity.Entity;
-import org.north.core.managment.SystemManager;
+import org.north.core.management.SystemManager;
 
 public class RemoveComponentDeferredCommand implements DeferredCommand {
     public final Entity entity;

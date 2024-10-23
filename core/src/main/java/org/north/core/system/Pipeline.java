@@ -1,6 +1,7 @@
 package org.north.core.system;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.entity.ComponentManager;
@@ -17,8 +18,8 @@ import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
-import org.north.core.managment.FrameTiming;
-import org.north.core.managment.SystemManager;
+import org.north.core.management.FrameTiming;
+import org.north.core.management.SystemManager;
 import org.north.core.physics.collision.Colliding;
 import org.north.core.physics.collision.Collision;
 import org.north.core.physics.collision.CollisionPair;
@@ -28,19 +29,18 @@ import org.north.core.scene.DefaultSceneComposer;
 import org.north.core.scene.Scene;
 import org.north.core.scene.SceneComposer;
 import org.north.core.system.process.*;
-import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.*;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Pipeline implements ISystem, Runnable {
+    private static final Logger log = LogManager.getLogger();
+
     private final Window window;
     private final Graphics graphics;
     private final ComponentManager componentManager;
@@ -50,14 +50,13 @@ public class Pipeline implements ISystem, Runnable {
 
     private final TreeNode<Entity> rootNode;
 
+    private final boolean editorEnabled;
+
     private Scene scene;
 
     private boolean isUpdatePaused = false;
-    private boolean load = false;
+    private final boolean load = false;
     private boolean stopped = false;
-
-    private static final Logger log = LoggerFactory.createLogger(Pipeline.class);
-    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(Pipeline.class);
 
     @Inject
     public Pipeline(ApplicationContext context) {
@@ -68,11 +67,17 @@ public class Pipeline implements ISystem, Runnable {
         this.timingContext = new FrameTiming(65);
         this.input = context.getDependency(Input.class);
 
+        this.editorEnabled =
+                ApplicationProperties.getBoolean("application.editor.enabled");
+
         try {
-            this.rootNode = context.addDependency(Entity.class, new Entity("root"));
+            this.rootNode =
+                    context.addDependency(Entity.class, new Entity("root"));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
+
+
     }
 
     public void setScene(Scene scene) {
@@ -86,7 +91,7 @@ public class Pipeline implements ISystem, Runnable {
         // todo: load scene from file (game data deserialization)
         composeScene(new DefaultSceneComposer());
 
-        if (ApplicationProperties.getBoolean("application.editor.enabled")) {
+        if (editorEnabled) {
             createEditorWindow();
         }
 
@@ -94,7 +99,7 @@ public class Pipeline implements ISystem, Runnable {
             try {
                 tick();
             } catch (RuntimeException e) {
-                log.log(Level.SEVERE, "Exiting game loop in case of thrown exception", e);
+                log.error("Exiting game loop in case of thrown exception", e);
                 break;
             }
         }
@@ -123,12 +128,18 @@ public class Pipeline implements ISystem, Runnable {
 
         update(elapsedTime);
 
+//        if (editorEnabled)
+//            updateGUI(elapsedTime);
+
         registerCollisions();
         handleCollisions();
 
         applyDeferredCommands();
 
         render(window);
+
+//        if (editorEnabled)
+//            renderGUI(window);
 
         timingContext.sync();
     }
@@ -157,17 +168,18 @@ public class Pipeline implements ISystem, Runnable {
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    logger.info("Handling init component [{}: {}]", new Object[]{system.getClass().getName(), component.getEntity().getName()});
+                    log.info("Handling init component [{}: {}]",
+                            system.getClass().getName(), component.getEntity().getName());
                     try {
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
                     } catch (ComponentNotFoundException e) {
                         // Logger.error(e);
-                        log.log(Level.WARNING, "Component not found", e);
+                        log.warn("Component not found", e);
                         component.setState(ComponentState.LATE_INIT_STATE);
                     } catch (NullPointerException e) {
                         // Logger.error(e);
-                        log.log(Level.WARNING, "Null pointer exception", e);
+                        log.warn("Null pointer exception while initializing component", e);
                         component.setState(ComponentState.LATE_INIT_STATE);
                     }
                 } else if (component.inState(ComponentState.LATE_INIT_STATE)) {
@@ -197,7 +209,7 @@ public class Pipeline implements ISystem, Runnable {
                     try {
                         process.handleInput(component, input);
                     } catch (Exception e) {
-                        log.warning(e.getMessage());
+                        log.warn("failed handling input events", e);
                     }
                 }
             }
@@ -212,50 +224,35 @@ public class Pipeline implements ISystem, Runnable {
 //        Stopwatch.start();
 
         List<Collision> collisions = systemManager.collisions;
-        List<MeshCollider> componentList;
-        CollisionPair pair;
+
+        int collisionsListSize = collisions.size();
+
         Collision collision;
-        Collision previousFrameCollision;
-        MeshCollider that;
-        MeshCollider other;
-        Entity A;
-        Entity B;
-        Vector3f positionA;
-        Vector3f positionB;
-        int componentListSize;
-        int collisionsListSize;
-        boolean isCollisionFound;
-        int lindex;
-        int rindex;
-        int cindex;
-
-        collisionsListSize = collisions.size();
-
         for (CollisionHandlingProcess<? extends Component> process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
             if (!MeshColliderSystem.class.isAssignableFrom(process.getClass())) continue;
-            componentList = ((MeshColliderSystem) process).getComponentList();
-            componentListSize = componentList.size();
-            for (lindex = 0; lindex < componentListSize - 1; lindex++) {
-                that = componentList.get(lindex);
-                for (rindex = lindex + 1; rindex < componentListSize; rindex++) {
-                    other = componentList.get(rindex);
-                    A = that.entity;
-                    B = other.entity;
+            List<MeshCollider> componentList = ((MeshColliderSystem) process).getComponentList();
+            int componentsCount = componentList.size();
+            for (int lindex = 0; lindex < componentsCount - 1; lindex++) {
+                MeshCollider that = componentList.get(lindex);
+                for (int rindex = lindex + 1; rindex < componentsCount; rindex++) {
+                    MeshCollider other = componentList.get(rindex);
+                    Entity A = that.entity;
+                    Entity B = other.entity;
                     if (that.isStatic && other.isStatic) continue;
                     if (that.body == null || other.body == null) continue;
+                    Collision previousFrameCollision;
                     if (that.body.isIntersects(other.body)) {
-                        positionA = A.getTransform().getPosition();
-                        positionB = B.getTransform().getPosition();
-                        isCollisionFound = false;
-                        for (cindex = 0; cindex < collisionsListSize; cindex++) {
+                        Vector3f positionA = A.getTransform().getPosition();
+                        Vector3f positionB = B.getTransform().getPosition();
+                        boolean collisionFound = false;
+                        for (int cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = collisions.get(cindex);
                             if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
-                                isCollisionFound = true;
+                                collisionFound = true;
                                 if (previousFrameCollision.inState(CollisionState.ENTERED)) {
                                     //todo: add collision pool
-                                    previousFrameCollision.pair = new CollisionPair(positionA, positionB);
-                                    previousFrameCollision.state = CollisionState.CONTINUED;
-                                    previousFrameCollision.isModified = true;
+                                    previousFrameCollision.setPair(new CollisionPair(positionA, positionB));
+                                    previousFrameCollision.setState(CollisionState.CONTINUED);
                                     // Logger.info(String.format(
 //                                            "Collision modified! a1: %s\tstate: %s",
 //                                            previousFrameCollision,
@@ -265,11 +262,11 @@ public class Pipeline implements ISystem, Runnable {
                                 break;
                             }
                         }
-                        if (!isCollisionFound) {
+                        if (!collisionFound) {
                             //todo: add collision pool
-                            pair      = new CollisionPair(positionA, positionB);
-                            collision = new Collision(CollisionState.ENTERED, A, B, pair);
-                            collision.isModified = true;
+                            CollisionPair pair = new CollisionPair(positionA, positionB);
+                            collision = new Collision(A, B, pair);
+                            collision.setModified(true);
                             collisions.add(collision);
                             collisionsListSize++;
                             // Logger.info(String.format(
@@ -279,19 +276,18 @@ public class Pipeline implements ISystem, Runnable {
 //                            ));
                         }
                     } else {
-                        for (cindex = 0; cindex < collisionsListSize; cindex++) {
+                        for (int cindex = 0; cindex < collisionsListSize; cindex++) {
                             previousFrameCollision = collisions.get(cindex);
                             if (isSameCollisionAsInPreviousFrame(previousFrameCollision, A, B)) {
-                                if (CollisionState.EXITED != previousFrameCollision.state) {
-                                    previousFrameCollision.isModified = true;
-                                    previousFrameCollision.state = CollisionState.EXITED;
+                                if (!previousFrameCollision.inState(CollisionState.EXITED)) {
+                                    previousFrameCollision.setState(CollisionState.EXITED);
                                     // Logger.info(String.format(
 //                                            "Collision modified! a1: %s\tstate: %s",
 //                                            previousFrameCollision,
 //                                            previousFrameCollision.state
 //                                    ));
                                 } else {
-                                    previousFrameCollision.isModified = false;
+                                    previousFrameCollision.setModified(false);
                                 }
                                 break;
                             }
@@ -301,9 +297,9 @@ public class Pipeline implements ISystem, Runnable {
             }
         }
 
-        for (cindex = collisionsListSize - 1; cindex >= 0; cindex--) {
+        for (int cindex = collisionsListSize - 1; cindex >= 0; cindex--) {
             collision = collisions.get(cindex);
-            if (collision.inState(CollisionState.EXITED) && !collision.isModified) {
+            if (collision.inState(CollisionState.EXITED) && !collision.isModified()) {
                 collisions.remove(cindex);
                 collisionsListSize--;
                 // Logger.info(String.format(
@@ -318,8 +314,8 @@ public class Pipeline implements ISystem, Runnable {
     }
 
     private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Colliding A, Colliding B) {
-        return (previousFrameCollision.A == A && previousFrameCollision.B == B) ||
-               (previousFrameCollision.A == B && previousFrameCollision.B == A);
+        return (previousFrameCollision.getA() == A && previousFrameCollision.getB() == B) ||
+               (previousFrameCollision.getA() == B && previousFrameCollision.getB() == A);
     }
 
     //todo: performance
@@ -366,9 +362,9 @@ public class Pipeline implements ISystem, Runnable {
                 Component component = iterator.next();
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting enter collision [%s] for component [%s]", collision, component));
-                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
+                    if (collision.getA() != component.getEntity() && collision.getB() != component.getEntity()) continue;
                     if (collision.inState(CollisionState.ENTERED)) {
-                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.getA()) collision.swapAB();
                         process.onCollisionStarted(component, collision);
                     }
                 }
@@ -390,9 +386,9 @@ public class Pipeline implements ISystem, Runnable {
                 Component component = iterator.next();
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting hold collision [%s] for component [%s]", collision, component));
-                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
+                    if (collision.getA() != component.getEntity() && collision.getB() != component.getEntity()) continue;
                     if (collision.inState(CollisionState.CONTINUED)) {
-                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.getA()) collision.swapAB();
                         process.onCollisionContinued(component, collision);
                     }
                 }
@@ -414,9 +410,9 @@ public class Pipeline implements ISystem, Runnable {
                 Component component = iterator.next();
                 for (Collision collision : systemManager.collisions) {
                     // Logger.trace(String.format("Visiting exit collision [%s] for component [%s]", collision, component));
-                    if (collision.A != component.getEntity() && collision.B != component.getEntity()) continue;
+                    if (collision.getA() != component.getEntity() && collision.getB() != component.getEntity()) continue;
                     if (collision.inState(CollisionState.EXITED)) {
-                        if (component.getEntity() == collision.A) swapCollisionEntities(collision);
+                        if (component.getEntity() == collision.getA()) collision.swapAB();
                         process.onCollisionEnded(component, collision);
                     }
                 }
@@ -424,12 +420,6 @@ public class Pipeline implements ISystem, Runnable {
         }
 
 //        Stopwatch.stop("Collision exit handling ended!");
-    }
-
-    private void swapCollisionEntities(Collision collision) {
-        Colliding temp = collision.B;
-        collision.B = collision.A;
-        collision.A = temp;
     }
 
     public void handleCollisions() {

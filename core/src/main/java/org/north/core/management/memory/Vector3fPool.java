@@ -1,4 +1,4 @@
-package org.north.core.managment.memory;
+package org.north.core.management.memory;
 
 import org.joml.Vector3f;
 

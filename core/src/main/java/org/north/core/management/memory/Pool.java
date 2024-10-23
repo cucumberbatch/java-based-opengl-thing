@@ -1,4 +1,4 @@
-package org.north.core.managment.memory;
+package org.north.core.management.memory;
 
 public interface Pool<T> {
     void put(T o);

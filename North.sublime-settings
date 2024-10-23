@@ -1,0 +1,15 @@
+{
+	"ignored_packages":
+	[
+		"Vintage",
+	],
+	"color_scheme": "Packages/Colorsublime - Themes/Tricolore.tmTheme",
+
+	"spell_check": true,
+
+	"caret_style": "blink",
+	"block_caret": true,
+
+	"font_size": 10,
+	
+}

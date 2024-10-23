@@ -25,10 +25,10 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
                                                                     CollisionHandlingProcess<Button>,
                                                                     RenderProcess<Button> {
 
-    public static final int IDLE_BUTTON_STATE          = 0;
-    public static final int HOVER_BUTTON_STATE         = 1;
-    public static final int IDLE_TO_HOVER_BUTTON_STATE = 2;
-    public static final int HOVER_TO_IDLE_BUTTON_STATE = 3;
+    public enum ButtonState {
+        IDLE_BUTTON_STATE, HOVER_BUTTON_STATE,
+        IDLE_TO_HOVER_BUTTON_STATE, HOVER_TO_IDLE_BUTTON_STATE;
+    }
 
     @Inject
     public ButtonSystem(ApplicationContext context) {
@@ -59,13 +59,14 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
         float transitionTimeLimit = button.transitionTimeLimit;
 
         switch (button.buttonState) {
-            case IDLE_BUTTON_STATE | HOVER_BUTTON_STATE:
+            case IDLE_BUTTON_STATE:
+            case HOVER_BUTTON_STATE:
                 break;
             case IDLE_TO_HOVER_BUTTON_STATE: {
                 if (button.transitionTimeAccumulator > transitionTimeLimit) {
                     button.transitionTimeAccumulator = .0f;
                     button.buttonColor = button.buttonOnHoverColor;
-                    button.buttonState = HOVER_BUTTON_STATE;
+                    button.buttonState = ButtonState.HOVER_BUTTON_STATE;
                 } else {
                     button.transitionTimeAccumulator += deltaTime;
                     float ratio = button.transitionTimeAccumulator / transitionTimeLimit;
@@ -77,7 +78,7 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
                 if (button.transitionTimeAccumulator > transitionTimeLimit) {
                     button.transitionTimeAccumulator = .0f;
                     button.buttonColor = button.buttonDefaultColor;
-                    button.buttonState = IDLE_BUTTON_STATE;
+                    button.buttonState = ButtonState.IDLE_BUTTON_STATE;
                 } else {
                     button.transitionTimeAccumulator += deltaTime;
                     float ratio = button.transitionTimeAccumulator / transitionTimeLimit;
@@ -90,14 +91,14 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
 
     @Override
     public void onCollisionStarted(Button button, Collision collision) {
-        VisualCursor visualCursor = ((Entity) collision.A).get(VisualCursor.class);
+        VisualCursor visualCursor = ((Entity) collision.getA()).get(VisualCursor.class);
         if (visualCursor != null && visualCursor.isIntersects && visualCursor.previouslySelectedButtonShape != button.buttonShape) return;
-        button.buttonState = IDLE_TO_HOVER_BUTTON_STATE;
+        button.buttonState = ButtonState.IDLE_TO_HOVER_BUTTON_STATE;
     }
 
     @Override
     public void onCollisionEnded(Button button, Collision collision)  {
-        button.buttonState = HOVER_TO_IDLE_BUTTON_STATE;
+        button.buttonState = ButtonState.HOVER_TO_IDLE_BUTTON_STATE;
     }
 
     @Override

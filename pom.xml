@@ -25,7 +25,7 @@
         <maven.jar.version>3.1.0</maven.jar.version>
         <joml.version>1.9.9</joml.version>
         <lwjgl.version>3.2.3</lwjgl.version>
-        <lwjgl.natives>natives-windows</lwjgl.natives>
+        <lwjgl.natives>natives-linux</lwjgl.natives>
         <junit-jupiter.version>5.8.0</junit-jupiter.version>
         <junit.surefire.version>2.19.1</junit.surefire.version>
         <junit.surefire-provider.version>1.1.0</junit.surefire-provider.version>
@@ -107,15 +107,18 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
+                <artifactId>log4j-api</artifactId>
                 <version>2.19.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
                 <version>2.19.0</version>
-                <type>test-jar</type>
-                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.jcabi</groupId>
+                <artifactId>jcabi-log</artifactId>
+                <version>0.17.1</version>
             </dependency>
 
         </dependencies>

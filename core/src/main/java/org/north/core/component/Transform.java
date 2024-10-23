@@ -11,7 +11,7 @@ import java.util.Iterator;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent {
+public class Transform extends AbstractComponent implements Iterable<Transform> {
     public Transform parent;
 
     private Vector3f position = new Vector3f(0, 0, 0);
@@ -89,6 +89,7 @@ public class Transform extends AbstractComponent {
      * @deprecated use method with matrix argument as temporary destination object
      * @return a local model matrix of this transform
      */
+    @Deprecated(forRemoval = true)
     public Matrix4f getLocalModelMatrix() {
         return getLocalModelMatrix(new Matrix4f());
     }
@@ -154,27 +155,20 @@ public class Transform extends AbstractComponent {
 //                super.toString();
 //    }
 
-    public Iterable<Transform> ascendantIterableTransform() {
-        return new Iterable<>() {
-            final Transform transform = Transform.this;
+    public Iterator<Transform> iterator() {
+        return new Iterator<>() {
+            Transform next = Transform.this;
 
             @Override
-            public Iterator<Transform> iterator() {
-                return new Iterator<>() {
-                    Transform next = transform;
+            public boolean hasNext() {
+                return next != null;
+            }
 
-                    @Override
-                    public boolean hasNext() {
-                        return next != null;
-                    }
-
-                    @Override
-                    public Transform next() {
-                        Transform transform = next;
-                        next = next.parent;
-                        return transform;
-                    }
-                };
+            @Override
+            public Transform next() {
+                Transform transform = next;
+                next = next.parent;
+                return transform;
             }
         };
     }

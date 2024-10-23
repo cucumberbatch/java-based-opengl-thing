@@ -1,7 +1,7 @@
 package org.north.core.system;
 
 import org.north.core.component.Component;
-import org.north.core.managment.Resettable;
+import org.north.core.management.Resettable;
 
 import java.util.Collection;
 import java.util.Iterator;

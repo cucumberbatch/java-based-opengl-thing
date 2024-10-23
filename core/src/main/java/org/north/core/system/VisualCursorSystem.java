@@ -226,7 +226,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     @Override
     public void onCollisionStarted(VisualCursor visualCursor, Collision collision) {
-        selectedEntity = (Entity) collision.A;
+        selectedEntity = (Entity) collision.getA();
         visualCursor.previouslySelectedButtonShape = selectedEntity.get(MeshCollider.class).body;
         visualCursor.isIntersects = true;
         cursorState = HOVER_TO_IDLE_CURSOR_STATE;
@@ -234,7 +234,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     @Override
     public void onCollisionEnded(VisualCursor visualCursor, Collision collision)  {
-        if (collision.A == selectedEntity) {
+        if (collision.getA() == selectedEntity) {
             selectedEntity = null;
             visualCursor.isIntersects = false;
         }

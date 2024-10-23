@@ -5,7 +5,7 @@ import org.north.core.graphics.shader.Shader;
 public class Material {
     public long    id;
     public String  name;
-    public Shader shader;
+    public Shader  shader;
     public Texture texture;
 
     public Material(String name, Shader shader, Texture texture) {

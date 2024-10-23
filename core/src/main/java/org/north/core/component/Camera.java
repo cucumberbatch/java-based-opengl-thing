@@ -61,12 +61,16 @@ public class Camera extends AbstractComponent {
 
     @Override
     public String toString() {
-        return "\nat:   " + at +
-                "\nup:   " + up +
-                "\neye:  " + eye +
-                "\nview: " + viewMatrix +
-                "\nprojection: " + projectionMatrix;
-
+        return "Camera{" +
+                "at=" + at +
+                ", up=" + up +
+                ", eye=" + eye +
+                ", near=" + near +
+                ", far=" + far +
+                ", angle=" + angle +
+                ", ratio=" + ratio +
+                ", viewMatrix=" + viewMatrix +
+                ", projectionMatrix=" + projectionMatrix +
+                '}';
     }
-
 }

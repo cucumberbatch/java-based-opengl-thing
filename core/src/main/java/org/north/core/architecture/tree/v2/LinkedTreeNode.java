@@ -72,7 +72,6 @@ public abstract class LinkedTreeNode<Node extends LinkedTreeNode<Node>> implemen
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean add(Node subtree) {
         if (subtree == null) {
             return false;
@@ -86,7 +85,8 @@ public abstract class LinkedTreeNode<Node extends LinkedTreeNode<Node>> implemen
             }
             daughter.setNextSibling(subtree);
         }
-        subtree.setParent((Node) this);
+        @SuppressWarnings("unchecked") Node parent = (Node) this;
+        subtree.setParent(parent);
         return true;
     }
 

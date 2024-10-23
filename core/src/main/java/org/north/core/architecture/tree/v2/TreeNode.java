@@ -4,44 +4,88 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * An interface for implementation of a tree-like data structures
+ * @apiNote {@link Node} datatype must extend one of the implementations
+ * of {@link TreeNode} interface to have access to this functionality
+ * @param <Node> a type of data, that needs to be represented as a tree
+ */
 public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, Serializable {
 
     /**
      * Checks if the current node does not have any subtrees
-     * @return true if the current node has no children, false otherwise
+     * @return {@code true} if the current node has no children, {@code false} - otherwise
      */
     boolean isLeaf();
 
     /**
-     * Returns a parent node relative to the current node
-     * @return parent node
+     * Returns a parent node relative to the current node, or null if there is no parent
+     * @return parent {@link Node}, or {@code null} if there is no parent node
      */
     Node getParent();
 
+    /**
+     * Checks if this node has a reference to the next node on the same tree depth level
+     * @return {@code true} if this node has a reference to the next node, {@code false} - otherwise
+     */
     boolean hasNextSibling();
 
+    /**
+     * Checks if this node has a reference to the previous node on the same tree depth level
+     * @return {@code true} if this node has a reference to the previous node, {@code false} - otherwise
+     */
+    boolean hasPreviousSibling();
+
+    /**
+     * Returns a reference to the next sibling node on the same tree depth level
+     * @return {@link Node} of the next sibling node, {@code null} - if this is the rightmost node
+     */
     Node getNextSibling();
 
+    /**
+     * Returns a reference to the previous sibling node on the same tree depth level
+     * @return {@link Node} of the previous sibling node, {@code null} - if this is the leftmost node
+     */
     Node getPreviousSibling(Node subtree);
-
-    boolean hasPreviousSibling();
 
     Node getLeftMostDaughter();
 
+    /**
+     * Adds specified {@code subtree} to this entity as its daughter node
+     * @param subtree a node that has to be added as a daughter node
+     * @return {@code true} if that subtree was added successfully, {@code false} - if specified subtree is {@code null}
+     */
     boolean add(Node subtree);
 
     boolean remove(Node subtree);
 
     Collection<Node> getSubtrees();
 
+
+    /**
+     * Checks if this node is the rightmost node
+     * @return {@code true} if this is the rightmost node, {@code false} - otherwise
+     */
+    default boolean isRightMostNode() {
+        return !hasNextSibling();
+    }
+
+    /**
+     * Checks if this node is the leftmost node
+     * @return {@code true} if this is the leftmost node, {@code false} - otherwise
+     */
+    default boolean isLeftMostNode() {
+        return !hasPreviousSibling();
+    }
+
     /**
      * Returns the root node relative to the current node
-     * @return root node relative to the current node
+     * @return root {@link Node} relative to the current node
      */
-    @SuppressWarnings("unchecked")
     default Node getRoot() {
         if (isRoot()) {
-            return (Node) this;
+            @SuppressWarnings("unchecked") Node node = (Node) this;
+            return node;
         }
         Node root = getParent();
         while (!root.isRoot()) {
@@ -73,8 +117,8 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
      * @param subtree a given subtree node
      * @return a boolean value that indicates whether the current node
      * is the parent of a given subtree node. If the subtree is not null and
-     * the current node equals its parent, the method will return true.
-     * Otherwise, it will return false.
+     * the current node equals its parent, the method will return {@code true}.
+     * Otherwise, it will return {@code false}.
      */
     default boolean isParentOf(Node subtree) {
         return subtree != null && this.equals(subtree.getParent());
@@ -98,10 +142,10 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         return subtree != null && this.isAncestorOf(subtree);
     }
 
-    @SuppressWarnings("unchecked")
     default Node find(Predicate<Node> predicate) {
         Deque<Node> stack = new ArrayDeque<>();
-        stack.push((Node) this);
+        @SuppressWarnings("unchecked") Node node = (Node) this;
+        stack.push(node);
         while (!stack.isEmpty()) {
             Node poppedNode = stack.pop();
             if (predicate.test(poppedNode))
@@ -113,9 +157,8 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     default void ascendantTraverse(Action<Node> action) {
-        Node currentNode = (Node) this;
+        @SuppressWarnings("unchecked") Node currentNode = (Node) this;
         action.execute(currentNode);
         while (!currentNode.isRoot() && !action.isStoppingConditionSatisfied()) {
             currentNode = currentNode.getParent();
@@ -123,10 +166,10 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         }
     }
 
-    @SuppressWarnings("unchecked")
     default void traversePreorder(Action<Node> action) {
         Deque<Node> stack = new ArrayDeque<>();
-        stack.push((Node) this);
+        @SuppressWarnings("unchecked") Node node = (Node) this;
+        stack.push(node);
         while (!stack.isEmpty() && !action.isStoppingConditionSatisfied()) {
             Node poppedNode = stack.pop();
             action.execute(poppedNode);

@@ -1,30 +1,96 @@
 package org.north.core.physics.collision;
 
-import org.north.core.managment.data.Stateful;
+import org.north.core.management.data.Stateful;
 
 public class Collision implements Stateful<CollisionState> {
-    public Colliding A;
-    public Colliding B;
-    public CollisionPair pair;
-    public CollisionState state;
-    public boolean isModified;
+    private Colliding a;
+    private Colliding b;
+    private CollisionPair pair;
+    private CollisionState state;
+    private boolean isModified;
 
-    public Collision(CollisionState state,
-                     Colliding A,
-                     Colliding B,
+    /**
+     * Creates a collision object with default state {@link CollisionState#ENTERED}
+     *
+     * @param a first colliding object
+     * @param b second colliding object
+     * @param pair object that holds info about collision
+     */
+    public Collision(Colliding a,
+                     Colliding b,
                      CollisionPair pair) {
-        register(state, A, B, pair);
+        this(CollisionState.ENTERED, a, b, pair);
     }
 
-    public Collision register(CollisionState state,
-                              Colliding A,
-                              Colliding B,
-                              CollisionPair pair) {
+    /**
+     * Creates a collision object with specified {@code state}
+     *
+     * @param state state of collision from {@link CollisionState}
+     * @param a first colliding object
+     * @param b second colliding object
+     * @param pair object that holds info about collision
+     */
+    public Collision(CollisionState state,
+                     Colliding a,
+                     Colliding b,
+                     CollisionPair pair) {
         this.state = state;
-        this.A = A;
-        this.B = B;
+        this.a = a;
+        this.b = b;
         this.pair = pair;
-        return this;
+    }
+
+    public Colliding getA() {
+        return a;
+    }
+
+    public Colliding getB() {
+        return b;
+    }
+
+    public CollisionPair getPair() {
+        return pair;
+    }
+
+    public boolean isModified() {
+        return isModified;
+    }
+
+    public void setA(Colliding a) {
+        this.a = a;
+    }
+
+    public void setB(Colliding b) {
+        this.b = b;
+    }
+
+    public void setPair(CollisionPair pair) {
+        this.pair = pair;
+    }
+
+    public void setModified(boolean modified) {
+        this.isModified = modified;
+    }
+
+    @Override
+    public CollisionState getState() {
+        return state;
+    }
+
+    /**
+     * Changes collision state and also sets {@code isModified} to {@code true}
+     * @param state new state of collision
+     */
+    @Override
+    public void setState(CollisionState state) {
+        this.state = state;
+        this.isModified = true;
+    }
+
+    public void swapAB() {
+        Colliding temp = b;
+        b = a;
+        a = temp;
     }
 
     @Override
@@ -34,25 +100,16 @@ public class Collision implements Stateful<CollisionState> {
 
         Collision collision = (Collision) o;
 
-        return (this.A == collision.A && this.B == collision.B ||
-                this.A == collision.B && this.B == collision.A);
+        return this.state.equals(collision.state) &&
+                (this.a == collision.a && this.b == collision.b ||
+                 this.a == collision.b && this.b == collision.a);
     }
 
     @Override
     public int hashCode() {
-        int result = A != null ? A.hashCode() : 0;
-        result = 31 * result + (B != null ? B.hashCode() : 0);
+        int result = a != null ? a.hashCode() : 0;
+        result = 31 * result + (b != null ? b.hashCode() : 0);
         result = 31 * result + (pair != null ? pair.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public CollisionState getState() {
-        return state;
-    }
-
-    @Override
-    public void setState(CollisionState collisionState) {
-        this.state = collisionState;
     }
 }

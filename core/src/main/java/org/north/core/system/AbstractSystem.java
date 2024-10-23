@@ -7,10 +7,8 @@ import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;
-import org.north.core.exception.ComponentNotFoundException;
-import org.north.core.graphics.Window;
-import org.north.core.managment.memory.Pool;
-import org.north.core.managment.memory.Vector3fPool;
+import org.north.core.management.memory.Pool;
+import org.north.core.management.memory.Vector3fPool;
 import org.north.core.utils.logger.LoggerFactory;
 
 import java.util.*;
@@ -33,6 +31,12 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
         this.vector3fPool = context.getDependency(Vector3fPool.class);
     }
 
+    //todo: Very bad architecture decision, needs to refactor!
+    // Maybe we should create a map of component class to
+    // ComponentAttachmentListener in between layers of client api
+    // and SystemManager, or even in SystemManager class.
+    // In that case we can add listeners for any kind of component
+    // and implement special logic to run in engine environment for that component
     public final void setCameraComponent(Camera camera) {
         cm.setCameraComponent(camera);
     }

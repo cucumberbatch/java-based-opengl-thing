@@ -5,6 +5,7 @@ import org.north.core.component.CameraControls;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
+import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;

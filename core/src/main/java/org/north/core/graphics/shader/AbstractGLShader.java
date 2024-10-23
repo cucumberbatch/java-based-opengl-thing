@@ -1,6 +1,5 @@
 package org.north.core.graphics.shader;
 
-import org.lwjgl.opengl.GL20;
 import org.north.core.utils.ResourceManager;
 
 import java.io.*;
@@ -27,13 +26,11 @@ public abstract class AbstractGLShader implements Shader, Externalizable {
 
     @Override
     public void enable() {
-        GL20.glUseProgram(id);
         enabled = true;
     }
 
     @Override
     public void disable() {
-        GL20.glUseProgram(0);
         enabled = false;
     }
 

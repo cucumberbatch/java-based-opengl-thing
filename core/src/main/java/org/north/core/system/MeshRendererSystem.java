@@ -24,10 +24,10 @@ public class MeshRendererSystem
         VertexArray vertexArray = meshRenderer.mesh.vertexArray;
         int renderType = meshRenderer.renderType;
 
-        shader.enable();
+        graphics.enable(shader);
         graphics.prepareShader(shader, meshRenderer);
         vertexArray.render(renderType);
-        shader.disable();
+        graphics.disable(shader);
 
     }
 }

@@ -5,7 +5,7 @@ import org.north.core.config.EngineConfig;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
-import org.north.core.managment.SystemManager;
+import org.north.core.management.SystemManager;
 import org.north.core.scene.Scene;
 import org.north.core.system.Pipeline;
 
@@ -35,9 +35,10 @@ public class Engine {
     }
 
     public void run() {
-        window.init();
+        Graphics graphics = context.getDependency(Graphics.class);
+        window.init(graphics);
         pipeline.run();
-        window.destroy();
+        window.destroy(graphics);
     }
 
 }

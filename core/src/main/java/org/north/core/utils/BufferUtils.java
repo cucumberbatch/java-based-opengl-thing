@@ -1,5 +1,7 @@
 package org.north.core.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BufferUtils {
+    private static final Logger log = LogManager.getLogger();
 
     private static final Map<Integer, ByteBuffer> BYTE_BUFFER_STORAGE = new HashMap<>();
     private static final Map<Integer, IntBuffer> INT_BUFFER_STORAGE = new HashMap<>();
@@ -47,7 +50,7 @@ public class BufferUtils {
             return buffer;
         }
         buffer = ByteBuffer.allocateDirect(array.length << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
-        Logger.debug(String.format("IntBuffer of size %d created", buffer.capacity()));
+        log.debug("IntBuffer of size {} created", buffer.capacity());
         buffer.put(array).flip();
         INT_BUFFER_STORAGE.put(array.length, buffer);
         return buffer;

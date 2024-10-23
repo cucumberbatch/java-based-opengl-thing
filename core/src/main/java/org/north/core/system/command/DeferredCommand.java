@@ -1,6 +1,6 @@
 package org.north.core.system.command;
 
-import org.north.core.managment.SystemManager;
+import org.north.core.management.SystemManager;
 
 public interface DeferredCommand {
     enum CommandType {

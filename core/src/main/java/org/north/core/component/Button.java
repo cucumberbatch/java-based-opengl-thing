@@ -5,6 +5,7 @@ import org.north.core.graphics.VertexArray;
 import org.north.core.shape.Rectangle;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import org.north.core.system.ButtonSystem;
 
 public class Button extends AbstractComponent {
 
@@ -38,6 +39,6 @@ public class Button extends AbstractComponent {
     public float transitionTimeLimit       = 1.2f;
     public float transitionTimeAccumulator = 0.0f;
 
-    public int buttonState = 0;
+    public ButtonSystem.ButtonState buttonState = ButtonSystem.ButtonState.IDLE_BUTTON_STATE;
 
 }

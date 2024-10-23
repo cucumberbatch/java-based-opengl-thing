@@ -1,4 +1,4 @@
-package org.north.core.managment.data;
+package org.north.core.management.data;
 
 /**
  * This interface marks inherited classes as identifiable,
@@ -16,10 +16,11 @@ public interface Identifiable<ID> {
     ID getId();
 
     /**
-     * Set an id for specific instance.
+     * Set an id for that instance.
      * <p><b>Note:</b> must be used only single time in a whole instance lifecycle.</p>
      *
      * @param id specified identifier
+     * @throws IdentifierAlreadySetException if this instance already has a unique identifier
      */
-    void setId(ID id);
+    void setId(ID id) throws IdentifierAlreadySetException;
 }

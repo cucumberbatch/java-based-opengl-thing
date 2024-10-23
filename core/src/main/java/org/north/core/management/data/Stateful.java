@@ -1,4 +1,4 @@
-package org.north.core.managment.data;
+package org.north.core.management.data;
 
 public interface Stateful<State extends Enum<State>> {
 

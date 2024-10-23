@@ -1,7 +1,8 @@
 package org.north.core.graphics;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.north.core.utils.BufferUtils;
-import org.north.core.utils.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -14,6 +15,7 @@ import java.util.Map;
 import static org.lwjgl.opengl.GL11.*;
 
 public class TextureManager {
+    private static final Logger log = LogManager.getLogger();
     private static final Map<String, Texture> preloadedTexturesMap = new HashMap<>();
 
     public static Texture tryToLoadTexture(String textureFilePath) {
@@ -39,16 +41,16 @@ public class TextureManager {
             pixels = new int[width * height];
             image.getRGB(0, 0, width, height, pixels, 0, width);
         } catch (FileNotFoundException e) {
-            // Logger.error(String.format("Texture '<underline>%s</>' not found!", path), e);
+             log.error("Texture '{}' not found!", path, e);
             return null;
         } catch (SecurityException e) {
-            // Logger.error(String.format("Texture file access denied on path '<underline>%s</>'!", path), e);
+             log.error("Texture file access denied on path '{}'!", path, e);
             return null;
         } catch (IllegalArgumentException e) {
-            // Logger.error(String.format("Incorrect texture file path '<underline>%s</>'!", path), e);
+             log.error("Incorrect texture file path '{}'!", path, e);
             return null;
         } catch (IOException e) {
-            // Logger.error(String.format("Error while loading texture '<underline>%s</>'!", path), e);
+             log.error("Error while loading texture '{}'!", path, e);
             return null;
         }
 

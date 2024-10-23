@@ -4,7 +4,7 @@ import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
-import org.north.core.managment.SystemManager;
+import org.north.core.management.SystemManager;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.RemoveComponentDeferredCommand;
@@ -12,7 +12,6 @@ import org.north.core.system.command.RemoveComponentDeferredCommand;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ComponentManager {
     private final ManagedEntityPool managedEntityPool;

@@ -207,4 +207,13 @@ public class Graphics {
         return previouslyRenderedTexture != null && previouslyRenderedTexture.getId() == texture.getId();
     }
 
+    public void enable(Shader shader) {
+        GL20.glUseProgram(shader.getId());
+        shader.enable();
+    }
+
+    public void disable(Shader shader) {
+        GL20.glUseProgram(0);
+        shader.disable();
+    }
 }

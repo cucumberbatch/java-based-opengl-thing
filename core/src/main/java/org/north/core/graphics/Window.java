@@ -1,27 +1,30 @@
 package org.north.core.graphics;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.joml.Vector2f;
+import org.lwjgl.glfw.Callbacks;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryStack;
 import org.north.core.config.EngineConfig;
 import org.north.core.physics.collision.MeshMovementListener;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.CameraControlsSystem;
 import org.north.core.system.Input;
-
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.system.MemoryStack;
-import org.joml.Vector2f;
-import org.north.core.utils.logger.LoggerFactory;
+import org.north.core.system.Pipeline;
 
 import java.nio.IntBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
+    private static final Logger log = LogManager.getLogger();
+
     public final String title;
     private static int width;
     private static int height;
@@ -31,8 +34,6 @@ public class Window {
 
     private long window = -1;
     private final boolean vSync;
-
-    private static final Logger log = LoggerFactory.createLogger(Window.class);
 
     @Inject
     public Window(EngineConfig config) {
@@ -46,11 +47,11 @@ public class Window {
         this.vSync = vSync;
     }
 
-    public void init() {
+    public void init(Graphics graphics) {
         log.info("Window initialization started");
         if (window != -1) return;
 
-        GLFW.glfwSetErrorCallback((code, message) -> log.log(Level.SEVERE, "err_code 0x%08X: %s ", new Object[]{code, message}));
+        GLFW.glfwSetErrorCallback((code, message) -> log.error(String.format("err_code 0x%08X: %s ", code, message)));
 
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
@@ -73,8 +74,7 @@ public class Window {
         GLFW.glfwSetKeyCallback(window, new Input.KeyboardInput());
         GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
         GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
-        GLFW.glfwSetWindowSizeCallback(window, (window, width, height) -> new CameraControlsSystem.WindowSizeCallback(null));
-
+        GLFW.glfwSetWindowSizeCallback(window, new CameraControlsSystem.WindowSizeCallback(graphics));
 
 
 //        GLFW.glfwSetWindowRefreshCallback(window, new GLFWWindowRefreshCallback() {
@@ -128,7 +128,7 @@ public class Window {
         log.info("Window initialization ended");
     }
 
-    public void destroy() {
+    public void destroy(Graphics graphics) {
         log.info("Window destruction process started");
 
         if (window == -1) return;

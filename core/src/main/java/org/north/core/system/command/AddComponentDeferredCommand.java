@@ -2,11 +2,11 @@ package org.north.core.system.command;
 
 import org.north.core.component.Component;
 import org.north.core.architecture.entity.Entity;
-import org.north.core.managment.SystemManager;
+import org.north.core.management.SystemManager;
 
 public class AddComponentDeferredCommand implements DeferredCommand {
-    public final Entity entity;
-    public final Component component;
+    private final Entity entity;
+    private final Component component;
 
     public AddComponentDeferredCommand(Entity entity, Component component) {
         this.entity = entity;
@@ -19,5 +19,15 @@ public class AddComponentDeferredCommand implements DeferredCommand {
     }
 
     @Override
-    public CommandType getType() { return CommandType.ADD_COMPONENT; }
+    public CommandType getType() {
+        return CommandType.ADD_COMPONENT;
+    }
+
+    @Override
+    public String toString() {
+        return "AddComponentDeferredCommand{" +
+                "entity=" + entity +
+                ", component=" + component +
+                '}';
+    }
 }

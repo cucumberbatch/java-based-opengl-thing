@@ -1,4 +1,4 @@
-package org.north.core.managment.factory;
+package org.north.core.management.factory;
 
 public interface IFactory<T> {
     T create();
