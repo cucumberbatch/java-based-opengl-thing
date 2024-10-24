@@ -1,17 +1,15 @@
 package org.north.core.editor.ui;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.north.core.architecture.entity.Entity;
-import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.util.AbstractList;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class EntityTreeModel implements TreeModel {
-    private final Logger log = LoggerFactory.createLogger(EntityTreeModel.class);
+    private final Logger log = LogManager.getLogger();
     private final Entity root;
 
     public EntityTreeModel(Entity root) {

@@ -6,9 +6,7 @@
 
     <appenders>
         <Console name="CONSOLE">
-            <PatternLayout header="%blue{[debug build ver:0.0.001]\n}"
-                           footer="footer"
-                           pattern="%cyan{%d{ABSOLUTE_MICROS}} [%t] %highlight{%5p} %24style{%c{1.}} - %m%n"/>
+            <PatternLayout pattern="%cyan{%d{ABSOLUTE_MICROS}} [%t] %highlight{%5p} %24style{%c{1.}} - %m%n"/>
         </Console>
     </appenders>
 

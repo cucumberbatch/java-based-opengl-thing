@@ -1,14 +1,14 @@
 package org.north.core.utils;
 
-import org.north.core.utils.logger.LoggerFactory;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Stopwatch {
     private static final LongStack NANO_TIME_STACK = new LongStack();
-    private static final Logger log = LoggerFactory.createLogger(Stopwatch.class);
+    private static final Logger log = LogManager.getLogger();
 
     public static void start() {
         NANO_TIME_STACK.push(System.nanoTime());
@@ -16,7 +16,7 @@ public class Stopwatch {
 
     public static void stop(String messageTemplate) {
         float diffMillis = (float) (System.nanoTime() - NANO_TIME_STACK.pop()) / 1_000_000L;
-        log.log(Level.INFO, "Stopwatch: %.3f[ms] %s", new Object[]{diffMillis, messageTemplate});
+        log.printf(Level.INFO, "Stopwatch: %.3f[ms] %s", diffMillis, messageTemplate);
     }
 
     public static class LongStack {

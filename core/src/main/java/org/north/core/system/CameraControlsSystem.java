@@ -307,7 +307,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         @Override
         public void invoke(long window, int width, int height) {
-            log.info("window size: " + window + " : " + height);
+            log.info("window size = {}w : {}h", width, height);
 
             camera.ratio = (float) width / height;
             CameraSystem.PERSPECTIVE_MATRIX = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
@@ -317,7 +317,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
             else if (ProjectionState.ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;
 
             GL30.glViewport(0, 0, width, height);
-            java.lang.System.out.printf("Aspect ratio: %f width: %s height: %s\n", camera.ratio, width, height);
+            log.info("Aspect ratio: {} width: {} height: {}", camera.ratio, width, height);
         }
     }
 }

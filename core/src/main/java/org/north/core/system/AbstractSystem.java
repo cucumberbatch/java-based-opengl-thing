@@ -1,5 +1,7 @@
 package org.north.core.system;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
@@ -9,14 +11,12 @@ import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.management.memory.Pool;
 import org.north.core.management.memory.Vector3fPool;
-import org.north.core.utils.logger.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
 
-    protected static final Logger log = LoggerFactory.createLogger(AbstractSystem.class);
+    protected static final Logger log = LogManager.getLogger();
 
     // map for storing componentId-to-component pair
     private final Map<UUID, E> componentMap = new HashMap<>();

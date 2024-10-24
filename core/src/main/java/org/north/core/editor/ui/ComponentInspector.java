@@ -1,9 +1,10 @@
 package org.north.core.editor.ui;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Component;
 import org.north.core.editor.EditorUtils;
-import org.north.core.utils.logger.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -14,10 +15,9 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Logger;
 
 public class ComponentInspector extends JFrame {
-    private final Logger log = LoggerFactory.createLogger(ComponentInspector.class);
+    private final Logger log = LogManager.getLogger();
 
     private Entity rootEntityNode;
 
