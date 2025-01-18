@@ -29,6 +29,7 @@ public class Graphics {
     private final Map<String, Integer> uniformLocationCache = new HashMap<>();
     private int activeTextureCount;
     private final int[] activeTextureBuff = new int[4];
+    private int enabledShaderId;
 
     @Inject
     public Graphics(Window window) {
@@ -208,8 +209,11 @@ public class Graphics {
     }
 
     public void enable(Shader shader) {
-        GL20.glUseProgram(shader.getId());
-        shader.enable();
+        if (enabledShaderId != shader.getId()) {
+            GL20.glUseProgram(shader.getId());
+            shader.enable();
+        }
+        enabledShaderId = shader.getId();
     }
 
     public void disable(Shader shader) {
