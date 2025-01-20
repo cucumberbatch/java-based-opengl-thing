@@ -3,6 +3,7 @@ package org.north.core.scene;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.architecture.tree.v2.TreeNode;
@@ -21,6 +22,41 @@ public class DefaultSceneComposer implements SceneComposer {
 //        initReferenceScene(sceneRoot, cm);
         testScene(sceneRoot, cm);
 //        initSpaceshipOnScreen(sceneRoot, cm);
+//        testManyTransparentCubesGrid(sceneRoot, cm);
+    }
+
+    private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {
+        GL30.glClearColor(.1f, .1f, .1f, 1f);
+
+        Entity camera = new Entity("camera");
+        cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
+        root.add(camera);
+
+        int N = 16;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                for (int k = 0; k < N; k++) {
+                    Entity cube = new Entity("cube_" + i + "_" + j + "_" + k);
+                    final float x = i;
+                    final float z = j;
+                    final float y = k;
+                    cm.take(cube).addAndPerform(Transform.class, transform -> {
+                        transform.moveTo(0.5f * x, 0.5f * y, 0.5f * z);
+                        transform.rescaleTo(0.4999f, 0.4999f, 0.4999f);
+                    });
+
+                    cm.take(cube).addAndPerform(MeshRenderer.class, meshRenderer -> {
+                        meshRenderer.shader = new SimpleColorShader();
+                        meshRenderer.mesh = PredefinedMeshes.CUBE;
+                        meshRenderer.color.set(0, 0, 0, 0f);
+                    });
+
+                    cm.take(cube).add(CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
+
+                    root.add(cube);
+                }
+            }
+        }
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
