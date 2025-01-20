@@ -219,5 +219,6 @@ public class Graphics {
     public void disable(Shader shader) {
         GL20.glUseProgram(0);
         shader.disable();
+        enabledShaderId = -1;
     }
 }
