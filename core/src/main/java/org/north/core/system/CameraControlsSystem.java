@@ -251,7 +251,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
-        cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 1.3f : 1f;
+        cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 4.7f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
 
@@ -307,8 +307,11 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         @Override
         public void invoke(long window, int width, int height) {
-            log.info("window size = {}w : {}h", width, height);
+            //todo: something is wrong there, maybe the first frame rendering goes faster than components initialization
+            if (camera == null) return;
+            assert camera != null : "camera reference is null, cannot properly resize window";
 
+            log.info("window size = {}w : {}h", width, height);
             camera.ratio = (float) width / height;
             CameraSystem.PERSPECTIVE_MATRIX = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
             CameraSystem.ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1, 1, -1, 1);
