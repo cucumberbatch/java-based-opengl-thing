@@ -38,6 +38,7 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
+import static org.north.core.system.Pipeline.UpdateFlowState.*;
 
 public class Pipeline implements ISystem, Runnable {
     private static final Logger log = LogManager.getLogger();
@@ -52,10 +53,13 @@ public class Pipeline implements ISystem, Runnable {
     private final TreeNode<Entity> rootNode;
 
     private final boolean editorEnabled;
+    private final boolean smoothStopAndStartUpdateProcess;
 
     private Scene scene;
 
-    private boolean isUpdatePaused = false;
+    enum UpdateFlowState { RUNNING, STOPPED, RUN_TO_STOP, STOP_TO_RUN }
+
+    private UpdateFlowState updateFlowState = RUNNING;
     private final boolean load = false;
     private boolean stopped = false;
 
@@ -70,6 +74,9 @@ public class Pipeline implements ISystem, Runnable {
 
         this.editorEnabled =
                 ApplicationProperties.getBoolean("application.editor.enabled");
+
+        this.smoothStopAndStartUpdateProcess =
+                ApplicationProperties.getBoolean("application.editor.process.update.smooth-stop-and-start");
 
         try {
             this.rootNode =
@@ -118,6 +125,10 @@ public class Pipeline implements ISystem, Runnable {
         });
     }
 
+    final int maxCountedFrames = 120;
+    int fpsAverageCount = 0;
+    int countedFrames = 0;
+
     public synchronized void tick() {
         timingContext.updateTiming();
         final float elapsedTime = timingContext.getElapsedTime();
@@ -143,6 +154,14 @@ public class Pipeline implements ISystem, Runnable {
 //            renderGUI(window);
 
         timingContext.sync();
+        countedFrames++;
+        fpsAverageCount += timingContext.getActualFrameRate();
+
+        if (countedFrames > maxCountedFrames) {
+            log.info("Average FPS: {}", fpsAverageCount / maxCountedFrames);
+            fpsAverageCount = 0;
+            countedFrames = 0;
+        }
     }
 
     public void stop() {
@@ -194,7 +213,25 @@ public class Pipeline implements ISystem, Runnable {
         input.updateInput();
 
         if (input.isHeld(GLFW.GLFW_KEY_P)) {
-            isUpdatePaused = !isUpdatePaused;
+            if (updateFlowState.equals(RUNNING)) {
+                if (smoothStopAndStartUpdateProcess) {
+                    updateFlowState = RUN_TO_STOP;
+                } else {
+                    updateFlowState = STOPPED;
+                    runFactor = 0;
+                }
+            } else if (updateFlowState.equals(STOPPED)) {
+                if (smoothStopAndStartUpdateProcess) {
+                    updateFlowState = STOP_TO_RUN;
+                } else {
+                    updateFlowState = RUNNING;
+                    runFactor = 1;
+                }
+            } else if (updateFlowState.equals(RUN_TO_STOP)) {
+                updateFlowState = STOP_TO_RUN;
+            } else {
+                updateFlowState = RUN_TO_STOP;
+            }
             input.heldKeys.set(GLFW.GLFW_KEY_P, false);
         }
     }
@@ -319,6 +356,8 @@ public class Pipeline implements ISystem, Runnable {
                (previousFrameCollision.getA() == B && previousFrameCollision.getB() == A);
     }
 
+    float runFactor = 1;
+
     //todo: performance
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -326,8 +365,27 @@ public class Pipeline implements ISystem, Runnable {
 //        Stopwatch.start();
         glfwPollEvents();
 
+        float modifiedDeltaTime = deltaTime;
+
+        if (updateFlowState.equals(RUN_TO_STOP)) {
+            runFactor = runFactor - runFactor * deltaTime * 5;
+            modifiedDeltaTime = deltaTime * runFactor;
+            if (runFactor < 0.01f) {
+                runFactor = 0;
+                updateFlowState = STOPPED;
+            }
+        } else if (updateFlowState.equals(STOP_TO_RUN)) {
+            runFactor = runFactor + (1 - runFactor) * deltaTime * 5;
+            modifiedDeltaTime = deltaTime * runFactor;
+            if (runFactor > 0.98f) {
+                runFactor = 1;
+                updateFlowState = RUNNING;
+            }
+        }
+
         for (UpdateProcess process : systemManager.getProcessList(UpdateProcess.class)) {
-            if (isUpdatePaused && !CameraControlsSystem.class.isAssignableFrom(process.getClass())) continue;
+            boolean isCameraControlsSystem = CameraControlsSystem.class.isAssignableFrom(process.getClass());
+            if (updateFlowState.equals(STOPPED) && !isCameraControlsSystem) continue;
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -339,7 +397,11 @@ public class Pipeline implements ISystem, Runnable {
 //                            component.getEntity().getName())
 //                    );
                     try {
-                        process.update(component, deltaTime);
+                        if (isCameraControlsSystem) {
+                            process.update(component, deltaTime);
+                        } else {
+                            process.update(component, modifiedDeltaTime);
+                        }
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
                         component.setState(ComponentState.READY_TO_INIT_STATE);
