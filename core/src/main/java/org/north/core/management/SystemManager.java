@@ -17,6 +17,7 @@ import org.north.core.system.System;
 import org.north.core.system.command.DeferredCommand;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.Process;
+import org.north.core.system.process.RenderProcess;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,22 +43,19 @@ public class SystemManager implements Resettable {
         scanner = new ComponentHandlerScanner();
         cameraDistanceComparator = new EntityDistanceToCameraComparator();
         deferredCommands = new LinkedList<>();
-        componentToSystemAssociations = new HashMap<>();
+        componentToSystemAssociations = new IdentityHashMap<>();
         collisions = new ArrayList<>();
         systemList = new ArrayList<>();
-        systemMap = new HashMap<>();
-        processMap = new HashMap<>();
+        systemMap = new IdentityHashMap<>();
+        processMap = new IdentityHashMap<>();
 
         initProcessMap(ApplicationProperties.getProperty("process.package"));
         loadComponentSystemsFromPackage(ApplicationProperties.getProperty("system.package"));
     }
 
+    @SuppressWarnings("unchecked")
     public <ProcessType extends Process> List<ProcessType> getProcessList(Class<ProcessType> processTypeClass) {
-        List<ProcessType> processList = new ArrayList<>();
-        for (Process process : processMap.get(processTypeClass)) {
-            processList.add(processTypeClass.cast(process));
-        }
-        return processList;
+        return (List<ProcessType>) processMap.get(processTypeClass);
     }
 
     private void loadComponentSystemsFromPackage(String packagePath) {
@@ -108,14 +106,15 @@ public class SystemManager implements Resettable {
     @SuppressWarnings("unchecked")
     public <ComponentInstance extends Component> ComponentInstance addComponent(ComponentInstance component) {
         Class<? extends Component> componentClass = component.getClass();
+        System<?> system;
 
         // initialize system if it is not
-        if (systemMap.get(componentClass) == null) {
+        if ((system = systemMap.get(componentClass)) == null) {
             try {
                 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
                 Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
                 if (systemClass == null) return null;
-                System<?> system = applicationContext.addDependency(systemClass);
+                system = applicationContext.addDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
                 attachToSystemLists(system);
@@ -126,12 +125,11 @@ public class SystemManager implements Resettable {
         }
 
         // change state if it has no init process
-        Class<?> system = systemMap.get(component.getClass()).getClass();
-        if (!InitProcess.class.isAssignableFrom(system)) {
+        if (!InitProcess.class.isAssignableFrom(system.getClass())) {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
 
-        return (ComponentInstance) systemMap.get(componentClass).addComponent(component);
+        return (ComponentInstance) system.addComponent(component);
     }
 
     @SuppressWarnings("unchecked")
@@ -145,11 +143,23 @@ public class SystemManager implements Resettable {
         throw new ComponentNotFoundException(componentId);
     }
 
-    public void sortComponentsByDistanceToCamera(List<? extends Component> components) {
-        if (camera == null) return;
-        if (!cameraDistanceComparator.isCameraSet()) cameraDistanceComparator.setCamera(camera);
+    private Map<RenderProcess<?>, List<? extends Component>> scm = new IdentityHashMap<>();
+
+    public List<? extends Component> sortComponentsByDistanceToCamera(RenderProcess<?> process) {
+        if (camera == null) return Collections.emptyList();
+        if (!cameraDistanceComparator.isCameraSet()) cameraDistanceComparator.setCameraPosition(camera.getTransform().getPosition());
+
+        List<? extends Component> components;
+        if (scm.containsKey(process)) {
+            components = scm.get(process);
+        } else {
+            System<? extends Component> system = (System<? extends Component>) process;
+            components = system.getComponentList();
+            scm.put(process, components);
+        }
 
         components.sort(cameraDistanceComparator);
+        return components;
     }
 
     public void addDeferredCommand(DeferredCommand command) {
@@ -157,9 +167,10 @@ public class SystemManager implements Resettable {
     }
 
     public void applyDeferredCommands() {
+        if (deferredCommands.isEmpty()) return;
         for (DeferredCommand command : deferredCommands) {
             command.execute(this);
-            log.info("executed deferred command: {}", command);
+//            log.info("executed deferred command: {}", command);
         }
         deferredCommands.clear();
     }
@@ -172,25 +183,23 @@ public class SystemManager implements Resettable {
     }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
+        private Vector3f cameraPosition;
 
-        private final Vector3f temp1 = new Vector3f();
-        private final Vector3f temp2 = new Vector3f();
-        private Camera camera;
-
-        public void setCamera(Camera camera) {
-            this.camera = camera;
+        //note: we need to be careful because of passing a reference to camera position only once at the start of Camera component life,
+        // so if we accidentally replace Transform.position vec instance we loose all position changes and scene will be rendered in wrong order
+        public void setCameraPosition(Vector3f cameraPosition) {
+            this.cameraPosition = cameraPosition;
         }
 
         public boolean isCameraSet() {
-            return this.camera != null;
+            return this.cameraPosition != null;
         }
 
         @Override
         public int compare(Component o1, Component o2) {
-            Vector3f cameraPosition = camera.getTransform().getGlobalPosition(temp1);
-            float o1Distance = o1.getTransform().getGlobalPosition(temp2).distance(cameraPosition);
-            float o2Distance = o2.getTransform().getGlobalPosition(temp2).distance(cameraPosition);
-            return (int) ((o2Distance - o1Distance) * 100f);
+            float o1Distance = o1.getTransform().cachedGlobalPosition.distance(cameraPosition);
+            float o2Distance = o2.getTransform().cachedGlobalPosition.distance(cameraPosition);
+            return Float.compare(o2Distance, o1Distance);
         }
     }
 

@@ -182,14 +182,17 @@ public class Pipeline implements ISystem, Runnable {
         //    if (systemManager.hasNoComponentsToInit()) return;
         //
 
+        boolean hasComponentsToInit = false;
+        Stopwatch.start();
         for (InitProcess process : systemManager.getProcessList(InitProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
                 if (component.inState(ComponentState.READY_TO_INIT_STATE)) {
-                    log.info("Handling init component [{}: {}]",
-                            system.getClass().getName(), component.getEntity().getName());
+                    hasComponentsToInit = true;
+//                    log.info("Handling init component [{}: {}]",
+//                            system.getClass().getName(), component.getEntity().getName());
                     try {
                         process.init(component);
                         component.setState(ComponentState.READY_TO_OPERATE_STATE);
@@ -207,6 +210,9 @@ public class Pipeline implements ISystem, Runnable {
                 }
             }
         }
+
+        if (hasComponentsToInit) Stopwatch.stop("Handled init process");
+        else                     Stopwatch.reset();
     }
 
     public void updateInput() {
@@ -497,13 +503,11 @@ public class Pipeline implements ISystem, Runnable {
 
 //        Stopwatch.start();
 
+        //fixme: no way it's a good approach to render things on screen because of different systems on which we iterate,
+        // which means that components of different render groups would be sorted only in certain group,
+        // not in the whole world context, so it can cause a lot of graphical bugs for more than one render system
         for (RenderProcess process : systemManager.getProcessList(RenderProcess.class)) {
-            System<? extends Component> system = (System<? extends Component>) process;
-            List<? extends Component> components = system.getComponentList();
-            systemManager.sortComponentsByDistanceToCamera(components);
-            if (MeshRendererSystem.class.isAssignableFrom(system.getClass())) {
-                // Logger.debug("rendering order: " + components.stream().map(component -> component.getEntity().getName()).collect(Collectors.toList()));
-            }
+            List<? extends Component> components = systemManager.sortComponentsByDistanceToCamera(process);
             for (Component component : components) {
                 if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     // Logger.trace(String.format(

@@ -18,6 +18,8 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
     private Vector3f rotation = new Vector3f(0, 0, 0);
     private Vector3f scale    = new Vector3f(1, 1, 1);
 
+    public Vector3f cachedGlobalPosition = getGlobalPosition(new Vector3f());
+
     private static final MovementListener EMPTY_MOVEMENT_LISTENER = (e, p1, p2) -> {};
 
     private MovementListener movementListener = EMPTY_MOVEMENT_LISTENER;
@@ -39,6 +41,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
             movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position));
         }
         this.position.set(position);
+        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
     }
 
     public void moveTo(float x, float y, float z) {
@@ -46,6 +49,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
             movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z));
         }
         this.position.set(x, y, z);
+        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
     }
 
     public void moveRel(Vector3f position) {
@@ -53,6 +57,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
             movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position).add(this.position));
         }
         this.position.add(position);
+        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
     }
 
     public void moveRel(float x, float y, float z) {
@@ -60,6 +65,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
             movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
         }
         this.position.add(x, y, z);
+        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
     }
 
     public void rescaleTo(Vector3f scale) {
@@ -133,7 +139,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
         for (Transform it = this; it != null; it = it.parent) {
             gTransform.position.add(it.position);
             gTransform.rotation.add(it.rotation);
-            gTransform.scale.set(gTransform.scale.x * it.scale.x, gTransform.scale.y * it.scale.y, gTransform.scale.z * it.scale.z);
+            gTransform.scale.mul(it.scale);
         }
         return gTransform;
     }

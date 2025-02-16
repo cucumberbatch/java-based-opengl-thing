@@ -118,7 +118,7 @@ public class ComponentManager {
         try {
             return componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(String.format("Failed to instantiate component of %s through reflections", componentClass), e);
         }
     }
 

@@ -20,6 +20,7 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     // map for storing componentId-to-component pair
     private final Map<UUID, E> componentMap = new HashMap<>();
+    private final Collection<E> mapValues = componentMap.values();
 
     protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
@@ -43,17 +44,17 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     @Override
     public final Iterator<E> getComponentIterator() {
-        return componentMap.values().iterator();
+        return mapValues.iterator();
     }
 
     @Override
     public final List<E> getComponentList() {
-        return new ArrayList<>(componentMap.values());
+        return new ArrayList<>(mapValues);
     }
 
     @Override
     public Collection<E> getComponentUnmodifiableCollection() {
-        return Collections.unmodifiableCollection(componentMap.values());
+        return Collections.unmodifiableCollection(mapValues);
     }
 
     @Override

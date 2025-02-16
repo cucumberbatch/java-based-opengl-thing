@@ -14,6 +14,10 @@ public class Stopwatch {
         NANO_TIME_STACK.push(System.nanoTime());
     }
 
+    public static void reset() {
+        NANO_TIME_STACK.pop();
+    }
+
     public static void stop(String messageTemplate) {
         float diffMillis = (float) (System.nanoTime() - NANO_TIME_STACK.pop()) / 1_000_000L;
         log.printf(Level.INFO, "Stopwatch: %.3f[ms] %s", diffMillis, messageTemplate);

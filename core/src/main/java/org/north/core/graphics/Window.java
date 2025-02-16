@@ -16,6 +16,7 @@ import org.north.core.reflection.di.Inject;
 import org.north.core.system.CameraControlsSystem;
 import org.north.core.system.Input;
 import org.north.core.system.Pipeline;
+import org.north.core.utils.Stopwatch;
 
 import java.nio.IntBuffer;
 
@@ -48,7 +49,7 @@ public class Window {
     }
 
     public void init(Graphics graphics) {
-        log.info("Window initialization started");
+        Stopwatch.start();
         if (window != -1) return;
 
         GLFW.glfwSetErrorCallback((code, message) -> log.error(String.format("err_code 0x%08X: %s ", code, message)));
@@ -99,7 +100,7 @@ public class Window {
             // Center the window
             GLFW.glfwSetWindowPos(
                     window,
-                    (videoMode.width() - pWidth.get(0)) / 2,
+                    (videoMode.width() - pWidth.get(0)) / 2 * 8 / 5,
                     (videoMode.height() - pHeight.get(0)) / 2
             );
         }
@@ -125,7 +126,7 @@ public class Window {
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE);
 
-        log.info("Window initialization ended");
+        Stopwatch.stop("Window initialization completed");
     }
 
     public void destroy(Graphics graphics) {

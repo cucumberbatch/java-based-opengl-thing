@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-// todo: automate "component-to-system" association with annotation processors and reflections
 public interface System<E extends Component> extends Resettable {
     Iterator<E> getComponentIterator();
     List<E> getComponentList();

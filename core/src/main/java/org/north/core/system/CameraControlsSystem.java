@@ -27,7 +27,7 @@ import static java.lang.Math.PI;
 
 @ComponentHandler(CameraControls.class)
 public class CameraControlsSystem extends AbstractSystem<CameraControls>
-        implements InitProcess<CameraControls>, InputHandleProcess<CameraControls>, UpdateProcess<CameraControls>, RenderProcess<CameraControls> {
+        implements InitProcess<CameraControls>, InputHandleProcess<CameraControls>, UpdateProcess<CameraControls> { //}, RenderProcess<CameraControls> {
 
     private static final float MAX_CAMERA_ANGLE = 89.986f;
 
@@ -109,10 +109,10 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         updateCameraMovement(cameraControls, deltaTime);
     }
 
-    @Override
-    public void render(CameraControls cameraControls, Graphics graphics) {
-
-    }
+//    @Override
+//    public void render(CameraControls cameraControls, Graphics graphics) {
+//
+//    }
 
     private ProjectionState lastProjectionStateBeforeFocusLoss = ProjectionState.PERSPECTIVE_VIEW_STATE;
 
@@ -232,52 +232,57 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private void updateCameraMovement(CameraControls cameraControls, float deltaTime) {
         if (!mouseCaptured) return;
 
-        Vector3f temp = vector3fPool.get();
-        Vector3f temp2 = vector3fPool.get();
+        Vector2f cursorPosition  = lastCursorPosition;
+        cursorPositionDifference = new Vector2f(cursorPosition)       .sub(previousCursorPosition);
+        virtualCursorPosition    = new Vector2f(virtualCursorPosition).add(cursorPositionDifference);
+        previousCursorPosition   = cursorPosition;
 
-        Vector2f cursorPosition = lastCursorPosition;
-        cursorPositionDifference = new Vector2f(cursorPosition).sub(previousCursorPosition);
-        virtualCursorPosition = new Vector2f(virtualCursorPosition).add(cursorPositionDifference);
-        previousCursorPosition = cursorPosition;
-
-        float verticalAngle = virtualCursorPosition.y / (graphics.window.getWidth() / 256f) - 180;
+        float verticalAngle   =  virtualCursorPosition.y / (graphics.window.getWidth() / 256f) - 180;
         float horizontalAngle = -virtualCursorPosition.x / (graphics.window.getWidth() / 256f) - 180;
 
         verticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
 
-
-        Vector3f point = temp.set(0f, 0f, 1f)
+        Vector3f point = vector3fPool.get().set(0f, 0f, 1f)
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
         cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 4.7f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
+        Vector3f vec3f = vector3fPool.get();
 
         // up-down movement
         // note: incorrect
         if (keyQIsHeld) {
-            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point)
+                    .normalize()
+                    .rotateX((float) Math.toRadians(horizontalAngle))
+                    .rotateY((float) Math.toRadians(verticalAngle))
+                    .mul(-deltaTime * cameraMovementSpeed));
         }
         if (keyEIsHeld) {
-            componentTransform.moveRel(temp2.set(point).normalize().rotateX((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point)
+                    .normalize()
+                    .rotateX((float) Math.toRadians(horizontalAngle))
+                    .rotateY((float) Math.toRadians(verticalAngle))
+                    .mul(deltaTime * cameraMovementSpeed));
         }
 
         // left-right movement
         if (keyDIsHeld) {
-            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(-deltaTime * cameraMovementSpeed));
         }
         if (keyAIsHeld) {
-            componentTransform.moveRel(temp2.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point.x, 0f, point.z).normalize().rotateY((float) Math.toRadians(90f)).mul(deltaTime * cameraMovementSpeed));
         }
 
         // forward-backward movement
         if (keyWIsHeld) {
-            componentTransform.moveRel(temp2.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point).normalize().mul(deltaTime * cameraMovementSpeed));
         }
         if (keySIsHeld) {
-            componentTransform.moveRel(temp2.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
+            componentTransform.moveRel(vec3f.set(point).normalize().mul(-deltaTime * cameraMovementSpeed));
         }
 
         // todo: something wrong with projection when position point is not (0, 0, 0)
@@ -286,10 +291,10 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         camera.eye.set(componentTransform.getPosition());
         camera.at.set(point.add(componentTransform.getPosition()));
 
-        camera.viewMatrix.identity().lookAt(camera.eye, camera.at, temp2.set(0f, 1f, 0f));
+        camera.viewMatrix.identity().lookAt(camera.eye, camera.at, vec3f.set(0f, 1f, 0f));
 
-        vector3fPool.put(temp2);
-        vector3fPool.put(temp);
+        vector3fPool.put(vec3f);
+        vector3fPool.put(point);
 
         graphics.view = camera.viewMatrix;
     }

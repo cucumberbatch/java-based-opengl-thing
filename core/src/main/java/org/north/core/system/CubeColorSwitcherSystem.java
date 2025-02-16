@@ -3,12 +3,9 @@ package org.north.core.system;
 import org.joml.Vector4f;
 import org.north.core.component.CubeColorSwitcher;
 import org.north.core.component.MeshRenderer;
-import org.north.core.component.MovementComponent;
-import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
 import java.util.Random;
@@ -17,7 +14,8 @@ import java.util.Random;
 public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> implements UpdateProcess<CubeColorSwitcher> {
     private final Random rnd = new Random();
     private static final float MAX_ACC_VALUE = 1.2f;
-    private static final Vector4f targetVec = new Vector4f(1f, 1f, 1f, 0.0125f);
+    private static final Vector4f turnedOffCubeColor = new Vector4f(1f, 1f, 1f, 0.0125f);
+    private static final Vector4f turnedOnCubeColor = new Vector4f(0f, 0f, 0f, .01f);
 
     @Inject
     public CubeColorSwitcherSystem(ApplicationContext context) {
@@ -36,13 +34,16 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
 //            float r = rnd.nextFloat();
 //            float g = rnd.nextFloat();
 //            float b = rnd.nextFloat();
-            renderer.color.set(0, 0, 0, .01f);
+            renderer.color.set(turnedOnCubeColor);
             component.acc = 0f;
             component.switched = true;
+        } else if (component.acc > MAX_ACC_VALUE * ((float) 8 / 9)) {
+            // a bit of smoothness
+            renderer.color.lerp(turnedOnCubeColor, deltaTime * 10);
         } else if (component.switched) {
 //            Vector4f color = renderer.color;
 //            renderer.color.set(color.x,color.y, color.z, color.w * 0.786f);
-            renderer.color.lerp(targetVec, deltaTime * 10);
+            renderer.color.lerp(turnedOffCubeColor, deltaTime * 10);
 //            renderer.color.set(targetVec);
 
 //            Transform transform = component.getTransform();

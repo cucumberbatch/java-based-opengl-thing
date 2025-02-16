@@ -20,9 +20,9 @@ public class DefaultSceneComposer implements SceneComposer {
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
 //        initCubeAndCamera(sceneRoot, cm);
 //        initReferenceScene(sceneRoot, cm);
-        testScene(sceneRoot, cm);
+//        testScene(sceneRoot, cm);
 //        initSpaceshipOnScreen(sceneRoot, cm);
-//        testManyTransparentCubesGrid(sceneRoot, cm);
+        testManyTransparentCubesGrid(sceneRoot, cm);
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {
@@ -54,6 +54,7 @@ public class DefaultSceneComposer implements SceneComposer {
                     cm.take(cube).add(CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
 
                     root.add(cube);
+//                    root = cube;
                 }
             }
         }
