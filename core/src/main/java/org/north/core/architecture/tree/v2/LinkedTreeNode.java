@@ -72,6 +72,14 @@ public abstract class LinkedTreeNode<Node extends LinkedTreeNode<Node>> implemen
     }
 
     @Override
+    public int size() {
+        final int[] counter = new int[]{0};
+        traversePreorder(node -> counter[0]++);
+        return counter[0];
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public boolean add(Node subtree) {
         if (subtree == null) {
             return false;
@@ -85,8 +93,7 @@ public abstract class LinkedTreeNode<Node extends LinkedTreeNode<Node>> implemen
             }
             daughter.setNextSibling(subtree);
         }
-        @SuppressWarnings("unchecked") Node parent = (Node) this;
-        subtree.setParent(parent);
+        subtree.setParent((Node) this);
         return true;
     }
 

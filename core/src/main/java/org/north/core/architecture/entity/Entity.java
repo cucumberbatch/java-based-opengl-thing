@@ -60,7 +60,7 @@ public class Entity
     }
 
     public Entity getByName(String name) {
-        return super.find(node -> node.getName().equals(name));
+        return super.findFirst(node -> node.getName().equals(name));
     }
 
     @Override

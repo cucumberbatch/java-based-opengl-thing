@@ -48,6 +48,10 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
      */
     Node getPreviousSibling(Node subtree);
 
+    /**
+     * Returns a reference to the left most daughter node from this node subtree
+     * @return {@link Node} of the left most daughter node, {@code null} - if this node have no daughter nodes
+     */
     Node getLeftMostDaughter();
 
     /**
@@ -98,11 +102,7 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
      * Returns the size of the subtree rooted at the current node
      * @return size of a subtree
      */
-    default int size() {
-        final int[] counter = new int[]{0};
-        traversePreorder(node -> counter[0]++);
-        return counter[0];
-    }
+    int size();
 
     /**
      * Checks whether there is a parent node for the specified node
@@ -142,10 +142,19 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         return subtree != null && this.isAncestorOf(subtree);
     }
 
-    default Node find(Predicate<Node> predicate) {
+    /**
+     * Returns first occurance of node which was accepted by provided {@code predicate} filter
+     * @param predicate a filter predicate
+     * @return the first found element that was accepted by provided filter or {@code null} if there is no such element
+     * @throws NullPointerException if the specified {@code predicate} is null
+     */
+    @SuppressWarnings("unchecked")
+    default Node findFirst(Predicate<Node> predicate) {
+        if (predicate == null)
+            throw new NullPointerException("Predicate must not be null!");
+
         Deque<Node> stack = new ArrayDeque<>();
-        @SuppressWarnings("unchecked") Node node = (Node) this;
-        stack.push(node);
+        stack.push((Node) this);
         while (!stack.isEmpty()) {
             Node poppedNode = stack.pop();
             if (predicate.test(poppedNode))
@@ -157,8 +166,9 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     default void ascendantTraverse(Action<Node> action) {
-        @SuppressWarnings("unchecked") Node currentNode = (Node) this;
+        Node currentNode = (Node) this;
         action.execute(currentNode);
         while (!currentNode.isRoot() && !action.isStoppingConditionSatisfied()) {
             currentNode = currentNode.getParent();
@@ -166,10 +176,10 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         }
     }
 
+    @SuppressWarnings("unchecked")
     default void traversePreorder(Action<Node> action) {
         Deque<Node> stack = new ArrayDeque<>();
-        @SuppressWarnings("unchecked") Node node = (Node) this;
-        stack.push(node);
+        stack.push((Node) this);
         while (!stack.isEmpty() && !action.isStoppingConditionSatisfied()) {
             Node poppedNode = stack.pop();
             action.execute(poppedNode);
@@ -189,8 +199,8 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
         private final Deque<Node> traversalStack;
 
         public TreeNodeIterator(Node subtree) {
-            this.traversalStack = new ArrayDeque<>(subtree.size());
-            this.traversalStack.push(subtree);
+            traversalStack = new ArrayDeque<>();
+            traversalStack.push(subtree);
         }
 
         @Override
@@ -200,15 +210,14 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
 
         @Override
         public Node next() {
-            if (!hasNext()) {
+            if (!hasNext())
                 throw new NoSuchElementException();
-            }
+
             Node poppedNode = traversalStack.pop();
             for (Node descentNode : poppedNode.getSubtrees()) {
                 traversalStack.push(descentNode);
             }
             return poppedNode;
         }
-
     }
 }

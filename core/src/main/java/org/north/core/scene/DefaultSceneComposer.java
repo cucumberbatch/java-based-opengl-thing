@@ -165,7 +165,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         root.add(referenceBox);
 
-        if (root.find(entity -> entity.has(Camera.class)) == null) {
+        if (root.findFirst(entity -> entity.has(Camera.class)) == null) {
             Entity camera = new Entity("camera");
 
             cm.take(camera)
