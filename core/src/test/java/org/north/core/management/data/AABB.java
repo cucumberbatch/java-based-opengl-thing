@@ -41,4 +41,12 @@ class AABB implements AxisAlignedBoundingBox {
     public float zMax() {
         return farTopRight.z;
     }
+
+    @Override
+    public String toString() {
+        return "AABB{" +
+                "nearBottomLeft=" + nearBottomLeft +
+                ", farTopRight=" + farTopRight +
+                '}';
+    }
 }

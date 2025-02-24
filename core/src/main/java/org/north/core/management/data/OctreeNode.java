@@ -2,7 +2,15 @@ package org.north.core.management.data;
 
 import org.joml.Vector3f;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * A simple OctreeNode data structure implementation
@@ -21,23 +29,25 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
     private OctreeNode<E>   parentNode;
     private OctreeNode<E>[] childNodes;
     private List<E>         elements;
-    private byte            maxElementsCount;
-    private byte            depth;
-    private byte            maxDepth;
+    private int             maxElementsCount;
+    private int             depth;
+    private int             maxDepth;
 
     public OctreeNode(Vector3f nearBottomLeftPoint, Vector3f farTopRightPoint) {
-        this(nearBottomLeftPoint.x, farTopRightPoint.x, nearBottomLeftPoint.y, farTopRightPoint.y, nearBottomLeftPoint.z, farTopRightPoint.z, null, (byte) 0);
+        this(nearBottomLeftPoint.x, farTopRightPoint.x, nearBottomLeftPoint.y, farTopRightPoint.y, nearBottomLeftPoint.z, farTopRightPoint.z, null, 0, DEFAULT_MAX_DEPTH);
     }
 
     public OctreeNode(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
-        this(xMin, xMax, yMin, yMax, zMin, zMax, null, (byte) 0);
+        this(xMin, xMax, yMin, yMax, zMin, zMax, null, 0, DEFAULT_MAX_DEPTH);
     }
 
-    private OctreeNode(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, OctreeNode<E> parentNode, byte depth) {
+    private OctreeNode(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, OctreeNode<E> parentNode, int depth, int maxDepth) {
         setBounds(xMin, xMax, yMin, yMax, zMin, zMax);
         this.elements = new ArrayList<>(DEFAULT_DENSITY_FACTOR);
         this.parentNode = parentNode;
         this.depth = depth;
+        this.maxDepth = maxDepth;
+        this.maxElementsCount = DEFAULT_DENSITY_FACTOR;
     }
 
     /**
@@ -45,20 +55,45 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
      * @param element element to insert
      */
     public void insert(E element) {
-        if (!isLeaf()) {
-            insertElementInChildNodes(element);
-            return;
-        }
         elements.add(element);
 
-        if (depth + 1 > DEFAULT_MAX_DEPTH || elements.size() < DEFAULT_DENSITY_FACTOR)
+        if (depth == maxDepth || elements.size() < DEFAULT_DENSITY_FACTOR)
             return;
 
-        subdivide();
-        for (E e : elements)
-            insertElementInChildNodes(e);
+        if (isLeaf())
+            subdivide();
+
+        for (E e : elements) {
+            for (OctreeNode<E> node : childNodes) {
+                if (e.isIntersects(node)) {
+                    node.insert(e);
+                    if (e.isInside(node)) break;
+                }
+            }
+        }
 
         elements.clear();
+    }
+
+    private void subdivide() {
+        float xMid = (xMax + xMin) * 0.5f;
+        float yMid = (yMax + yMin) * 0.5f;
+        float zMid = (zMax + zMin) * 0.5f;
+
+        childNodes = new OctreeNode[8];
+        for (int i = 0; i < 8; i++) {
+            int xb = (X_BIT & i);
+            int yb = (Y_BIT & i) >> 1;
+            int zb = (Z_BIT & i) >> 2;
+            childNodes[i] = new OctreeNode<>(
+                    xMin * (1 ^ xb) + xMid * xb, xMid * (1 ^ xb) + xMax * xb,
+                    yMin * (1 ^ yb) + yMid * yb, yMid * (1 ^ yb) + yMax * yb,
+                    zMin * (1 ^ zb) + zMid * zb, zMid * (1 ^ zb) + zMax * zb,
+                    this,
+                    depth + 1,
+                    maxDepth
+            );
+        }
     }
 
     /**
@@ -121,48 +156,23 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
 
     private class OctreeLazyIterator implements Iterator<E> {
         private AxisAlignedBoundingBox queryBox;
-        private OctreeNode<E> currentNode;
-        private Deque<Integer> nodeIndexStack;
-        private Deque<Integer> elementIndexStack;
-        private Set<E> traversedElementsSet;
-        private E nextElement;
+        private OctreeNode<E>          currentNode;
+        private Deque<Integer>         nodeIndexStack;
+        private Deque<Integer>         elementIndexStack;
+        private Set<E>                 traversedElementsSet;
+        private E                      nextElement;
 
         private OctreeLazyIterator(AxisAlignedBoundingBox bounds) {
-            queryBox = bounds;
-            nodeIndexStack = new ArrayDeque<>(maxDepth);
-            elementIndexStack = new ArrayDeque<>(maxDepth);
+            queryBox             = bounds;
+            currentNode          = OctreeNode.this;
+            nodeIndexStack       = new ArrayDeque<>(maxDepth + 1);
+            elementIndexStack    = new ArrayDeque<>(maxDepth + 1);
             traversedElementsSet = new HashSet<>();
 
-            // iterate to the deepest node of a tree that intersects with a query,
-            // so we can start iterating from bottom to top
-            currentNode = OctreeNode.this;
-            while (!currentNode.isLeaf()) {
-                OctreeNode<E>[] nodes = currentNode.childNodes;
-                for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
-                    OctreeNode<E> node = nodes[i];
-                    if (queryBox.isIntersects(node)) {
-                        currentNode = node;
-                        nodeIndexStack.push(i);
-                        elementIndexStack.push(0);
-                        break;
-                    }
-                }
-            }
+            elementIndexStack.push(0);
+            nodeIndexStack.push(0);
 
-            int elementIndex = 0;
-            for (int elementsCount = currentNode.elements.size(); elementIndex < elementsCount; elementIndex++) {
-                E e = currentNode.elements.get(elementIndex);
-                if (queryBox.isIntersects(e)) {
-                    // when we found first element in node which intersects with query box we break the iterations,
-                    // the next elements of node will be retrieved by calling next() method of iterator
-                    nextElement = e;
-                    traversedElementsSet.add(e);
-                    break;
-                }
-            }
-
-            if (elementIndex + 1 == currentNode.elements.size())
-                elementIndexStack.pop();
+            nextElement = findNextElement();
         }
 
         @Override
@@ -172,48 +182,59 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
 
         @Override
         public E next() {
-            throw new UnsupportedOperationException("Not implemented yet :(");
-
-/*
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            E previouslyFoundElement = nextElement;
-            E nextElementCandidate = null;
-            do {
-            } while (queryBox.isIntersects(nextElementCandidate));
-
-            nextElement = nextElementCandidate;
-            return previouslyFoundElement;
-*/
+            E element = nextElement;
+            nextElement = findNextElement();
+            return element;
         }
-    }
 
-    private void subdivide() {
-        float xMid = (xMax + xMin) * 0.5f;
-        float yMid = (yMax + yMin) * 0.5f;
-        float zMid = (zMax + zMin) * 0.5f;
+        private E findNextElement() {
+            while (true) {
+                // search for elements that intersects
+                int elementsListSize = currentNode.elements.size();
+                for (int elementIndex = elementIndexStack.pop(); elementIndex < elementsListSize; elementIndex++) {
+                    E e = currentNode.elements.get(elementIndex);
+                    if (queryBox.isIntersects(e) && !traversedElementsSet.contains(e)) {
+                        nextElement = e;
+                        elementIndexStack.push(elementIndex + 1);
+                        traversedElementsSet.add(e);
+                        return e;
+                    }
+                }
+                elementIndexStack.push(maxElementsCount);
 
-        childNodes = new OctreeNode[8];
-        for (int i = 0; i < 8; i++) {
-            int xb = (X_BIT & i);
-            int yb = (Y_BIT & i) >> 1;
-            int zb = (Z_BIT & i) >> 2;
-            childNodes[i] = new OctreeNode<>(
-                    xMin * (1 ^ xb) + xMid * xb, xMid * (1 ^ xb) + xMax * xb,
-                    yMin * (1 ^ yb) + yMid * yb, yMid * (1 ^ yb) + yMax * yb,
-                    zMin * (1 ^ zb) + zMid * zb, zMid * (1 ^ zb) + zMax * zb,
-                    this,
-                    (byte) (depth + 1)
-            );
-        }
-    }
+                // we need to pull out pushed indexes that relates on this node
+                if (!currentNode.isLeaf()) {
+                    // search for child nodes of this node
+                    boolean nodeFound = false;
+                    for (int nodeIndex = nodeIndexStack.pop(); nodeIndex < 8; nodeIndex++) {
+                        OctreeNode<E> node = currentNode.childNodes[nodeIndex];
+                        if (queryBox.isIntersects(node)) {
+                            currentNode = node;
+                            nodeIndexStack.push(nodeIndex + 1);
+                            nodeIndexStack.push(0);
+                            elementIndexStack.push(0);
+                            nodeFound = true;
+                            break;
+                        }
+                    }
+                    if (nodeFound) {
+                        continue;
+                    } else {
+                        nodeIndexStack.push(8);
+                    }
+                }
 
-    private void insertElementInChildNodes(E element) {
-        for (OctreeNode<E> node : childNodes) {
-            if (element.isIntersects(node)) {
-                node.insert(element);
-                if (element.isInside(node)) break;
+                if (currentNode.isRoot()) {
+                    nextElement = null;
+                    return null;
+                } else {
+                    currentNode = currentNode.parentNode;
+                    nodeIndexStack.pop();
+                    elementIndexStack.pop();
+                }
             }
         }
     }
