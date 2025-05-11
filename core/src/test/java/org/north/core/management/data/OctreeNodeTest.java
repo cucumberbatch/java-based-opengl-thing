@@ -50,7 +50,9 @@ class OctreeNodeTest {
     @Test
     void iteratorTest() {
         OctreeNode<AxisAlignedBoundingBox> octree =
-                new OctreeNode<>(new Vector3f(0, 0, 0), new Vector3f(100, 100, 100));
+                new OctreeNode<>(new Vector3f(-1000, -1000, -1000),
+                        new Vector3f(1000,
+                                1000, 1000));
 
         AABB e1 = new AABB(new Vector3f(10, 10, 10), new Vector3f(20, 20, 20));
         AABB e2 = new AABB(new Vector3f(30, 30, 30), new Vector3f(40, 40, 40));
@@ -86,5 +88,7 @@ class OctreeNodeTest {
             resultSet.add(obj);
         }
         Assertions.assertEquals(set3, resultSet);
+
+        System.out.println("Result tree:\n" + octree);
     }
 }

@@ -1,16 +1,9 @@
 package org.north.core.management.data;
 
 import org.joml.Vector3f;
+import org.north.core.physics.collision.Collision;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A simple OctreeNode data structure implementation
@@ -55,6 +48,11 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
      * @param element element to insert
      */
     public void insert(E element) {
+        if (!isLeaf()) {
+            insertInternal(element);
+            return;
+        }
+
         elements.add(element);
 
         if (depth == maxDepth || elements.size() < DEFAULT_DENSITY_FACTOR)
@@ -63,37 +61,45 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
         if (isLeaf())
             subdivide();
 
-        for (E e : elements) {
-            for (OctreeNode<E> node : childNodes) {
-                if (e.isIntersects(node)) {
-                    node.insert(e);
-                    if (e.isInside(node)) break;
-                }
-            }
-        }
+        for (E e : elements)
+            insertInternal(e);
 
         elements.clear();
+    }
+
+    private void insertInternal(E element) {
+        for (OctreeNode<E> node : childNodes) {
+            if (element.isIntersects(node)) {
+                node.insert(element);
+                if (element.isInside(node)) break;
+            }
+        }
     }
 
     private void subdivide() {
         float xMid = (xMax + xMin) * 0.5f;
         float yMid = (yMax + yMin) * 0.5f;
         float zMid = (zMax + zMin) * 0.5f;
+        int increasedDepth = depth + 1;
 
-        childNodes = new OctreeNode[8];
-        for (int i = 0; i < 8; i++) {
-            int xb = (X_BIT & i);
-            int yb = (Y_BIT & i) >> 1;
-            int zb = (Z_BIT & i) >> 2;
-            childNodes[i] = new OctreeNode<>(
-                    xMin * (1 ^ xb) + xMid * xb, xMid * (1 ^ xb) + xMax * xb,
-                    yMin * (1 ^ yb) + yMid * yb, yMid * (1 ^ yb) + yMax * yb,
-                    zMin * (1 ^ zb) + zMid * zb, zMid * (1 ^ zb) + zMax * zb,
-                    this,
-                    depth + 1,
-                    maxDepth
-            );
-        }
+        childNodes = new OctreeNode[]{
+            new OctreeNode<E>(xMin, xMid, yMin, yMid, zMin, zMid, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMid, xMax, yMin, yMid, zMin, zMid, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMin, xMid, yMid, yMax, zMin, zMid, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMid, xMax, yMid, yMax, zMin, zMid, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMin, xMid, yMin, yMid, zMid, zMax, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMid, xMax, yMin, yMid, zMid, zMax, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMin, xMid, yMid, yMax, zMid, zMax, this,
+                    increasedDepth, maxDepth),
+            new OctreeNode<E>(xMid, xMax, yMid, yMax, zMid, zMax, this,
+                    increasedDepth, maxDepth),
+        };
     }
 
     /**
@@ -239,6 +245,31 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
         }
     }
 
+    public Collection<Collision> getAllCollisions() {
+        Collection<Collision> collisions = new ArrayList<>();
+
+        // Retrieve all elements from octree
+        Set<E> collectedElementsForColliusionCheck = new HashSet<>();
+        collectElements(this, new HashSet<>());
+
+        // Check collisions for all given elements from octree by querying each from collection
+        for (E element : collectedElementsForColliusionCheck)
+            for (E collidedElement : query(element))
+                collisions.add(new Collision(element, collidedElement, null));
+
+        return collisions;
+    }
+
+    private void collectElements(OctreeNode<E> node, Set<E> elementsSet) {
+        elementsSet.addAll(node.elements);
+
+        if (node.isLeaf())
+            return;
+
+        for (OctreeNode<E> childNode : node.childNodes)
+            collectElements(childNode, elementsSet);
+    }
+
     private void setBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
         this.xMin = xMin;
         this.xMax = xMax;
@@ -254,4 +285,32 @@ public class OctreeNode<E extends AxisAlignedBoundingBox> implements AxisAligned
     @Override public float yMax() { return yMax; }
     @Override public float zMin() { return zMin; }
     @Override public float zMax() { return zMax; }
+
+    @Override
+    public String toString() {
+        return printRecursive(this, 0, new StringBuilder("Root")).toString();
+    }
+
+    private StringBuilder printRecursive(OctreeNode<E> node, int depth,
+                                     StringBuilder buffer) {
+        if (node == null) return buffer;
+
+        // Создаем отступ
+        for (int i = 0; i < depth; i++) {
+            buffer.append("  ");
+        }
+
+        // Выводим информацию о текущем узле
+        buffer.append(": ").append((node.isLeaf() ? "Leaf\n" : "Internal\n"));
+
+        // Рекурсивно выводим детей
+        if (!node.isLeaf()) {
+            for (int i = 0; i < 8; i++) {
+                buffer.append(printRecursive(node.childNodes[i], depth + 1,
+                        buffer.append("Child ").append(i)));
+            }
+        }
+
+        return buffer;
+    }
 }

@@ -20,6 +20,7 @@ import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.management.FrameTiming;
 import org.north.core.management.SystemManager;
+import org.north.core.management.data.AxisAlignedBoundingBox;
 import org.north.core.physics.collision.Colliding;
 import org.north.core.physics.collision.Collision;
 import org.north.core.physics.collision.CollisionPair;
@@ -63,7 +64,6 @@ public class Pipeline implements ISystem, Runnable {
     private final boolean load = false;
     private boolean stopped = false;
 
-    @Inject
     public Pipeline(ApplicationContext context) {
         this.window = context.getDependency(Window.class);
         this.graphics = context.getDependency(Graphics.class);
@@ -97,11 +97,8 @@ public class Pipeline implements ISystem, Runnable {
         // Logger.info("Game loop started");
 
         // todo: load scene from file (game data deserialization)
+        scene = new Scene("test scene");
         composeScene(new DefaultSceneComposer());
-
-        if (editorEnabled) {
-            createEditorWindow();
-        }
 
         while (window.shouldNotClose() && !stopped) {
             try {
@@ -111,18 +108,6 @@ public class Pipeline implements ISystem, Runnable {
                 break;
             }
         }
-        // Logger.info("Game loop ended");
-    }
-
-    private void createEditorWindow() {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                new ComponentInspector("North component inspector", (Entity) rootNode);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     final int maxCountedFrames = 120;
@@ -140,9 +125,6 @@ public class Pipeline implements ISystem, Runnable {
 
         update(elapsedTime);
 
-//        if (editorEnabled)
-//            updateGUI(elapsedTime);
-
         registerCollisions();
         handleCollisions();
 
@@ -150,18 +132,15 @@ public class Pipeline implements ISystem, Runnable {
 
         render(window);
 
-//        if (editorEnabled)
-//            renderGUI(window);
-
         timingContext.sync();
         countedFrames++;
         fpsAverageCount += timingContext.getActualFrameRate();
 
-        if (countedFrames > maxCountedFrames) {
-            log.info("Average FPS: {}", fpsAverageCount / maxCountedFrames);
-            fpsAverageCount = 0;
-            countedFrames = 0;
-        }
+//        if (countedFrames > maxCountedFrames) {
+//            log.info("Average FPS: {}", fpsAverageCount / maxCountedFrames);
+//            fpsAverageCount = 0;
+//            countedFrames = 0;
+//        }
     }
 
     public void stop() {
@@ -260,9 +239,11 @@ public class Pipeline implements ISystem, Runnable {
         }
     }
 
-    //todo: performance
     @SuppressWarnings("unchecked")
     public void registerCollisions() {
+        systemManager.registerCollisions();
+
+        /*
         if (systemManager.getProcessList(CollisionHandlingProcess.class).isEmpty()) return;
 
 //        Stopwatch.start();
@@ -355,9 +336,11 @@ public class Pipeline implements ISystem, Runnable {
         }
 
 //        Stopwatch.stop("Collision register systems handling ended!");
+        */
+
     }
 
-    private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, Colliding A, Colliding B) {
+    private boolean isSameCollisionAsInPreviousFrame(Collision previousFrameCollision, AxisAlignedBoundingBox A, AxisAlignedBoundingBox B) {
         return (previousFrameCollision.getA() == A && previousFrameCollision.getB() == B) ||
                (previousFrameCollision.getA() == B && previousFrameCollision.getB() == A);
     }

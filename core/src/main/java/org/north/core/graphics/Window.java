@@ -10,9 +10,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
-import org.north.core.config.EngineConfig;
+import org.north.core.config.ApplicationProperties;
 import org.north.core.physics.collision.MeshMovementListener;
-import org.north.core.reflection.di.Inject;
 import org.north.core.system.CameraControlsSystem;
 import org.north.core.system.Input;
 import org.north.core.system.Pipeline;
@@ -36,9 +35,13 @@ public class Window {
     private long window = -1;
     private final boolean vSync;
 
-    @Inject
-    public Window(EngineConfig config) {
-        this(config.windowTitle, config.windowWidth, config.windowHeight, config.vsync);
+    public Window() {
+        this(
+                ApplicationProperties.getProperty("application.window.title"),
+                ApplicationProperties.getInt("application.window.width"),
+                ApplicationProperties.getInt("application.window.height"),
+                ApplicationProperties.getBoolean("application.window.vsync")
+        );
     }
 
     public Window(String title, int width, int height, boolean vSync) {

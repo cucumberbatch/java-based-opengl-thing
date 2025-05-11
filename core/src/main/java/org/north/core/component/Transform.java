@@ -2,6 +2,7 @@ package org.north.core.component;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.north.core.management.data.AxisAlignedBoundingBox;
 import org.north.core.physics.collision.MovementListener;
 
 import java.util.Iterator;
@@ -11,7 +12,7 @@ import java.util.Iterator;
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent implements Iterable<Transform> {
+public class Transform extends AbstractComponent implements Iterable<Transform>, AxisAlignedBoundingBox {
     public Transform parent;
 
     private Vector3f position = new Vector3f(0, 0, 0);
@@ -177,6 +178,39 @@ public class Transform extends AbstractComponent implements Iterable<Transform> 
                 return transform;
             }
         };
+    }
+
+    //todo: probably, in all aabb getters below we need to take a global position and scale
+    // or just use something like callbacks when entity was moved to perform octree update
+    // in a separate thread
+    @Override
+    public float xMin() {
+        return position.x - scale.x;
+    }
+
+    @Override
+    public float xMax() {
+        return position.x + scale.x;
+    }
+
+    @Override
+    public float yMin() {
+        return position.y - scale.y;
+    }
+
+    @Override
+    public float yMax() {
+        return position.y + scale.y;
+    }
+
+    @Override
+    public float zMin() {
+        return position.z - scale.z;
+    }
+
+    @Override
+    public float zMax() {
+        return position.z + scale.z;
     }
 
     /*

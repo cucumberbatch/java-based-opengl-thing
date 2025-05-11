@@ -20,8 +20,8 @@ public class SceneInitializer {
     }
 
     public void initSceneInUpdater(ComponentManager cm) {
-        scene.entities.forEach(entity -> entity.components.values()
-                .forEach(component -> cm.add(entity, component.getClass())));
+//        scene.entities.forEach(entity -> entity.components.values()
+//                .forEach(component -> cm.add(entity, component.getClass())));
     }
 
     public Transform readSceneFromFile(String filePath) {

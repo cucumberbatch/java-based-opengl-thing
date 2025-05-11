@@ -11,9 +11,11 @@ public class ApplicationProperties {
     private final Properties properties;
 
     private ApplicationProperties() throws IOException {
-        InputStream resourceStream = this.getClass().getClassLoader().getResourceAsStream("north.properties");
-        this.properties = new Properties();
-        this.properties.load(resourceStream);
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        try (InputStream resourceStream = classLoader.getResourceAsStream("north.properties")) {
+            this.properties = new Properties();
+            this.properties.load(resourceStream);
+        }
     }
 
     public static String getProperty(String property) {

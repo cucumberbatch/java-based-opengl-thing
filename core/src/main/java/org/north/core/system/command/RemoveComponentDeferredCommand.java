@@ -16,7 +16,7 @@ public class RemoveComponentDeferredCommand implements DeferredCommand {
     @Override
     public void execute(SystemManager systemManager) {
         component.setActivity(false);
-        systemManager.getSystem(component.getClass()).removeComponent(component.getId());
+        systemManager.getSystemByComponentType(component.getClass()).removeComponent(component.getId());
     }
 
     @Override

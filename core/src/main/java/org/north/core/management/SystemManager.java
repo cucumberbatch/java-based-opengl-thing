@@ -6,12 +6,12 @@ import org.joml.Vector3f;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
+import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentNotFoundException;
-import org.north.core.graphics.Window;
+import org.north.core.management.data.OctreeNode;
 import org.north.core.physics.collision.Collision;
-import org.north.core.reflection.di.Inject;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
 import org.north.core.system.command.DeferredCommand;
@@ -25,25 +25,30 @@ import java.util.stream.Collectors;
 public class SystemManager implements Resettable {
     private static final Logger log = LogManager.getLogger();
 
+    /**
+     * Collisions that was registered in an octree during a frame computation
+     */
     public final List<Collision> collisions;
-    private final Map<Class<? extends Process>, List<Process>> processMap;
-    private final Map<Class<? extends Component>, System<?>> systemMap;
-    private final List<System<?>> systemList;
-    private final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
-    private final Queue<DeferredCommand> deferredCommands;
-    private final ComponentHandlerScanner scanner;
-    private final ApplicationContext applicationContext;
-    private final EntityDistanceToCameraComparator cameraDistanceComparator;
+
+    public final Map<Class<? extends Process>, List<Process>> processMap;
+    public final Map<Class<? extends Component>, System<?>> systemMap;
+    public final List<System<?>> systemList;
+    public final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
+    public final Queue<DeferredCommand> deferredCommands;
+    public final ComponentHandlerScanner scanner;
+    public final ApplicationContext applicationContext;
+    public final EntityDistanceToCameraComparator cameraDistanceComparator;
+    public final OctreeNode<Transform> spatialTree;
 
     private Camera camera;
 
-    @Inject
     public SystemManager(ApplicationContext context) {
         applicationContext = context;
         scanner = new ComponentHandlerScanner();
         cameraDistanceComparator = new EntityDistanceToCameraComparator();
         deferredCommands = new LinkedList<>();
         componentToSystemAssociations = new IdentityHashMap<>();
+        spatialTree = new OctreeNode<>(new Vector3f(0, 0, 0), new Vector3f(8, 8, 8));
         collisions = new ArrayList<>();
         systemList = new ArrayList<>();
         systemMap = new IdentityHashMap<>();
@@ -54,8 +59,8 @@ public class SystemManager implements Resettable {
     }
 
     @SuppressWarnings("unchecked")
-    public <ProcessType extends Process> List<ProcessType> getProcessList(Class<ProcessType> processTypeClass) {
-        return (List<ProcessType>) processMap.get(processTypeClass);
+    public <P extends Process> List<P> getProcessList(Class<P> processType) {
+        return (List<P>) processMap.get(processType);
     }
 
     private void loadComponentSystemsFromPackage(String packagePath) {
@@ -86,25 +91,16 @@ public class SystemManager implements Resettable {
         }
     }
 
-    private void attachToSystemLists(System<?> system) {
-        Class<?> clazz = system.getClass();
-        for (Class<? extends Process> processClass : processMap.keySet()) {
-            if (processClass.isAssignableFrom(clazz)) {
-                processMap.get(processClass).add((Process) system);
-            }
-        }
-    }
-
     public void setCameraComponent(Camera camera) {
         this.camera = camera;
     }
 
-    public System<?> getSystem(Class<? extends Component> componentClass) {
-        return systemMap.get(componentClass);
+    public System<?> getSystemByComponentType(Class<? extends Component> componentType) {
+        return systemMap.get(componentType);
     }
 
     @SuppressWarnings("unchecked")
-    public <ComponentInstance extends Component> ComponentInstance addComponent(ComponentInstance component) {
+    public <C extends Component> C addComponent(C component) {
         Class<? extends Component> componentClass = component.getClass();
         System<?> system;
 
@@ -117,7 +113,14 @@ public class SystemManager implements Resettable {
                 system = applicationContext.addDependency(systemClass);
                 systemMap.put(componentClass, system);
                 systemList.add(system);
-                attachToSystemLists(system);
+
+                // Attaching to system list
+                for (Class<? extends Process> processClass : processMap.keySet()) {
+                    if (processClass.isAssignableFrom(systemClass)) {
+                        processMap.get(processClass).add((Process) system);
+                    }
+                }
+
                 // Logger.info(String.format("System %s initialized", system.getClass().getName()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -129,7 +132,11 @@ public class SystemManager implements Resettable {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
 
-        return (ComponentInstance) system.addComponent(component);
+        if (component instanceof Transform) {
+            spatialTree.insert((Transform) component);
+        }
+
+        return (C) system.addComponent(component);
     }
 
     @SuppressWarnings("unchecked")
@@ -180,6 +187,10 @@ public class SystemManager implements Resettable {
         for (System<?> system : systemList) {
             system.reset();
         }
+    }
+
+    public void registerCollisions() {
+        Collection<Collision> foundCollisions = spatialTree.getAllCollisions();
     }
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {

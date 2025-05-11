@@ -10,7 +10,6 @@ import org.lwjgl.opengl.GL30;
 import org.north.core.component.MeshRenderer;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.shader.Shader;
-import org.north.core.reflection.di.Inject;
 import org.north.core.utils.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -31,7 +30,6 @@ public class Graphics {
     private final int[] activeTextureBuff = new int[4];
     private int enabledShaderId;
 
-    @Inject
     public Graphics(Window window) {
         this.window = window;
     }

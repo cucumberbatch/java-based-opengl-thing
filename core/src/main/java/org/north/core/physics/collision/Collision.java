@@ -1,10 +1,11 @@
 package org.north.core.physics.collision;
 
+import org.north.core.management.data.AxisAlignedBoundingBox;
 import org.north.core.management.data.Stateful;
 
 public class Collision implements Stateful<CollisionState> {
-    private Colliding a;
-    private Colliding b;
+    private AxisAlignedBoundingBox a;
+    private AxisAlignedBoundingBox b;
     private CollisionPair pair;
     private CollisionState state;
     private boolean isModified;
@@ -16,8 +17,8 @@ public class Collision implements Stateful<CollisionState> {
      * @param b second colliding object
      * @param pair object that holds info about collision
      */
-    public Collision(Colliding a,
-                     Colliding b,
+    public Collision(AxisAlignedBoundingBox a,
+                     AxisAlignedBoundingBox b,
                      CollisionPair pair) {
         this(CollisionState.ENTERED, a, b, pair);
     }
@@ -31,8 +32,8 @@ public class Collision implements Stateful<CollisionState> {
      * @param pair object that holds info about collision
      */
     public Collision(CollisionState state,
-                     Colliding a,
-                     Colliding b,
+                     AxisAlignedBoundingBox a,
+                     AxisAlignedBoundingBox b,
                      CollisionPair pair) {
         this.state = state;
         this.a = a;
@@ -40,11 +41,11 @@ public class Collision implements Stateful<CollisionState> {
         this.pair = pair;
     }
 
-    public Colliding getA() {
+    public AxisAlignedBoundingBox getA() {
         return a;
     }
 
-    public Colliding getB() {
+    public AxisAlignedBoundingBox getB() {
         return b;
     }
 
@@ -56,11 +57,11 @@ public class Collision implements Stateful<CollisionState> {
         return isModified;
     }
 
-    public void setA(Colliding a) {
+    public void setA(AxisAlignedBoundingBox a) {
         this.a = a;
     }
 
-    public void setB(Colliding b) {
+    public void setB(AxisAlignedBoundingBox b) {
         this.b = b;
     }
 
@@ -88,7 +89,7 @@ public class Collision implements Stateful<CollisionState> {
     }
 
     public void swapAB() {
-        Colliding temp = b;
+        AxisAlignedBoundingBox temp = b;
         b = a;
         a = temp;
     }

@@ -5,7 +5,6 @@ import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.management.data.Identifiable;
 import org.north.core.management.data.IdentifierAlreadySetException;
-import org.north.core.physics.collision.Colliding;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.UUID;
  */
 public class Entity
         extends LinkedTreeNode<Entity>
-        implements Identifiable<UUID>, ComponentContainer, Colliding, Externalizable {
+        implements Identifiable<UUID>, ComponentContainer, Externalizable {
 
     public UUID id;
     public String name;
