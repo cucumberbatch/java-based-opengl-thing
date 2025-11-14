@@ -1,7 +1,7 @@
 package org.north.core.editor.ui;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Component;
 import org.north.core.editor.EditorUtils;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public class ComponentInspector extends JFrame {
-    private final Logger log = LogManager.getLogger();
+    private final Logger log = LoggerFactory.getLogger(ComponentInspector.class);
 
     private Entity rootEntityNode;
 

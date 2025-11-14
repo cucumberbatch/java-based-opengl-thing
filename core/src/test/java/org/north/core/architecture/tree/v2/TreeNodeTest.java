@@ -3,12 +3,16 @@ package org.north.core.architecture.tree.v2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 class TreeNodeTest {
+
+    private final Logger logger = LoggerFactory.getLogger(TreeNodeTest.class);
 
     static class TreeEntry extends LinkedTreeNode<TreeEntry> {
     }
@@ -214,7 +218,7 @@ class TreeNodeTest {
         n2.add(n3);
         n3.add(n4);
 
-        n1.traversePreorder(System.out::println);
+        n1.traversePreorder(node -> logger.info("{}", node));
     }
 
     @Test
@@ -223,7 +227,7 @@ class TreeNodeTest {
         n1.add(n3);
         n1.add(n4);
 
-        n1.traversePreorder(System.out::println);
+        n1.traversePreorder(node -> logger.info("{}", node));
     }
 
     @Test
@@ -231,7 +235,7 @@ class TreeNodeTest {
         growAdvancedTree();
         List<TreeNode<?>> expectedResult = new ArrayList<>();
 
-        n1.traversePreorder(System.out::println);
+        n1.traversePreorder(node -> logger.info("{}", node));
     }
 
     @Test

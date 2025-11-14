@@ -1,7 +1,7 @@
 package org.north.core.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BufferUtils {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LoggerFactory.getLogger(BufferUtils.class);
 
     private static final Map<Integer, ByteBuffer> BYTE_BUFFER_STORAGE = new HashMap<>();
     private static final Map<Integer, IntBuffer> INT_BUFFER_STORAGE = new HashMap<>();

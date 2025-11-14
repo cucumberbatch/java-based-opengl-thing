@@ -1,7 +1,5 @@
 package org.north.core.architecture.tree;
 
-import org.north.core.architecture.entity.Entity;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

@@ -1,6 +1,5 @@
 package org.north.core.architecture.tree;
 
-import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Component;
 
 import java.util.Collection;

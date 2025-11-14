@@ -64,7 +64,7 @@ public class Entity
 
     @Override
     public boolean add(Entity entity) {
-        if (super.add(entity) && parent != null && parent.transform != null) {
+        if (parent != null && parent.transform != null && super.add(entity)) {
             transform.parent = parent.transform;
             return true;
         }

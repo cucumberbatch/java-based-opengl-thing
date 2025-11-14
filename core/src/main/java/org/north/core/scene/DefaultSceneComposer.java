@@ -32,7 +32,7 @@ public class DefaultSceneComposer implements SceneComposer {
         cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
         root.add(camera);
 
-        int N = 16;
+        int N = 8;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < N; k++) {

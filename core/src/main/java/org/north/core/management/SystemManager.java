@@ -1,7 +1,7 @@
 package org.north.core.management;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.joml.Vector3f;
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemManager implements Resettable {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LoggerFactory.getLogger(SystemManager.class);
 
     /**
      * Collisions that was registered in an octree during a frame computation
@@ -66,7 +66,7 @@ public class SystemManager implements Resettable {
     private void loadComponentSystemsFromPackage(String packagePath) {
         try {
             // Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
-            List<ComponentHandlerScanner.Pair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
+            List<ComponentHandlerScanner.SystemComponentPair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
             annotatedClassesInPackage.forEach(pair -> componentToSystemAssociations.put(pair.component, pair.system));
 
             List<String> classNames = annotatedClassesInPackage.stream()
@@ -82,7 +82,9 @@ public class SystemManager implements Resettable {
 
     private void initProcessMap(String processPackageName) {
         try {
+            log.info("processPackageName: " + processPackageName);
             List<Class<? extends Process>> processClasses = scanner.getAllProcessClasses(processPackageName);
+            log.info("found process classes: " + processClasses);
             for (Class<? extends Process> processClass : processClasses) {
                 processMap.put(processClass, new ArrayList<>());
             }

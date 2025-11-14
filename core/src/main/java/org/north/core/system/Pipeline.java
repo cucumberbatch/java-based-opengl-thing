@@ -1,7 +1,7 @@
 package org.north.core.system;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.entity.ComponentManager;
@@ -42,7 +42,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.north.core.system.Pipeline.UpdateFlowState.*;
 
 public class Pipeline implements ISystem, Runnable {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LoggerFactory.getLogger(Pipeline.class);
 
     private final Window window;
     private final Graphics graphics;

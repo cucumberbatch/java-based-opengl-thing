@@ -1,7 +1,7 @@
 package org.north.core.system;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.joml.Vector3f;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
@@ -16,7 +16,7 @@ import java.util.*;
 
 public abstract class AbstractSystem<E extends Component> implements System<E> {
 
-    protected static final Logger log = LogManager.getLogger();
+    protected static final Logger log = LoggerFactory.getLogger(AbstractSystem.class);
 
     // map for storing componentId-to-component pair
     private final Map<UUID, E> componentMap = new HashMap<>();
