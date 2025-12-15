@@ -38,7 +38,7 @@ public abstract class AbstractComponent implements Component {
 
     @Override
     public void attachToEntity(Entity entity) {
-        entity.add(entity, this);
+        entity.add(this);
         this.entity = entity;
     }
 

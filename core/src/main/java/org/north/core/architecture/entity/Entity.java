@@ -10,8 +10,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,7 +21,7 @@ import java.util.UUID;
  */
 public class Entity
         extends LinkedTreeNode<Entity>
-        implements Identifiable<UUID>, ComponentContainer, Externalizable {
+        implements Identifiable<UUID>, Externalizable {
 
     public UUID id;
     public String name;
@@ -101,38 +99,23 @@ public class Entity
         //        daughters = (List<Entity>) in.readObject();
     }
 
-    //todo: for removal
-    @Deprecated
-    @Override
-    public boolean has(Entity ignored, Class<? extends Component> type) {
+    public boolean has(Class<? extends Component> type) {
         return componentContainer.has(this, type);
     }
 
-    //todo: for removal
-    @Deprecated
-    @Override
-    public <C extends Component> C get(Entity ignored, Class<C> type) {
+    public <C extends Component> C get(Class<C> type) {
         return componentContainer.get(this, type);
     }
 
-    //todo: for removal
-    @Deprecated
-    @Override
-    public <C extends Component> void add(Entity ignored, C component) {
+    public <C extends Component> void add(C component) {
         componentContainer.add(this, component);
     }
 
-    //todo: for removal
-    @Deprecated
-    @Override
-    public <C extends Component> C remove(Entity ignored, Class<C> type) {
+    public <C extends Component> C remove(Class<C> type) {
         return componentContainer.remove(this, type);
     }
 
-    //todo: for removal
-    @Deprecated
-    @Override
-    public Set<Class<? extends Component>> getComponentClassSet(Entity ignored) {
+    public Set<Class<? extends Component>> getComponentClassSet() {
         return componentContainer.getComponentClassSet(this);
     }
 

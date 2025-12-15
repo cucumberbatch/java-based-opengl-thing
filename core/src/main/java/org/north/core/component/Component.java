@@ -24,8 +24,7 @@ public interface Component
     }
 
     default Transform getTransform() {
-        Entity entity = getEntity();
-        return entity.get(entity, Transform.class);
+        return getEntity().get(Transform.class);
     }
 }
  

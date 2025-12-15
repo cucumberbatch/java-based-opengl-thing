@@ -90,14 +90,14 @@ public class ComponentManager {
 
     public final <ComponentInstance extends Component> ComponentInstance get(Entity entity,
                                                                              Class<ComponentInstance> componentClass) {
-        return entity.get(entity, componentClass);
+        return entity.get(componentClass);
     }
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... classes) {
         List<Component> components = new ArrayList<>();
         for (Class<? extends Component> aClass : classes) {
-            Component component = entity.get(entity, aClass);
+            Component component = entity.get(aClass);
             components.add(component);
         }
         return components;
@@ -109,7 +109,7 @@ public class ComponentManager {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
 
-        ComponentInstance component = entity.get(entity, componentClass);
+        ComponentInstance component = entity.get(componentClass);
         systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
         return component;
     }
@@ -166,7 +166,7 @@ public class ComponentManager {
 
         public synchronized <ComponentInstance extends Component> ComponentInstance get(Class<ComponentInstance> componentClass) {
             cm.pushManagedEntity(this);
-            return entity.get(entity, componentClass);
+            return entity.get(componentClass);
         }
 
         @SafeVarargs

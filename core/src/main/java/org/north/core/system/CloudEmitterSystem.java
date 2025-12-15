@@ -47,12 +47,10 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
     @Override
     public void init(CloudEmitter cloudEmitter) {
         spaceshipTransform = cloudEmitter.getTransform();
-
-        Entity gasCloudSpawner = sceneRoot.getByName("gasCloudSpawner");
-        spawnerTransform = gasCloudSpawner.get(gasCloudSpawner, Transform.class);
+        spawnerTransform = sceneRoot.getByName("gasCloudSpawner").get(Transform.class);
         world = sceneRoot.getByName("movableWorld");
-        worldTransform = world.get(world, Transform.class);
-        movableWorldRigidBody = world.get(world, RigidBody.class);
+        worldTransform = world.get(Transform.class);
+        movableWorldRigidBody = world.get(RigidBody.class);
 
         movableWorldRigidBody.isGravitational = false;
     }
@@ -100,12 +98,12 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
             cm.take(gasCloudEntity)
                     .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
-            Transform transform = gasCloudEntity.get(gasCloudEntity, Transform.class);
+            Transform transform = gasCloudEntity.get(Transform.class);
             Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
             transform.moveTo(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
             transform.rescaleTo(emittingScale);
 
-            MeshRenderer renderer = gasCloudEntity.get(gasCloudEntity, MeshRenderer.class);
+            MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
             renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
             renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
 
