@@ -89,7 +89,7 @@ public class TestSystemApi {
         }
     }
 
-    //@Test
+    @Test
     public void testEntityQueryInMultipleThreads() {
         ComponentRegistry componentRegistry = new ComponentRegistry.Builder()
                 .add(Position.class)
@@ -162,6 +162,68 @@ public class TestSystemApi {
 
                 logger.info("x: {}\ty: {}", p.x, p.y);
             });
+        });
+
+        try {
+            future1.get();
+            future2.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testEntityQueryInMultipleThreads2() {
+        ComponentRegistry componentRegistry = new ComponentRegistry.Builder()
+                .add(Position.class)
+                .add(Velocity.class)
+                .build();
+
+        EntityManager entityManager =
+                new EntityManager(componentRegistry);
+
+        for (int i = 0; i < 128; i++) {
+            entityManager.createEntity(Position.class, Velocity.class);
+        }
+
+        Future<?> future1 = CompletableFuture.runAsync(() -> {
+            Table.QueryResult<Entity> queryResult =
+                    entityManager.queryAllWith(Position.class, Velocity.class);
+            try (queryResult) {
+                Table.ComponentAccessor<Entity, Velocity> velocityAccessor =
+                        new Table.ComponentAccessor<>(queryResult, Velocity.class, AccessType.READ);
+                Table.ComponentAccessor<Entity, Position> positionAccessor =
+                        new Table.ComponentAccessor<>(queryResult, Position.class, AccessType.READ);
+                for (Entity entity : queryResult) {
+                    Position p = positionAccessor.get();
+                    Velocity v = velocityAccessor.get();
+
+                    p.x = (float) (+0.1 * entity.getId() + p.x + v.dx);
+                    p.y = (float) (-0.1 * entity.getId() + p.y + v.dy);
+
+                    logger.info("x: {}\ty: {}", p.x, p.y);
+                }
+            }
+        });
+
+        Future<?> future2 = CompletableFuture.runAsync(() -> {
+            Table.QueryResult<Entity> queryResult =
+                    entityManager.queryAllWith(Position.class, Velocity.class);
+            try (queryResult) {
+                Table.ComponentAccessor<Entity, Velocity> velocityAccessor =
+                        new Table.ComponentAccessor<>(queryResult, Velocity.class, AccessType.READ);
+                Table.ComponentAccessor<Entity, Position> positionAccessor =
+                        new Table.ComponentAccessor<>(queryResult, Position.class, AccessType.READ);
+                for (Entity entity : queryResult) {
+                    Position p = positionAccessor.get();
+                    Velocity v = velocityAccessor.get();
+
+                    p.x = (float) (+0.1 * entity.getId() + p.x + v.dx);
+                    p.y = (float) (-0.1 * entity.getId() + p.y + v.dy);
+
+                    logger.info("x: {}\ty: {}", p.x, p.y);
+                }
+            }
         });
 
         try {

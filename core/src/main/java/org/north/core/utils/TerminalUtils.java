@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+@Deprecated(forRemoval = true)
 public class TerminalUtils {
 
     public enum Ansi {

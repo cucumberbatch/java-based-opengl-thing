@@ -1,7 +1,10 @@
 package org.north.core.utils;
 
 import org.lwjgl.opengl.GL20;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +26,11 @@ import static org.lwjgl.opengl.GL20.glValidateProgram;
 
 public class ShaderUtils {
 
+    //todo: remove
+    private static final ResourceLoader resourceLoader = new LocalResourceLoader();
+
     private static final Map<Integer, Integer> shaderPrograms = new HashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(ShaderUtils.class);
 
 
     private ShaderUtils() {
@@ -37,8 +44,15 @@ public class ShaderUtils {
             return id;
         }
 
-        String vertex   = FileUtils.loadAsString(vertexPath);
-        String fragment = FileUtils.loadAsString(fragmentPath);
+        String vertex = null;
+        String fragment = null;
+        try {
+            vertex = resourceLoader.loadAsString(vertexPath);
+            fragment = resourceLoader.loadAsString(fragmentPath);
+        } catch (IOException e) {
+            log.error("unable to load shader", e);
+        }
+
         id = create(vertex, fragment);
 
         shaderPrograms.put(hash, id);
@@ -60,7 +74,7 @@ public class ShaderUtils {
         int compileStatus = glGetShaderi(shader, GL_COMPILE_STATUS);
 
         if (compileStatus == GL_FALSE) {
-            // Logger.warn(String.format("Failed to compile shader! Reason: %s", glGetShaderInfoLog(shader)));
+            log.warn("Failed to compile shader! Reason: {}", glGetShaderInfoLog(shader));
             return -1;
         }
 

@@ -1,9 +1,15 @@
 package org.north.core.management;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.locks.LockSupport;
+
 public class FrameTiming {
     private static final int  NANO_TIME_STEP = 100;
     private static final long NANO_SECONDS_IN_SECOND = 1_000_000_000L;
     private static final int DEFAULT_FRAME_RATE = 60;
+    private static final Logger log = LoggerFactory.getLogger(FrameTiming.class);
 
     private long previousNanoTime;
     private long loopStartTimeInNano;
@@ -35,12 +41,9 @@ public class FrameTiming {
 
     public void sync() {
         long endTimeInNano = loopStartTimeInNano + loopSlotInNano - NANO_TIME_STEP;
-        while (getCurrentNanoTime() < endTimeInNano) {
-            try {
-                Thread.sleep(0, NANO_TIME_STEP);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        long sleepTime = endTimeInNano - getCurrentNanoTime();
+        if (sleepTime > 0) {
+            LockSupport.parkNanos(sleepTime);
         }
     }
 

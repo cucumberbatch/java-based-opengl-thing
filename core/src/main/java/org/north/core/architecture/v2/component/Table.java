@@ -59,7 +59,7 @@ public class Table<E> {
         private final Collection<Table<E>> tables;
 
         private ComponentAccessor<E, ?>[] accessors;
-        private Lock currentTableLock;
+        private Lock tableLock;
 
         public QueryResult(Collection<Table<E>> tables) {
             this.tables = tables;
@@ -86,7 +86,7 @@ public class Table<E> {
             for (ComponentAccessor<E, ?> accessor : accessors) {
                 accessor.unlock();
             }
-            currentTableLock.unlock();
+            tableLock.unlock();
         }
 
         @Override
@@ -103,8 +103,8 @@ public class Table<E> {
             QueryResultIterator() {
                 this.tableIterator = tables.iterator();
                 Table<E> table = tableIterator.next();
-                currentTableLock = table.readLock();
-                currentTableLock.lock();
+                tableLock = table.readLock();
+                tableLock.lock();
                 this.entityIterator = table.entityIterator();
                 this.entity = entityIterator.next();
 
@@ -127,9 +127,9 @@ public class Table<E> {
                         return selected;
                     } else {
                         Table<E> table = tableIterator.next();
-                        currentTableLock.unlock();
-                        currentTableLock = table.readLock();
-                        currentTableLock.lock();
+                        tableLock.unlock();
+                        tableLock = table.readLock();
+                        tableLock.lock();
                         entityIterator = table.entityIterator();
 
                         lockAccessors(table);

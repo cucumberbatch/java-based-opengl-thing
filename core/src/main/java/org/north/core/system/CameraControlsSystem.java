@@ -118,7 +118,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
     private void updateScreenCapture(Graphics graphics) {
         if (escapeIsPressed) {
-            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+            GLFW.glfwSetInputMode(graphics.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
 
             if (intermediateCameraStateOnFocusLossEnabled) {
                 switch (projectionState) {
@@ -142,7 +142,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         }
 
         if (mouseLeftButtonIsPressed && !mouseCaptured) {
-            GLFW.glfwSetInputMode(graphics.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+            GLFW.glfwSetInputMode(graphics.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 
             if (intermediateCameraStateOnFocusLossEnabled) {
                 switch (lastProjectionStateBeforeFocusLoss) {
@@ -255,18 +255,24 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         // up-down movement
         // note: incorrect
         if (keyQIsHeld) {
-            componentTransform.moveRel(vec3f.set(point)
-                    .normalize()
-                    .rotateX((float) Math.toRadians(horizontalAngle))
-                    .rotateY((float) Math.toRadians(verticalAngle))
-                    .mul(-deltaTime * cameraMovementSpeed));
+            Vector3f delta = vec3f.set(0f, -1f, 0f)
+//                    .normalize()
+//                    .rotateY((float) Math.toRadians(-verticalAngle))
+//                    .rotateX((float) Math.toRadians(-horizontalAngle))
+                    .mul(deltaTime * cameraMovementSpeed);
+
+            log.info("delta is: {}, point is: {}", delta, point);
+            componentTransform.moveRel(delta);
         }
         if (keyEIsHeld) {
-            componentTransform.moveRel(vec3f.set(point)
-                    .normalize()
-                    .rotateX((float) Math.toRadians(horizontalAngle))
-                    .rotateY((float) Math.toRadians(verticalAngle))
-                    .mul(deltaTime * cameraMovementSpeed));
+            Vector3f delta = vec3f.set(0f, 1f, 0f)
+//                    .normalize()
+//                    .rotateX((float) Math.toRadians(horizontalAngle))
+//                    .rotateY((float) Math.toRadians(verticalAngle))
+                    .mul(deltaTime * cameraMovementSpeed);
+
+            log.info("delta is: {}, point is: {}", delta, point);
+            componentTransform.moveRel(delta);
         }
 
         // left-right movement

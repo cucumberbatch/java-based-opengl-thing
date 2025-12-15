@@ -22,8 +22,7 @@ public class BufferUtils {
 
     public static ByteBuffer createByteBuffer(byte[] array) {
         ByteBuffer buffer;
-        if (BYTE_BUFFER_STORAGE.get(array.length) != null) {
-            buffer = BYTE_BUFFER_STORAGE.get(array.length);
+        if ((buffer = BYTE_BUFFER_STORAGE.get(array.length)) != null) {
             buffer.clear().put(array).flip();
             return buffer;
         }
@@ -36,7 +35,7 @@ public class BufferUtils {
             buffer = ByteBuffer.allocateDirect(array.length);
         }
 
-        // Logger.debug(String.format("ByteBuffer of size %d created", buffer.capacity()));
+        //log.info(String.format("ByteBuffer of size %d created", buffer.capacity()));
         buffer.order(ByteOrder.nativeOrder()).put(array).flip();
         BYTE_BUFFER_STORAGE.put(array.length, buffer);
         return buffer;
@@ -44,13 +43,12 @@ public class BufferUtils {
 
     public static IntBuffer createIntBuffer(int[] array) {
         IntBuffer buffer;
-        if (INT_BUFFER_STORAGE.get(array.length) != null) {
-            buffer = INT_BUFFER_STORAGE.get(array.length);
+        if ((buffer = INT_BUFFER_STORAGE.get(array.length)) != null) {
             buffer.clear().put(array).flip();
             return buffer;
         }
         buffer = ByteBuffer.allocateDirect(array.length << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
-        log.debug("IntBuffer of size {} created", buffer.capacity());
+        //log.info("IntBuffer of size {} created", buffer.capacity());
         buffer.put(array).flip();
         INT_BUFFER_STORAGE.put(array.length, buffer);
         return buffer;
@@ -58,13 +56,12 @@ public class BufferUtils {
 
     public static FloatBuffer createFloatBuffer(float[] array) {
         FloatBuffer buffer;
-        if (FLOAT_BUFFER_STORAGE.get(array.length) != null) {
-            buffer = FLOAT_BUFFER_STORAGE.get(array.length);
+        if ((buffer = FLOAT_BUFFER_STORAGE.get(array.length)) != null) {
             buffer.clear().put(array).flip();
             return buffer;
         }
         buffer = ByteBuffer.allocateDirect(array.length << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        // Logger.debug(String.format("FloatBuffer of size %d created", buffer.capacity()));
+        //log.info(String.format("FloatBuffer of size %d created", buffer.capacity()));
         buffer.put(array).flip();
         FLOAT_BUFFER_STORAGE.put(array.length, buffer);
         return buffer;
@@ -72,8 +69,7 @@ public class BufferUtils {
 
     public static FloatBuffer createFloatBuffer(Matrix4f matrix4f) {
         FloatBuffer buffer;
-        if (FLOAT_BUFFER_STORAGE.get(16) != null) {
-            buffer = FLOAT_BUFFER_STORAGE.get(16);
+        if ((buffer = FLOAT_BUFFER_STORAGE.get(16)) != null) {
             return matrix4f.get(buffer);
         }
 
@@ -85,8 +81,7 @@ public class BufferUtils {
             buffer = ByteBuffer.allocateDirect(16 << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
         }
 
-//        buffer = ByteBuffer.allocateDirect(16 << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        // Logger.debug(String.format("FloatBuffer of size %d created", buffer.capacity()));
+        //log.info(String.format("FloatBuffer of size %d created", buffer.capacity()));
         matrix4f.get(buffer);
         FLOAT_BUFFER_STORAGE.put(16, buffer);
         return buffer;

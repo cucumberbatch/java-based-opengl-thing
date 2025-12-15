@@ -34,6 +34,10 @@ public class Graphics {
         this.window = window;
     }
 
+    public long getWindow() {
+        return window.getWindow();
+    }
+
     public int generateLineVertexBuffer() {
         // Create a vertex buffer
         int vertexBuffer = GL30.glGenBuffers();
