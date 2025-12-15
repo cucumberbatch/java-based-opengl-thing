@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public interface System<E extends Component> extends Resettable {
-    Iterator<E> getComponentIterator();
-    List<E> getComponentList();
-    Collection<E> getComponentUnmodifiableCollection();
-    E getComponent(UUID componentId);
-    E addComponent(Component component);
-    E removeComponent(UUID componentId);
+public interface System<C extends Component> extends Resettable {
+    Iterator<C> getComponentIterator();
+    List<C> getComponentList();
+    Collection<C> getComponentUnmodifiableCollection();
+    C getComponent(UUID componentId);
+    C addComponent(Component component);
+    C removeComponent(UUID componentId);
 }

@@ -14,13 +14,13 @@ import org.north.core.management.memory.Vector3fPool;
 
 import java.util.*;
 
-public abstract class AbstractSystem<E extends Component> implements System<E> {
+public abstract class AbstractSystem<C extends Component> implements System<C> {
 
     protected static final Logger log = LoggerFactory.getLogger(AbstractSystem.class);
 
     // map for storing componentId-to-component pair
-    private final Map<UUID, E> componentMap = new HashMap<>();
-    private final Collection<E> mapValues = componentMap.values();
+    private final Map<UUID, C> componentMap = new HashMap<>();
+    private final Collection<C> mapValues = componentMap.values();
 
     protected final Pool<Vector3f> vector3fPool;
     protected final ComponentManager cm;
@@ -43,22 +43,22 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
     }
 
     @Override
-    public final Iterator<E> getComponentIterator() {
+    public final Iterator<C> getComponentIterator() {
         return mapValues.iterator();
     }
 
     @Override
-    public final List<E> getComponentList() {
+    public final List<C> getComponentList() {
         return new ArrayList<>(mapValues);
     }
 
     @Override
-    public Collection<E> getComponentUnmodifiableCollection() {
+    public Collection<C> getComponentUnmodifiableCollection() {
         return Collections.unmodifiableCollection(mapValues);
     }
 
     @Override
-    public final E getComponent(UUID componentId) {
+    public final C getComponent(UUID componentId) {
 //        if (component == null) {
 //            throw new ComponentNotFoundException(componentId);
 //        }
@@ -67,17 +67,17 @@ public abstract class AbstractSystem<E extends Component> implements System<E> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public final E addComponent(Component component)
+    public final C addComponent(Component component)
             throws IllegalArgumentException, ClassCastException, ComponentAlreadyExistsException {
         if (componentMap.containsKey(component.getId())) {
             throw new ComponentAlreadyExistsException(component.getClass());
         }
-        return componentMap.put(component.getId(), (E) component);
+        return componentMap.put(component.getId(), (C) component);
         // Logger.debug(String.format("Component added [id=%d type=%s]", component.getId(), component.getClass().getSimpleName()));
     }
 
     @Override
-    public final E removeComponent(UUID componentId) {
+    public final C removeComponent(UUID componentId) {
         return componentMap.remove(componentId);
     }
 

@@ -1,5 +1,6 @@
 package org.north.core.system;
 
+import org.north.core.architecture.entity.Entity;
 import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
@@ -24,7 +25,8 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     @Override
     public void init(MeshCollider meshCollider) {
-        meshCollider.getEntity().getTransform().setTransformListener(new MeshMovementListener());
+        Entity meshColliderEntity = meshCollider.getEntity();
+        meshColliderEntity.get(meshColliderEntity, Transform.class).setTransformListener(new MeshMovementListener());
     }
 
     @Override

@@ -91,7 +91,7 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
 
     @Override
     public void onCollisionStarted(Button button, Collision collision) {
-        VisualCursor visualCursor = ((Entity) collision.getA()).get(VisualCursor.class);
+        VisualCursor visualCursor = ((Entity) collision.getA()).get(((Entity) collision.getA()), VisualCursor.class);
         if (visualCursor != null && visualCursor.isIntersects && visualCursor.previouslySelectedButtonShape != button.buttonShape) return;
         button.buttonState = ButtonState.IDLE_TO_HOVER_BUTTON_STATE;
     }

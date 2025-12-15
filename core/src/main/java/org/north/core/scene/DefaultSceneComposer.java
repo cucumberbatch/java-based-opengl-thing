@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
+import org.north.core.architecture.entity.ComponentContainer;
 import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.architecture.tree.v2.TreeNode;
@@ -26,9 +27,10 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {
+        ComponentContainer componentContainer = cm.getComponentContainer();
         GL30.glClearColor(.1f, .1f, .1f, 1f);
 
-        Entity camera = new Entity("camera");
+        Entity camera = new Entity("camera", componentContainer);
         cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
         root.add(camera);
 
@@ -36,7 +38,7 @@ public class DefaultSceneComposer implements SceneComposer {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < N; k++) {
-                    Entity cube = new Entity("cube_" + i + "_" + j + "_" + k);
+                    Entity cube = new Entity("cube_" + i + "_" + j + "_" + k, componentContainer);
                     final float x = i;
                     final float z = j;
                     final float y = k;
@@ -61,7 +63,8 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
-        Entity testCube = new Entity("test_cube");
+        ComponentContainer componentContainer = cm.getComponentContainer();
+        Entity testCube = new Entity("test_cube", componentContainer);
 
         cm.take(testCube).addAndPerform(Transform.class, transform -> {
             transform.moveTo(0.5f, 0.5f, 0.5f);
@@ -75,7 +78,7 @@ public class DefaultSceneComposer implements SceneComposer {
             meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
         });
 
-        Entity camera = new Entity("camera");
+        Entity camera = new Entity("camera", componentContainer);
 
         cm.take(camera).add(Transform.class, Camera.class, CameraControls.class);
 
@@ -89,10 +92,12 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void initCubeAndCamera(TreeNode<Entity> root, ComponentManager cm) {
-        Entity camera = new Entity("camera");
-        Entity center = new Entity("center");
-        Entity left = new Entity("left");
-        Entity right = new Entity("right");
+        ComponentContainer componentContainer = cm.getComponentContainer();
+
+        Entity camera = new Entity("camera", componentContainer);
+        Entity center = new Entity("center", componentContainer);
+        Entity left = new Entity("left", componentContainer);
+        Entity right = new Entity("right", componentContainer);
 
         root.add(camera);
         root.add(center);
@@ -153,7 +158,9 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void initReferenceScene(TreeNode<Entity> root, ComponentManager cm) {
-        Entity referenceBox = new Entity("referenceBox");
+        ComponentContainer componentContainer = cm.getComponentContainer();
+
+        Entity referenceBox = new Entity("referenceBox", componentContainer);
 
         List<? extends Component> componentList = cm.take(referenceBox)
                 .add(Transform.class, MeshRenderer.class, RigidBody.class);
@@ -165,8 +172,8 @@ public class DefaultSceneComposer implements SceneComposer {
 
         root.add(referenceBox);
 
-        if (root.findFirst(entity -> entity.has(Camera.class)) == null) {
-            Entity camera = new Entity("camera");
+        if (root.findFirst(entity -> entity.has(entity, Camera.class)) == null) {
+            Entity camera = new Entity("camera", componentContainer);
 
             cm.take(camera)
                     .add(Transform.class, Camera.class, CameraControls.class, PlayerControls.class);
@@ -176,11 +183,13 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void initSpaceshipOnScreen(TreeNode<Entity> root, ComponentManager cm) {
+        ComponentContainer componentContainer = cm.getComponentContainer();
+
         Transform transform;
         MeshRenderer renderer;
 
         // TV Screen object
-        Entity tvScreen = new Entity("tvScreen");
+        Entity tvScreen = new Entity("tvScreen", componentContainer);
         transform = cm.take(tvScreen).add(Transform.class);
         transform.rescaleTo(new Vector3f(2, 2, 2));
 
@@ -189,7 +198,7 @@ public class DefaultSceneComposer implements SceneComposer {
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         // Player spaceship in the middle of the screen
-        Entity player = new Entity("player");
+        Entity player = new Entity("player", componentContainer);
         transform = cm.take(player).add(Transform.class);
         transform.moveTo(new Vector3f(0f, 0f, 1f));
         transform.rescaleTo(0.2f, 0.2f, 0.2f);
@@ -201,7 +210,7 @@ public class DefaultSceneComposer implements SceneComposer {
         cm.take(player).add(CloudEmitter.class);
 
 
-        Entity gasCloudSpawner = new Entity("gasCloudSpawner");
+        Entity gasCloudSpawner = new Entity("gasCloudSpawner", componentContainer);
         transform = cm.take(gasCloudSpawner).add(Transform.class);
         transform.moveTo( new Vector3f(0f, -0.225f, 0.5f));
 
@@ -223,7 +232,7 @@ public class DefaultSceneComposer implements SceneComposer {
          */
 
         // Background texture behind tv screen, player and other gameplay objects
-        Entity background = new Entity("background");
+        Entity background = new Entity("background", componentContainer);
         transform = cm.take(background).add(Transform.class);
         transform.moveTo(new Vector3f(0f, 0f, 2f));
         transform.rescaleTo(new Vector3f(2, 2, 2));
@@ -233,14 +242,14 @@ public class DefaultSceneComposer implements SceneComposer {
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
 
         // Camera
-        Entity camera = new Entity("camera");
+        Entity camera = new Entity("camera", componentContainer);
         transform = cm.take(camera).add(Transform.class);
         transform.moveTo( new Vector3f(0f, 0f, 0f));
 
         cm.take(camera).add(Camera.class);
 
         // World that moves when player is "moving"
-        Entity movableWorld = new Entity("movableWorld");
+        Entity movableWorld = new Entity("movableWorld", componentContainer);
         cm.take(movableWorld).add(RigidBody.class);
         transform = cm.take(movableWorld).add(Transform.class);
         //        transform.scale = new Vector3f(5, 5, 5);

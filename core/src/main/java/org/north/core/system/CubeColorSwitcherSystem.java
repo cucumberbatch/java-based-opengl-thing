@@ -1,6 +1,7 @@
 package org.north.core.system;
 
 import org.joml.Vector4f;
+import org.north.core.architecture.entity.Entity;
 import org.north.core.component.CubeColorSwitcher;
 import org.north.core.component.MeshRenderer;
 import org.north.core.context.ApplicationContext;
@@ -29,7 +30,8 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
             component.switched = false;
             return;
         } else*/
-        MeshRenderer renderer = component.getEntity().get(MeshRenderer.class);
+        Entity entity = component.getEntity();
+        MeshRenderer renderer = entity.get(entity, MeshRenderer.class);
         if (component.acc > MAX_ACC_VALUE) {
 //            float r = rnd.nextFloat();
 //            float g = rnd.nextFloat();

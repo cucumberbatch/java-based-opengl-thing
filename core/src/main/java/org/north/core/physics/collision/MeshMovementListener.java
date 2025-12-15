@@ -20,7 +20,7 @@ public class MeshMovementListener implements MovementListener {
 
     private void runAsync(Entity entity, Vector3f previousPosition, Vector3f currentPosition) {
         executor.execute(() -> {
-            MeshCollider collider = entity.get(MeshCollider.class);
+            MeshCollider collider = entity.get(null, MeshCollider.class);
             // Logger.info(String.format("Registered movement of entity [%s]: %s -> %s", entity.getName(), previousPosition.toString(), currentPosition.toString()));
         });
     }

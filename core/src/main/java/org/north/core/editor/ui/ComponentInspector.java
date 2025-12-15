@@ -15,7 +15,10 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
+//todo: for removal, I think we don't need any of java graphics things to do editor stuff
 public class ComponentInspector extends JFrame {
     private final Logger log = LoggerFactory.getLogger(ComponentInspector.class);
 
@@ -65,10 +68,10 @@ public class ComponentInspector extends JFrame {
         setVisible(true);
     }
 
+    //todo: for remove
     private TreeSelectionListener createTreeSelectionListener(JPanel componentPanel) {
         return selectionEvent -> {
-            Collection<Component> components =
-                    ((Entity) selectionEvent.getPath().getLastPathComponent()).getComponentMap().values();
+            Collection<Component> components = Collections.emptyList();
 
             for (java.awt.Component component : componentPanel.getComponents()) {
                 componentPanel.remove(component);

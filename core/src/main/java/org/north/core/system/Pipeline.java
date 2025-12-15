@@ -1,5 +1,7 @@
 package org.north.core.system;
 
+import org.north.core.architecture.entity.ComponentContainer;
+import org.north.core.architecture.entity.MapBasedComponentContainer;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
@@ -64,6 +66,8 @@ public class Pipeline implements ISystem, Runnable {
     private final boolean load = false;
     private boolean stopped = false;
 
+    private final ComponentContainer componentContainer;
+
     public Pipeline(ApplicationContext context) {
         this.window = context.getDependency(Window.class);
         this.graphics = context.getDependency(Graphics.class);
@@ -72,6 +76,8 @@ public class Pipeline implements ISystem, Runnable {
         this.timingContext = new FrameTiming(65);
         this.input = context.getDependency(Input.class);
 
+//        this.componentContainer = new MapBasedComponentContainer();
+
         this.editorEnabled =
                 ApplicationProperties.getBoolean("application.editor.enabled");
 
@@ -79,8 +85,10 @@ public class Pipeline implements ISystem, Runnable {
                 ApplicationProperties.getBoolean("application.editor.process.update.smooth-stop-and-start");
 
         try {
+//            context.addDependency(ComponentContainer.class, componentContainer);
+            this.componentContainer = context.getDependency(ComponentContainer.class);
             this.rootNode =
-                    context.addDependency(Entity.class, new Entity("root"));
+                    context.addDependency(Entity.class, new Entity("root", componentContainer));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

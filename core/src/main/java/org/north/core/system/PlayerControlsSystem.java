@@ -4,6 +4,7 @@ import org.lwjgl.glfw.GLFW;
 import org.north.core.component.PlayerControls;
 import org.north.core.component.RigidBody;
 import org.north.core.architecture.entity.Entity;
+import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
@@ -28,7 +29,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
     @Override
     public void init(PlayerControls playerControls) {
         physicalBody = sceneRoot.getByName("referenceBox");
-        rigidBody = physicalBody.get(RigidBody.class);
+        rigidBody = physicalBody.get(physicalBody, RigidBody.class);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
             rigidBody.isGravitational = gravitationalState;
             rigidBody.velocity.set(0);
             rigidBody.acceleration.set(0);
-            physicalBody.getTransform().moveTo(0f, 0f, 0f);
+            physicalBody.get(physicalBody, Transform.class).moveTo(0f, 0f, 0f);
         }
     }
 }

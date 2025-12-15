@@ -2,6 +2,7 @@ package org.north.core.system;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
+import org.north.core.architecture.entity.ComponentContainer;
 import org.north.core.component.*;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.context.ApplicationContext;
@@ -30,6 +31,9 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
     private static final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
     private static final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
     private static final float twoPi = (float) (2 * PI);
+
+    private final ComponentContainer componentContainer;
+
     private boolean keyAIsHolded;
     private boolean keyDIsHolded;
     private boolean keyWIsHolded;
@@ -37,15 +41,18 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
         super(context);
+        this.componentContainer = context.getDependency(ComponentContainer.class);
     }
 
     @Override
     public void init(CloudEmitter cloudEmitter) {
         spaceshipTransform = cloudEmitter.getTransform();
-        spawnerTransform = sceneRoot.getByName("gasCloudSpawner").getTransform();
+
+        Entity gasCloudSpawner = sceneRoot.getByName("gasCloudSpawner");
+        spawnerTransform = gasCloudSpawner.get(gasCloudSpawner, Transform.class);
         world = sceneRoot.getByName("movableWorld");
-        worldTransform = world.getTransform();
-        movableWorldRigidBody = world.get(RigidBody.class);
+        worldTransform = world.get(world, Transform.class);
+        movableWorldRigidBody = world.get(world, RigidBody.class);
 
         movableWorldRigidBody.isGravitational = false;
     }
@@ -86,19 +93,19 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         }
 
         if (moving && acc > 1) {
-            Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++);
+            Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++, componentContainer);
 
             world.add(gasCloudEntity);
 
             cm.take(gasCloudEntity)
                     .add(Transform.class, MeshRenderer.class, GasCloud.class);
 
-            Transform transform = gasCloudEntity.getTransform();
+            Transform transform = gasCloudEntity.get(gasCloudEntity, Transform.class);
             Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
             transform.moveTo(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
             transform.rescaleTo(emittingScale);
 
-            MeshRenderer renderer = gasCloudEntity.get(MeshRenderer.class);
+            MeshRenderer renderer = gasCloudEntity.get(gasCloudEntity, MeshRenderer.class);
             renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
             renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
 

@@ -12,6 +12,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -27,18 +28,16 @@ public class Entity
     public UUID id;
     public String name;
 
-    public Map<Class<? extends Component>, Component> components;
+//    public Map<Class<? extends Component>, Component> components;
+    public final ComponentContainer componentContainer;
     public Transform transform;
 
-    public Entity() {
-        this(null);
-    }
-
-    public Entity(String name) {
+    public Entity(String name, ComponentContainer componentContainer) {
         UUID id = UUID.randomUUID();
         this.id = id;
         this.name = name != null ? name : id.toString();
-        this.components = new HashMap<>(4, 1.0f);
+        this.componentContainer = componentContainer;
+//        this.components = new HashMap<>(4, 1.0f);
     }
 
     @Override
@@ -81,26 +80,11 @@ public class Entity
     }
 
     @Override
-    public Map<Class<? extends Component>, Component> getComponentMap() {
-        return components;
-    }
-
-    @Override
-    public Transform getTransform() {
-        return transform;
-    }
-
-    @Override
-    public void setTransform(Transform transform) {
-        this.transform = transform;
-    }
-
-    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(id);
         out.writeUTF(name);
-        out.writeObject(getTransform());
-        out.writeObject(components);
+//        out.writeObject(getTransform());
+//        out.writeObject(components);
         out.writeObject(parent);
         //        out.writeObject(daughters);
     }
@@ -111,11 +95,47 @@ public class Entity
             throws IOException, ClassNotFoundException {
         id = (UUID) in.readObject();
         name = in.readUTF();
-        transform = (Transform) in.readObject();
-        components = (Map<Class<? extends Component>, Component>) in.readObject();
+//        transform = (Transform) in.readObject();
+//        components = (Map<Class<? extends Component>, Component>) in.readObject();
         parent = (Entity) in.readObject();
         //        daughters = (List<Entity>) in.readObject();
     }
+
+    //todo: for removal
+    @Deprecated
+    @Override
+    public boolean has(Entity ignored, Class<? extends Component> type) {
+        return componentContainer.has(this, type);
+    }
+
+    //todo: for removal
+    @Deprecated
+    @Override
+    public <C extends Component> C get(Entity ignored, Class<C> type) {
+        return componentContainer.get(this, type);
+    }
+
+    //todo: for removal
+    @Deprecated
+    @Override
+    public <C extends Component> void add(Entity ignored, C component) {
+        componentContainer.add(this, component);
+    }
+
+    //todo: for removal
+    @Deprecated
+    @Override
+    public <C extends Component> C remove(Entity ignored, Class<C> type) {
+        return componentContainer.remove(this, type);
+    }
+
+    //todo: for removal
+    @Deprecated
+    @Override
+    public Set<Class<? extends Component>> getComponentClassSet(Entity ignored) {
+        return componentContainer.getComponentClassSet(this);
+    }
+
 
     @Override
     public String toString() {
