@@ -1,13 +1,10 @@
 package org.north.core.system;
 
 import org.north.core.component.MeshCollider;
-import org.north.core.component.MeshRenderer;
 import org.north.core.component.VisualCursor;
-import org.north.core.component.Transform;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.*;
-import org.north.core.graphics.shader.SimpleColorShader;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
@@ -226,7 +223,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     @Override
     public void onCollisionStarted(VisualCursor visualCursor, Collision collision) {
-        visualCursor.previouslySelectedButtonShape = ((Entity) collision.getA()).get(MeshCollider.class).body;
+        visualCursor.previouslySelectedButtonShape = cm.get(((Entity) collision.getA()), MeshCollider.class).body;
         visualCursor.isIntersects = true;
         cursorState = HOVER_TO_IDLE_CURSOR_STATE;
     }

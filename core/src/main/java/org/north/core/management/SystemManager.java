@@ -76,7 +76,7 @@ public class SystemManager implements Resettable {
             // Logger.info(String.format("Found %s system(s) classes: %s", classNames.size(), classNames));
         } catch (Exception e) {
             // Logger.error("Error while loading systems. Reason: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new RuntimeException(String.format("Error while loading systems from package '%s'.", packagePath), e);
         }
     }
 

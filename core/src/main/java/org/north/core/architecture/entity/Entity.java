@@ -1,7 +1,6 @@
 package org.north.core.architecture.entity;
 
 import org.north.core.architecture.tree.v2.LinkedTreeNode;
-import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.management.data.Identifiable;
 import org.north.core.management.data.IdentifierAlreadySetException;
@@ -10,7 +9,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -26,16 +24,12 @@ public class Entity
     public UUID id;
     public String name;
 
-//    public Map<Class<? extends Component>, Component> components;
-    public final ComponentContainer componentContainer;
     public Transform transform;
 
-    public Entity(String name, ComponentContainer componentContainer) {
+    public Entity(String name) {
         UUID id = UUID.randomUUID();
         this.id = id;
         this.name = name != null ? name : id.toString();
-        this.componentContainer = componentContainer;
-//        this.components = new HashMap<>(4, 1.0f);
     }
 
     @Override
@@ -57,6 +51,10 @@ public class Entity
 
     public Entity getByName(String name) {
         return super.findFirst(node -> node.getName().equals(name));
+    }
+
+    public Transform getTransform() {
+        return transform;
     }
 
     @Override
@@ -98,27 +96,6 @@ public class Entity
         parent = (Entity) in.readObject();
         //        daughters = (List<Entity>) in.readObject();
     }
-
-    public boolean has(Class<? extends Component> type) {
-        return componentContainer.has(this, type);
-    }
-
-    public <C extends Component> C get(Class<C> type) {
-        return componentContainer.get(this, type);
-    }
-
-    public <C extends Component> void add(C component) {
-        componentContainer.add(this, component);
-    }
-
-    public <C extends Component> C remove(Class<C> type) {
-        return componentContainer.remove(this, type);
-    }
-
-    public Set<Class<? extends Component>> getComponentClassSet() {
-        return componentContainer.getComponentClassSet(this);
-    }
-
 
     @Override
     public String toString() {

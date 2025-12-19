@@ -31,7 +31,7 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
             return;
         } else*/
         Entity entity = component.getEntity();
-        MeshRenderer renderer = entity.get(MeshRenderer.class);
+        MeshRenderer renderer = cm.get(entity, MeshRenderer.class);
         if (component.acc > MAX_ACC_VALUE) {
 //            float r = rnd.nextFloat();
 //            float g = rnd.nextFloat();

@@ -14,7 +14,7 @@ public interface Component
     }
 
     Entity getEntity();
-    void attachToEntity(Entity entity);
+    void setEntity(Entity entity);
 
     boolean isActive();
     void setActivity(boolean activity);
@@ -24,7 +24,7 @@ public interface Component
     }
 
     default Transform getTransform() {
-        return getEntity().get(Transform.class);
+        return getEntity().getTransform();
     }
 }
  

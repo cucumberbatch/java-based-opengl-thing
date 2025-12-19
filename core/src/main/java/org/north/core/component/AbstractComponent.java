@@ -37,9 +37,11 @@ public abstract class AbstractComponent implements Component {
     }
 
     @Override
-    public void attachToEntity(Entity entity) {
-        entity.add(this);
+    public void setEntity(Entity entity) {
         this.entity = entity;
+        if (this instanceof Transform) {
+            this.entity.transform = (Transform) this;
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.north.core.physics.collision;
 
 import org.joml.Vector3f;
+import org.north.core.architecture.entity.ComponentManager;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.component.Transform;
 import org.north.core.physics.Sphere;
@@ -8,14 +9,16 @@ import org.north.core.physics.Sphere;
 public class RayCast {
     private final Vector3f origin;
     private final Vector3f direction;
+    private final ComponentManager cm;
 
-    public RayCast(Vector3f origin, Vector3f direction) {
+    public RayCast(Vector3f origin, Vector3f direction, ComponentManager cm) {
         this.origin = origin;
         this.direction = direction;
+        this.cm = cm;
     }
 
     public boolean isIntersects(Entity entity) {
-        Transform gTransform = entity.get(Transform.class).getGlobalTransform();
+        Transform gTransform = cm.get(entity, Transform.class).getGlobalTransform();
         Vector3f gPosition = gTransform.getPosition();
         float gSize = gTransform.getScale().length();
 

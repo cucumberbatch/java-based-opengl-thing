@@ -88,7 +88,7 @@ public class Pipeline implements ISystem, Runnable {
 //            context.addDependency(ComponentContainer.class, componentContainer);
             this.componentContainer = context.getDependency(ComponentContainer.class);
             this.rootNode =
-                    context.addDependency(Entity.class, new Entity("root", componentContainer));
+                    context.addDependency(Entity.class, new Entity("root"));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

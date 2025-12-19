@@ -15,7 +15,7 @@ class RayCastTest {
         float sphereRadius    = 1f;
 
         Sphere sphere   = new Sphere(sphereCenter, sphereRadius);
-        RayCast rayCast = new RayCast(rayOrigin, rayDirection);
+        RayCast rayCast = new RayCast(rayOrigin, rayDirection, null);
 
         Assertions.assertTrue(rayCast.isIntersects(sphere));
 

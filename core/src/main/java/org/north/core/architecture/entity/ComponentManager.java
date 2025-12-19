@@ -29,10 +29,6 @@ public class ComponentManager {
         }
     }
 
-    public ComponentContainer getComponentContainer() {
-        return this.componentContainer;
-    }
-
     public ManagedEntity take(Entity entity) {
         return popManagedEntity(entity);
     }
@@ -61,9 +57,16 @@ public class ComponentManager {
 
         ComponentInstance component = instantiateComponent(componentClass);
         component.setId(nextId());
-        component.attachToEntity(entity);
+        component.setEntity(entity);
 //        entity.add(component);
-        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+
+        // temporary disabled deferred commands for a while
+        //systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+
+        // using system manager instead for instant linking of entities with components
+        systemManager.addComponent(component);
+        componentContainer.add(entity, component);
+
 
         return component;
     }
@@ -80,9 +83,15 @@ public class ComponentManager {
         for (Class<? extends Component> componentClass: classes) {
             Component component = instantiateComponent(componentClass);
             component.setId(nextId());
-            component.attachToEntity(entity);
+            component.setEntity(entity);
             components.add(component);
-            systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+
+            // temporary disabled deferred commands for a while
+            //systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+
+            // using system manager instead for instant linking of entities with components
+            systemManager.addComponent(component);
+            componentContainer.add(entity, component);
         }
 
         return components;
@@ -90,17 +99,21 @@ public class ComponentManager {
 
     public final <ComponentInstance extends Component> ComponentInstance get(Entity entity,
                                                                              Class<ComponentInstance> componentClass) {
-        return entity.get(componentClass);
+        return componentContainer.get(entity, componentClass);
     }
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... classes) {
         List<Component> components = new ArrayList<>();
-        for (Class<? extends Component> aClass : classes) {
-            Component component = entity.get(aClass);
+        for (Class<? extends Component> componentType : classes) {
+            Component component = componentContainer.get(entity, componentType);
             components.add(component);
         }
         return components;
+    }
+
+    public final boolean has(Entity entity, Class<? extends Component> componentType) {
+        return componentContainer.has(entity, componentType);
     }
 
     public final <ComponentInstance extends Component> ComponentInstance remove(Entity entity,
@@ -109,8 +122,14 @@ public class ComponentManager {
             throw new IllegalArgumentException("Transform component cannot be removed!");
         }
 
-        ComponentInstance component = entity.get(componentClass);
-        systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
+        ComponentInstance component = componentContainer.get(entity, componentClass);
+
+        //systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
+
+        component.setActivity(false);
+        systemManager.getSystemByComponentType(componentClass).removeComponent(component.getId());
+
+
         return component;
     }
 
@@ -133,11 +152,11 @@ public class ComponentManager {
     }
 
     public static class ManagedEntity {
-        private final ComponentManager cm;
+        private final ComponentManager manager;
         private Entity entity;
 
-        public ManagedEntity(ComponentManager cm, Entity entity) {
-            this.cm = cm;
+        public ManagedEntity(ComponentManager manager, Entity entity) {
+            this.manager = manager;
             this.entity = entity;
         }
 
@@ -146,44 +165,49 @@ public class ComponentManager {
         }
 
         public synchronized <ComponentInstance extends Component> ComponentInstance add(Class<ComponentInstance> componentClass) {
-            cm.pushManagedEntity(this);
-            return cm.add(entity, componentClass);
+            manager.pushManagedEntity(this);
+            return manager.add(entity, componentClass);
         }
 
         public synchronized <ComponentInstance extends Component> ComponentInstance addAndPerform(Class<ComponentInstance> componentClass,
                                                                                                   Consumer<ComponentInstance> action) {
-            cm.pushManagedEntity(this);
-            ComponentInstance component = cm.add(entity, componentClass);
+            manager.pushManagedEntity(this);
+            ComponentInstance component = manager.add(entity, componentClass);
             action.accept(component);
             return component;
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> add(Class<? extends Component>... componentClasses) {
-            cm.pushManagedEntity(this);
-            return cm.add(entity, componentClasses);
+            manager.pushManagedEntity(this);
+            return manager.add(entity, componentClasses);
         }
 
         public synchronized <ComponentInstance extends Component> ComponentInstance get(Class<ComponentInstance> componentClass) {
-            cm.pushManagedEntity(this);
-            return entity.get(componentClass);
+            manager.pushManagedEntity(this);
+            return manager.get(entity, componentClass);
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> get(Class<? extends Component>... componentClasses) {
-            cm.pushManagedEntity(this);
-            return cm.get(entity, componentClasses);
+            manager.pushManagedEntity(this);
+            return manager.get(entity, componentClasses);
+        }
+
+        public synchronized boolean has(Class<? extends Component> componentClass) {
+            manager.pushManagedEntity(this);
+            return manager.has(entity, componentClass);
         }
 
         public synchronized <ComponentInstance extends Component> void remove(Class<ComponentInstance> componentClass) {
-            cm.pushManagedEntity(this);
-            cm.remove(entity, componentClass);
+            manager.pushManagedEntity(this);
+            manager.remove(entity, componentClass);
         }
 
         @SafeVarargs
         public final synchronized List<? extends Component> remove(Class<? extends Component>... componentClasses) {
-            cm.pushManagedEntity(this);
-            return cm.remove(entity, componentClasses);
+            manager.pushManagedEntity(this);
+            return manager.remove(entity, componentClasses);
         }
 
     }

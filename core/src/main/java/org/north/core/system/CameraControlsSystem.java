@@ -81,7 +81,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
     @Override
     public void init(CameraControls cameraControls) {
-        camera = cameraControls.entity.get(Camera.class);
+        camera = cm.get(cameraControls.entity, Camera.class);
     }
 
     @Override
