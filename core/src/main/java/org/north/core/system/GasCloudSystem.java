@@ -14,7 +14,7 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
 
     @Inject
     public GasCloudSystem(ApplicationContext context) {
-        super(context);
+        super(GasCloud.class, context);
     }
 
     @Override

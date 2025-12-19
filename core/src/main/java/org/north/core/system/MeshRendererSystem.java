@@ -15,7 +15,7 @@ public class MeshRendererSystem
 
     @Inject
     public MeshRendererSystem(ApplicationContext context) {
-        super(context);
+        super(MeshRenderer.class, context);
     }
 
     @Override

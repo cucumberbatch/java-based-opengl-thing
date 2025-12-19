@@ -20,7 +20,7 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
 
     @Inject
     public CubeColorSwitcherSystem(ApplicationContext context) {
-        super(context);
+        super(CubeColorSwitcher.class, context);
     }
 
     @Override

@@ -32,7 +32,7 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
 
     @Inject
     public ButtonSystem(ApplicationContext context) {
-        super(context);
+        super(Button.class, context);
     }
 
     @Override

@@ -3,57 +3,80 @@ package org.north.core.architecture.entity;
 import org.north.core.component.Component;
 import org.north.core.exception.ComponentAlreadyExistsException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MapBasedComponentContainer implements ComponentContainer {
-    private final Map<Class<? extends Component>, Map<Entity, ? extends Component>> componentStorage = new HashMap<>();
+    private final
+    Map<Class<? extends Component>, Map<Entity, ? extends Component>> componentByEntityStorage;
 
-    @Override
-    public boolean has(Entity entity, Class<? extends Component> type) {
-        Map<Entity, ? extends Component> entityComponents = componentStorage.get(type);
-        return entityComponents == null || !entityComponents.containsKey(entity);
+    private final
+    Map<Class<? extends Component>, List<Component>> componentByTypeStorage;
+
+
+    public MapBasedComponentContainer() {
+        this.componentByEntityStorage = new HashMap<>();
+        this.componentByTypeStorage   = new IdentityHashMap<>();
     }
 
     @Override
+    public boolean has(Entity entity, Class<? extends Component> type) {
+        Map<Entity, ? extends Component> componentsMap = componentByEntityStorage.get(type);
+        return componentsMap == null || !componentsMap.containsKey(entity);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public <C extends Component> C get(Entity entity, Class<C> type) {
-        Map<Entity, ? extends Component> entityComponents = componentStorage.get(type);
-        if (entityComponents == null || !entityComponents.containsKey(entity)) {
+        Map<Entity, ? extends Component> componentsMap = componentByEntityStorage.get(type);
+        C component;
+        if (componentsMap == null || (component = (C) componentsMap.get(entity)) == null) {
             throw new NullPointerException("Component not found!");
         }
-        return type.cast(entityComponents.get(entity));
+        return type.cast(component);
     }
 
     @Override
     public <C extends Component> void add(Entity entity, C component) {
         Class<? extends Component> type = component.getClass();
-        @SuppressWarnings("unchecked") Map<Entity, Component> entityComponents =
-                (Map<Entity, Component>) componentStorage.get(type);
+        @SuppressWarnings("unchecked")
+        Map<Entity, Component> componentsMap = (Map<Entity, Component>) componentByEntityStorage.get(type);
+        List<Component>        components    = componentByTypeStorage.get(type);
 
-        if (entityComponents == null) {
-            entityComponents = new HashMap<>();
-            componentStorage.put(type, entityComponents);
-        } else if (entityComponents.containsKey(entity)) {
+        if (componentsMap == null || components == null) {
+            componentsMap = new HashMap<>();
+            components    = new ArrayList<>();
+            componentByEntityStorage.put(type, componentsMap);
+            componentByTypeStorage  .put(type, components);
+        } else if (componentsMap.containsKey(entity)) {
             throw new ComponentAlreadyExistsException(type);
         }
-        entityComponents.put(entity, component);
+
+        componentsMap.put(entity, component);
+        components   .add(component);
     }
 
     @Override
     public <C extends Component> C remove(Entity entity, Class<C> type) {
-        Map<Entity, ? extends Component> entityComponents = componentStorage.get(type);
-        if (entityComponents == null || !entityComponents.containsKey(entity)) {
+        Map<Entity, ? extends Component> componentsMap = componentByEntityStorage.get(type);
+
+        Component component;
+        if (componentsMap == null || (component = componentsMap.remove(entity)) == null) {
             throw new NullPointerException("Component not found!");
         }
-        return type.cast(entityComponents.remove(entity));
+        componentByTypeStorage.get(type).remove(component);
+        return type.cast(component);
     }
 
     @Override
-    public Set<Class<? extends Component>> getComponentClassSet(Entity entity) {
+    @SuppressWarnings("unchecked")
+    public <C extends Component> Collection<C> getComponentsByType(Class<C> type) {
+        return (Collection<C>) componentByTypeStorage.get(type);
+    }
+
+    @Override
+    public Set<Class<? extends Component>> getComponentTypesSet(Entity entity) {
         Set<Class<? extends Component>> componentTypes = new HashSet<>();
-        for (Map<Entity, ? extends Component> entityToComponentMap : componentStorage.values()) {
+        for (Map<Entity, ? extends Component> entityToComponentMap : componentByEntityStorage.values()) {
             Component component = entityToComponentMap.get(entity);
             if (component != null) {
                 componentTypes.add(component.getClass());

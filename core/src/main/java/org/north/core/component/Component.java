@@ -1,13 +1,9 @@
 package org.north.core.component;
 
 import org.north.core.architecture.entity.Entity;
-import org.north.core.management.data.Identifiable;
 import org.north.core.management.data.Stateful;
 
-import java.util.UUID;
-
-public interface Component
-        extends Identifiable<UUID>, Stateful<ComponentState> {
+public interface Component extends Stateful<ComponentState> {
 
     default String getSimpleName() {
         return this.getClass().getSimpleName();

@@ -1,9 +1,8 @@
 package org.north.core.architecture.entity;
 
 import org.north.core.component.Component;
-import org.north.core.component.Transform;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Set;
 
 public interface ComponentContainer {
@@ -15,6 +14,8 @@ public interface ComponentContainer {
 
     <C extends Component> C remove(Entity entity, Class<C> type);
 
-    Set<Class<? extends Component>> getComponentClassSet(Entity entity);
+    <C extends Component> Collection<C> getComponentsByType(Class<C> type);
+
+    Set<Class<? extends Component>> getComponentTypesSet(Entity entity);
 
 }

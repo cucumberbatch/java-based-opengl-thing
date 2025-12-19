@@ -124,7 +124,7 @@ public class SystemManager implements Resettable {
                 }
 
                 // Logger.info(String.format("System %s initialized", system.getClass().getName()));
-            } catch (Exception e) {
+            } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -138,18 +138,7 @@ public class SystemManager implements Resettable {
             spatialTree.insert((Transform) component);
         }
 
-        return (C) system.addComponent(component);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E extends Component> E getComponent(UUID componentId) {
-        for (System<?> system : systemList) {
-            Component component = system.getComponent(componentId);
-            if (component != null) {
-                return (E) component;
-            }
-        }
-        throw new ComponentNotFoundException(componentId);
+        return (C) component; //system.addComponent(component);
     }
 
     private Map<RenderProcess<?>, List<? extends Component>> scm = new IdentityHashMap<>();

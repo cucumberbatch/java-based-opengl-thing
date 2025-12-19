@@ -1,6 +1,5 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.Entity;
 import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
@@ -20,7 +19,7 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     @Inject
     public MeshColliderSystem(ApplicationContext context) {
-        super(context);
+        super(MeshCollider.class, context);
     }
 
     @Override

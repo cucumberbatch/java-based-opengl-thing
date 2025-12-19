@@ -14,7 +14,7 @@ public class RigidBody2dSystem extends AbstractSystem<RigidBody2d>
 
     @Inject
     public RigidBody2dSystem(ApplicationContext context) {
-        super(context);
+        super(RigidBody2d.class, context);
     }
 
     @Override

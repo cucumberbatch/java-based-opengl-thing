@@ -6,8 +6,6 @@ import java.util.UUID;
 
 public abstract class AbstractComponent implements Component {
 
-    public UUID id;
-
     /* Entity which this component is belongs to */
     public transient Entity entity;
 
@@ -21,16 +19,6 @@ public abstract class AbstractComponent implements Component {
     /*
      Getters and setters implementation by an abstract component class
      */
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     @Override
     public Entity getEntity() {
         return entity;
@@ -69,7 +57,7 @@ public abstract class AbstractComponent implements Component {
     @Override
     public String toString() {
         return "AbstractComponent{" +
-                "id=" + id +
+                "entityId=" + entity.id +
                 ", isActive=" + isActive +
                 ", state=" + state.name() +
                 '}';

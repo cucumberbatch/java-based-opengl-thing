@@ -12,7 +12,7 @@ public class MovementSystem extends AbstractSystem<MovementComponent> implements
 
     @Inject
     public MovementSystem(ApplicationContext context) {
-        super(context);
+        super(MovementComponent.class, context);
     }
 
     @Override

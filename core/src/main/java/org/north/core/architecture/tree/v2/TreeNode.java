@@ -143,7 +143,7 @@ public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, S
     }
 
     /**
-     * Returns first occurance of node which was accepted by provided {@code predicate} filter
+     * Returns first occurrence of node which was accepted by provided {@code predicate} filter
      * @param predicate a filter predicate
      * @return the first found element that was accepted by provided filter or {@code null} if there is no such element
      * @throws NullPointerException if the specified {@code predicate} is null

@@ -23,7 +23,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
 
     @Inject
     public PlayerControlsSystem(ApplicationContext context) {
-        super(context);
+        super(PlayerControls.class, context);
     }
 
     @Override

@@ -10,13 +10,13 @@ import org.north.core.component.Component;
 public interface IComponentManager<E extends Component> {
 
     /**
-     * This method allows you to add a components to an entity that it calls
+     * This method allows you to add components to an entity that it calls
      *
      * @param component is a component that needs to be added to
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    void addComponent(E component) throws IllegalArgumentException, ClassCastException;
+    void addComponent(E component);
 
     /**
      * This method allows you to get the concrete component to an entity that it calls
@@ -26,7 +26,7 @@ public interface IComponentManager<E extends Component> {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    E getComponent(Class<E> componentClass) throws IllegalArgumentException, ClassCastException;
+    E getComponent(Class<E> componentClass);
 
     /**
      * Method that allows you to remove the component that attached to it entity
@@ -36,6 +36,6 @@ public interface IComponentManager<E extends Component> {
      * @throws IllegalArgumentException if a bad type argue, is not a component type
      * @throws ClassCastException       if unable to cast a component
      */
-    E removeComponent(Class<E> componentClass) throws IllegalArgumentException, ClassCastException;
+    E removeComponent(Class<E> componentClass);
 
 }

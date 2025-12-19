@@ -5,13 +5,11 @@ import org.north.core.component.CameraControls;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
-import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.graphics.Graphics;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InputHandleProcess;
 import org.north.core.system.process.InitProcess;
-import org.north.core.system.process.RenderProcess;
 import org.north.core.system.process.UpdateProcess;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -73,7 +71,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
     @Inject
     public CameraControlsSystem(ApplicationContext context) throws ReflectiveOperationException {
-        super(context);
+        super(CameraControls.class, context);
         this.graphics = context.getDependency(Graphics.class);
         this.intermediateCameraStateOnFocusLossEnabled =
                 ApplicationProperties.getBoolean("application.editor.camera.intermediate-state-on-focus-loss");
@@ -243,14 +241,14 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         verticalAngle = restrictAngle(verticalAngle, -MAX_CAMERA_ANGLE, MAX_CAMERA_ANGLE);
 
 
-        Vector3f point = vector3fPool.get().set(0f, 0f, 1f)
+        Vector3f point = vec3f().set(0f, 0f, 1f)
                 .rotateX((float) Math.toRadians(verticalAngle))
                 .rotateY((float) Math.toRadians(horizontalAngle));
 
         cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 4.7f : 1f;
 
         Transform componentTransform = cameraControls.getTransform();
-        Vector3f vec3f = vector3fPool.get();
+        Vector3f vec3f = vec3f();
 
         // up-down movement
         // note: incorrect
@@ -299,8 +297,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         camera.viewMatrix.identity().lookAt(camera.eye, camera.at, vec3f.set(0f, 1f, 0f));
 
-        vector3fPool.put(vec3f);
-        vector3fPool.put(point);
+        putBack(vec3f);
+        putBack(point);
 
         graphics.view = camera.viewMatrix;
     }

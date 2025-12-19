@@ -40,7 +40,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
 
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
-        super(context);
+        super(CloudEmitter.class, context);
         this.componentContainer = context.getDependency(ComponentContainer.class);
     }
 

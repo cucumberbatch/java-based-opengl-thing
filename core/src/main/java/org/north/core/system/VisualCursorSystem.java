@@ -66,7 +66,7 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     @Inject
     public VisualCursorSystem(ApplicationContext context) {
-        super(context);
+        super(VisualCursor.class, context);
         this.window = context.getDependency(Window.class);
     }
 

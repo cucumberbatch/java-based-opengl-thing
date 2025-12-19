@@ -15,7 +15,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
 
     @Inject
     public RigidBodySystem(ApplicationContext context) {
-        super(context);
+        super(RigidBody.class, context);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
         Transform transform = rigidBody.getTransform();
 
         /* Catch the free vector from pool for calculations */
-        Vector3f temp = vector3fPool.get();
+        Vector3f temp = vec3f();
 
         /* Update all kinds of movement for transform and rigid body components */
         updatePosition(transform, rigidBody, deltaTime, temp);
@@ -37,7 +37,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
         }
 
         /* Take it back */
-        vector3fPool.put(temp);
+        putBack(temp);
     }
 
     private void updateGravitationalAcceleration(RigidBody rigidBody, float deltaTime, Vector3f temp) {
@@ -61,9 +61,9 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
     }
 
     public void addImpulseToMassCenter(RigidBody rigidBody, Vector3f direction, float mass) {
-        Vector3f temp = vector3fPool.get();
+        Vector3f temp = vec3f();
         rigidBody.velocity.add(direction.mul(mass, temp));
-        vector3fPool.put(temp);
+        putBack(temp);
     }
 
 }

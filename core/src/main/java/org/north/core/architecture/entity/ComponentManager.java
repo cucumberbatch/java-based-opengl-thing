@@ -12,14 +12,14 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class ComponentManager {
-    private final SystemManager systemManager;
+    private final SystemManager      systemManager;
     private final ComponentContainer container;
 
     @Inject
     public ComponentManager(ApplicationContext context) {
         try {
             this.systemManager = context.getDependency(SystemManager.class);
-            this.container = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
+            this.container     = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -29,19 +29,13 @@ public class ComponentManager {
         systemManager.setCameraComponent(camera);
     }
 
-    private UUID nextId() {
-        return UUID.randomUUID();
-    }
-
     public final <C extends Component> C add(Entity entity, Class<C> type) {
         if (entity == null || type == null) {
             throw new IllegalArgumentException("Entity or component class must not be null");
         }
 
         C component = instantiateComponentOfType(type);
-        component.setId(nextId());
         component.setEntity(entity);
-//        entity.add(component);
 
         // temporary disabled deferred commands for a while
         //systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
@@ -50,22 +44,18 @@ public class ComponentManager {
         systemManager.addComponent(component);
         container.add(entity, component);
 
-
         return component;
     }
 
     @SafeVarargs
-    public final List<? extends Component> add(Entity entity,
-                                               Class<? extends Component>... classes) {
-        if (entity == null || classes == null) {
-            throw new IllegalArgumentException("Entity or component classes must not be null or empty");
+    public final List<? extends Component> add(Entity entity, Class<? extends Component>... types) {
+        if (entity == null || types == null) {
+            throw new IllegalArgumentException("Entity or component types must not be null or empty");
         }
 
-        List<Component> components = new ArrayList<>();
-
-        for (Class<? extends Component> componentClass: classes) {
-            Component component = instantiateComponentOfType(componentClass);
-            component.setId(nextId());
+        List<Component> components = new ArrayList<>(types.length);
+        for (Class<? extends Component> type : types) {
+            Component component = instantiateComponentOfType(type);
             component.setEntity(entity);
             components.add(component);
 
@@ -76,7 +66,6 @@ public class ComponentManager {
             systemManager.addComponent(component);
             container.add(entity, component);
         }
-
         return components;
     }
 
@@ -92,7 +81,7 @@ public class ComponentManager {
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... types) {
-        List<Component> components = new ArrayList<>();
+        List<Component> components = new ArrayList<>(types.length);
         for (Class<? extends Component> type : types) {
             Component component = container.get(entity, type);
             components.add(component);
@@ -114,7 +103,7 @@ public class ComponentManager {
         //systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
 
         component.setActivity(false);
-        systemManager.getSystemByComponentType(type).removeComponent(component.getId());
+        systemManager.getSystemByComponentType(type).removeComponent(component);
 
 
         return component;
@@ -128,6 +117,10 @@ public class ComponentManager {
             components.add(remove);
         }
         return components;
+    }
+
+    public final <C extends Component> Collection<C> getAllByType(Class<C> type) {
+        return container.getComponentsByType(type);
     }
 
     private <C extends Component> C instantiateComponentOfType(Class<C> type) {
