@@ -156,7 +156,7 @@ public class Pipeline implements ISystem, Runnable {
     }
 
     private void composeScene(SceneComposer composer) {
-        componentManager.take((Entity) rootNode).add(Transform.class);
+        componentManager.add((Entity) rootNode, Transform.class);
         composer.compose(rootNode, componentManager);
     }
 

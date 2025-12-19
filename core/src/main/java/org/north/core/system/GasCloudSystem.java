@@ -21,11 +21,11 @@ public class GasCloudSystem extends AbstractSystem<GasCloud> implements UpdatePr
     public void update(GasCloud gasCloud, float deltaTime) {
         Entity entity = gasCloud.getEntity();
 
-        MeshRenderer meshRenderer = cm.take(entity).get(MeshRenderer.class);
+        MeshRenderer meshRenderer = cm.get(entity, MeshRenderer.class);
         AtlasTextureAnimationShader shader = (AtlasTextureAnimationShader) meshRenderer.shader;
 
         if (shader.spriteIndex > 4) {
-            cm.take(entity).remove(MeshRenderer.class);
+            cm.remove(entity, MeshRenderer.class);
             entity.remove(entity);
         }
 

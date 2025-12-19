@@ -95,8 +95,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
 
             world.add(gasCloudEntity);
 
-            cm.take(gasCloudEntity)
-                    .add(Transform.class, MeshRenderer.class, GasCloud.class);
+            cm.add(gasCloudEntity, Transform.class, MeshRenderer.class, GasCloud.class);
 
             Transform transform = cm.get(gasCloudEntity, Transform.class);
             Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
