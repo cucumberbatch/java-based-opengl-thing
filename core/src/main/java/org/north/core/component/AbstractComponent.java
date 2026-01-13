@@ -27,9 +27,9 @@ public abstract class AbstractComponent implements Component {
     @Override
     public void setEntity(Entity entity) {
         this.entity = entity;
-        if (this instanceof Transform) {
-            this.entity.transform = (Transform) this;
-        }
+        //if (this instanceof Transform) {
+        //    this.entity.transform = (Transform) this;
+        //}
     }
 
     @Override

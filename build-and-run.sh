@@ -1,1 +1,1 @@
-./build.sh && java -jar core/target/core-*.jar
+./build.sh && java -ea -jar core/target/core-*.jar

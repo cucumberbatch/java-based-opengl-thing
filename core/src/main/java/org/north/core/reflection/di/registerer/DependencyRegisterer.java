@@ -103,7 +103,7 @@ public class DependencyRegisterer {
             if (noArgsConstructor != null) {
                 object = noArgsConstructor.newInstance();
             } else {
-                throw new RuntimeException("Inject annotation not found");
+                throw new RuntimeException("Inject annotation not found for a class '" + aClass.getName() + "'");
             }
         }
 

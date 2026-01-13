@@ -2,7 +2,6 @@ package org.north.core.system;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.north.core.architecture.entity.ComponentContainer;
 import org.north.core.component.*;
 import org.north.core.architecture.entity.Entity;
 import org.north.core.context.ApplicationContext;
@@ -20,19 +19,17 @@ import static org.joml.Math.*;
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         implements InitProcess<CloudEmitter>, InputHandleProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
     private float acc = 0;
-    private long gasCloudEntityNumber = 0;
+    private long  gasCloudEntityNumber = 0;
 
-    private Entity world;
-    private Transform worldTransform;
+    private Entity    movableWorld;
+    private Transform movableWorldTransform;
     private RigidBody movableWorldRigidBody;
     private Transform spaceshipTransform;
     private Transform spawnerTransform;
 
     private static final Vector3f emittingPosition = new Vector3f(0f, -0.225f, 0.5f);
-    private static final Vector3f emittingScale = new Vector3f(0.2f, 0.2f, 0.2f);
-    private static final float twoPi = (float) (2 * PI);
-
-    private final ComponentContainer componentContainer;
+    private static final Vector3f emittingScale    = new Vector3f(0.2f, 0.2f, 0.2f);
+    private static final float    twoPi = (float) (2 * PI);
 
     private boolean keyAIsHolded;
     private boolean keyDIsHolded;
@@ -41,16 +38,18 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
     @Inject
     public CloudEmitterSystem(ApplicationContext context) {
         super(CloudEmitter.class, context);
-        this.componentContainer = context.getDependency(ComponentContainer.class);
     }
 
     @Override
     public void init(CloudEmitter cloudEmitter) {
-        spaceshipTransform = cloudEmitter.getTransform();
-        spawnerTransform = cm.get(sceneRoot.getByName("gasCloudSpawner"), Transform.class);
-        world = sceneRoot.getByName("movableWorld");
-        worldTransform = cm.get(world, Transform.class);
-        movableWorldRigidBody = cm.get(world, RigidBody.class);
+        Entity emitterEntity = cloudEmitter.getEntity();
+        Entity spawnerEntity = sceneRoot.getByName("gasCloudSpawner");
+        movableWorld         = sceneRoot.getByName("movableWorld");
+        
+        spaceshipTransform    = cm.get(emitterEntity, Transform.class);
+        spawnerTransform      = cm.get(spawnerEntity, Transform.class);
+        movableWorldTransform = cm.get(movableWorld,  Transform.class);
+        movableWorldRigidBody = cm.get(movableWorld,  RigidBody.class);
 
         movableWorldRigidBody.isGravitational = false;
     }
@@ -67,8 +66,8 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         boolean moving = false;
 
         float accelerationSpeed = 15;
-        float rotationSpeed = 6;
-        float rotationIncrement = deltaTime * rotationSpeed;
+        float rotationSpeed     = 6;
+        float rotationIncrement     = deltaTime * rotationSpeed;
         float accelerationIncrement = deltaTime * accelerationSpeed;
         float angle = spaceshipTransform.getRotation().z;
 
@@ -84,7 +83,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         if (keyWIsHolded) {
             moving = true;
             movableWorldRigidBody.addImpulseToMassCenter(
-                    accelerationIncrement * (float) sin(angle),
+                    +accelerationIncrement * (float) sin(angle),
                     -accelerationIncrement * (float) cos(angle),
                     0f
             );
@@ -93,18 +92,41 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         if (moving && acc > 1) {
             Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++);
 
-            world.add(gasCloudEntity);
+            movableWorld.add(gasCloudEntity);
 
-            cm.add(gasCloudEntity, Transform.class, MeshRenderer.class, GasCloud.class);
+            //cm.add(gasCloudEntity, Transform.class, MeshRenderer.class, GasCloud.class);
 
-            Transform transform = cm.get(gasCloudEntity, Transform.class);
-            Vector3f globalPosition = worldTransform.getGlobalPosition(new Vector3f());
-            transform.moveTo(-globalPosition.x / 5, -globalPosition.y / 5, globalPosition.z);
-            transform.rescaleTo(emittingScale);
+            cm.addAndPerform(gasCloudEntity, Transform.class, transform -> {
+                Vector3f globalPos = movableWorldTransform.getGlobalPosition(new Vector3f());
+                
+                transform.moveTo(
+                    -globalPos.x / 5,
+                    -globalPos.y / 5,
+                    +globalPos.z
+                );
+                transform.rescaleTo(emittingScale);
+            });
 
-            MeshRenderer renderer = cm.get(gasCloudEntity, MeshRenderer.class);
-            renderer.shader = new AtlasTextureAnimationShader(6, 12, 12);
-            renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+            cm.addAndPerform(gasCloudEntity, MeshRenderer.class, renderer -> {
+                renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
+                renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+            });
+
+            cm.add(gasCloudEntity, GasCloud.class);
+
+            //Transform transform = cm.get(gasCloudEntity, Transform.class);
+            //Vector3f  globalPos = worldTransform.getGlobalPosition(new Vector3f());
+
+            //transform.moveTo(
+            //    -globalPos.x / 5,
+            //    -globalPos.y / 5,
+            //    +globalPos.z
+            //);
+            //transform.rescaleTo(emittingScale);
+
+            //MeshRenderer renderer = cm.get(gasCloudEntity, MeshRenderer.class);
+            //renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
+            //renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
 
             acc = 0;
         }

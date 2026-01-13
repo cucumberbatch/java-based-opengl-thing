@@ -1,5 +1,8 @@
 package org.north.core.management;
 
+import org.north.core.architecture.entity.ComponentContainer;
+import org.north.core.architecture.entity.MapBasedComponentContainer;
+import org.north.core.architecture.entity.Entity;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
@@ -40,19 +43,28 @@ public class SystemManager implements Resettable {
     public final EntityDistanceToCameraComparator cameraDistanceComparator;
     public final OctreeNode<Transform> spatialTree;
 
+    private final ComponentContainer componentContainer;
+
     private Camera camera;
 
     public SystemManager(ApplicationContext context) {
-        applicationContext = context;
-        scanner = new ComponentHandlerScanner();
-        cameraDistanceComparator = new EntityDistanceToCameraComparator();
-        deferredCommands = new LinkedList<>();
+        applicationContext            = context;
+        scanner                       = new ComponentHandlerScanner();
+        deferredCommands              = new LinkedList<>();
         componentToSystemAssociations = new IdentityHashMap<>();
         spatialTree = new OctreeNode<>(new Vector3f(0, 0, 0), new Vector3f(8, 8, 8));
-        collisions = new ArrayList<>();
-        systemList = new ArrayList<>();
-        systemMap = new IdentityHashMap<>();
-        processMap = new IdentityHashMap<>();
+        collisions  = new ArrayList<>();
+        systemList  = new ArrayList<>();
+        systemMap   = new IdentityHashMap<>();
+        processMap  = new IdentityHashMap<>();
+
+        try {
+            componentContainer       = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
+            cameraDistanceComparator = new EntityDistanceToCameraComparator(componentContainer);
+       } catch (ReflectiveOperationException e) {
+            log.error("Failed to create and register component container instance!");
+            throw new RuntimeException(e);
+        }
 
         initProcessMap(ApplicationProperties.getProperty("process.package"));
         loadComponentSystemsFromPackage(ApplicationProperties.getProperty("system.package"));
@@ -103,34 +115,38 @@ public class SystemManager implements Resettable {
 
     @SuppressWarnings("unchecked")
     public <C extends Component> C addComponent(C component) {
+        Entity entity = component.getEntity();
         Class<? extends Component> componentClass = component.getClass();
+        Class<? extends System<?>> systemClass    = null;
         System<?> system;
 
         // initialize system if it is not
         if ((system = systemMap.get(componentClass)) == null) {
             try {
                 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
-                Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
-                if (systemClass == null) return null;
-                system = applicationContext.addDependency(systemClass);
-                systemMap.put(componentClass, system);
-                systemList.add(system);
+                systemClass = componentToSystemAssociations.get(componentClass);
+                if (systemClass != null) {
+                    system = applicationContext.addDependency(systemClass);
+                    systemMap.put(componentClass, system);
+                    systemList.add(system);
 
-                // Attaching to system list
-                for (Class<? extends Process> processClass : processMap.keySet()) {
-                    if (processClass.isAssignableFrom(systemClass)) {
-                        processMap.get(processClass).add((Process) system);
+                    // Attaching to system list
+                    for (Class<? extends Process> processClass : processMap.keySet()) {
+                        if (processClass.isAssignableFrom(systemClass)) {
+                            processMap.get(processClass).add((Process) system);
+                        }
                     }
-                }
 
+                }
                 // Logger.info(String.format("System %s initialized", system.getClass().getName()));
+    
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
         }
-
+        
         // change state if it has no init process
-        if (!InitProcess.class.isAssignableFrom(system.getClass())) {
+        if (systemClass != null && !InitProcess.class.isAssignableFrom(systemClass)) {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
 
@@ -138,6 +154,7 @@ public class SystemManager implements Resettable {
             spatialTree.insert((Transform) component);
         }
 
+        componentContainer.add(entity, component);
         return (C) component; //system.addComponent(component);
     }
 
@@ -145,7 +162,10 @@ public class SystemManager implements Resettable {
 
     public List<? extends Component> sortComponentsByDistanceToCamera(RenderProcess<?> process) {
         if (camera == null) return Collections.emptyList();
-        if (!cameraDistanceComparator.isCameraSet()) cameraDistanceComparator.setCameraPosition(camera.getTransform().getPosition());
+        if (!cameraDistanceComparator.isCameraSet()) {
+            Transform transform = componentContainer.get(camera.getEntity(), Transform.class);
+            cameraDistanceComparator.setCameraPosition(transform.getPosition());
+        }
 
         List<? extends Component> components;
         if (scm.containsKey(process)) {
@@ -168,7 +188,7 @@ public class SystemManager implements Resettable {
         if (deferredCommands.isEmpty()) return;
         for (DeferredCommand command : deferredCommands) {
             command.execute(this);
-//            log.info("executed deferred command: {}", command);
+            log.info("executed deferred command: {}", command);
         }
         deferredCommands.clear();
     }
@@ -186,6 +206,11 @@ public class SystemManager implements Resettable {
 
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
         private Vector3f cameraPosition;
+        private final ComponentContainer componentContainer;
+
+        public EntityDistanceToCameraComparator(ComponentContainer componentContainer) {
+            this.componentContainer = componentContainer;
+        }
 
         //note: we need to be careful because of passing a reference to camera position only once at the start of Camera component life,
         // so if we accidentally replace Transform.position vec instance we loose all position changes and scene will be rendered in wrong order
@@ -199,8 +224,10 @@ public class SystemManager implements Resettable {
 
         @Override
         public int compare(Component o1, Component o2) {
-            float o1Distance = o1.getTransform().cachedGlobalPosition.distance(cameraPosition);
-            float o2Distance = o2.getTransform().cachedGlobalPosition.distance(cameraPosition);
+            Transform t1 = componentContainer.get(o1.getEntity(), Transform.class);
+            Transform t2 = componentContainer.get(o2.getEntity(), Transform.class);
+            float o1Distance = t1.cachedGlobalPosition.distance(cameraPosition);
+            float o2Distance = t2.cachedGlobalPosition.distance(cameraPosition);
             return Float.compare(o2Distance, o1Distance);
         }
     }

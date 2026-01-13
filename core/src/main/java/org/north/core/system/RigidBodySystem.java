@@ -20,7 +20,7 @@ public class RigidBodySystem extends AbstractSystem<RigidBody>
 
     @Override
     public void update(RigidBody rigidBody, float deltaTime) {
-        Transform transform = rigidBody.getTransform();
+        Transform transform = cm.get(rigidBody.getEntity(), Transform.class);
 
         /* Catch the free vector from pool for calculations */
         Vector3f temp = vec3f();

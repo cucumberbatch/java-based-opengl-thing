@@ -1,6 +1,7 @@
 package org.north.core.graphics.shader;
 
 import org.north.core.component.MeshRenderer;
+import org.north.core.component.Transform;
 import org.north.core.graphics.Graphics;
 
 public interface Shader {
@@ -10,5 +11,5 @@ public interface Shader {
     void disable();
     boolean isEnabled();
 
-    void updateUniforms(Graphics graphics, MeshRenderer renderer);
+    void updateUniforms(Graphics graphics, Transform transform, MeshRenderer renderer);
 }

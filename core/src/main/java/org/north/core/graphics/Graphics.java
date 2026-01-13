@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.north.core.component.MeshRenderer;
+import org.north.core.component.Transform;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.shader.Shader;
 import org.north.core.utils.BufferUtils;
@@ -67,9 +68,9 @@ public class Graphics {
         GL20.glDisableVertexAttribArray(vertexBuffer);
     }
 
-    public void prepareShader(Shader shader, MeshRenderer renderer) {
+    public void prepareShader(Shader shader, Transform transform, MeshRenderer renderer) {
         activeTextureCount = GL20.GL_TEXTURE0;
-        shader.updateUniforms(this, renderer);
+        shader.updateUniforms(this, transform, renderer);
     }
 
     public int getUniformLocation(Shader shader, String name) throws ShaderUniformNotFoundException {

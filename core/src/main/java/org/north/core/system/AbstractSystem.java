@@ -15,15 +15,16 @@ import org.north.core.management.memory.Vector3fPool;
 import java.util.*;
 
 public abstract class AbstractSystem<C extends Component> implements System<C> {
-
+    
     protected static final Logger log = LoggerFactory.getLogger(AbstractSystem.class);
 
-    private final Class<C>       componentType;
-    private final Pool<Vector3f> vector3fPool;
+    private final Class<C>           componentType;
+    private final Pool<Vector3f>     vector3fPool;
+    private final ComponentContainer container;
+    
+    protected final ComponentManager cm;
+    protected final Entity           sceneRoot;
 
-    protected final ComponentContainer container;
-    protected final ComponentManager   cm;
-    protected final Entity             sceneRoot;
 
     public AbstractSystem(Class<C> componentType, ApplicationContext context) {
         this.componentType = componentType;

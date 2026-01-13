@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.north.core.management.data.AxisAlignedBoundingBox;
 import org.north.core.physics.collision.MovementListener;
+import org.north.core.component.ComponentState;
 
 import java.util.Iterator;
 
@@ -24,6 +25,10 @@ public class Transform extends AbstractComponent implements Iterable<Transform>,
     private static final MovementListener EMPTY_MOVEMENT_LISTENER = (e, p1, p2) -> {};
 
     private MovementListener movementListener = EMPTY_MOVEMENT_LISTENER;
+
+    public Transform() {
+        super.setState(ComponentState.READY_TO_OPERATE_STATE);
+    }
 
     public Vector3f getPosition() {
         return position;

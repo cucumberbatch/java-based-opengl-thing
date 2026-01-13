@@ -5,6 +5,8 @@ import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.management.SystemManager;
+import org.north.core.system.command.AddComponentDeferredCommand;
+import org.north.core.system.command.RemoveComponentDeferredCommand;
 import org.north.core.reflection.di.Inject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,13 +18,9 @@ public class ComponentManager {
     private final ComponentContainer container;
 
     @Inject
-    public ComponentManager(ApplicationContext context) {
-        try {
-            this.systemManager = context.getDependency(SystemManager.class);
-            this.container     = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    public ComponentManager(ApplicationContext context) {     
+        this.container     = context.getDependency(ComponentContainer.class);
+        this.systemManager = context.getDependency(SystemManager.class);
     }
 
     public void setCameraComponent(Camera camera) {
@@ -33,18 +31,7 @@ public class ComponentManager {
         if (entity == null || type == null) {
             throw new IllegalArgumentException("Entity or component class must not be null");
         }
-
-        C component = instantiateComponentOfType(type);
-        component.setEntity(entity);
-
-        // temporary disabled deferred commands for a while
-        //systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
-
-        // using system manager instead for instant linking of entities with components
-        systemManager.addComponent(component);
-        container.add(entity, component);
-
-        return component;
+        return instantiateAndRegisterComponent(entity, type);
     }
 
     @SafeVarargs
@@ -52,21 +39,18 @@ public class ComponentManager {
         if (entity == null || types == null) {
             throw new IllegalArgumentException("Entity or component types must not be null or empty");
         }
-
-        List<Component> components = new ArrayList<>(types.length);
+        List<Component> addedComponents = new ArrayList<>(types.length);
         for (Class<? extends Component> type : types) {
-            Component component = instantiateComponentOfType(type);
-            component.setEntity(entity);
-            components.add(component);
-
-            // temporary disabled deferred commands for a while
-            //systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
-
-            // using system manager instead for instant linking of entities with components
-            systemManager.addComponent(component);
-            container.add(entity, component);
+            addedComponents.add(instantiateAndRegisterComponent(entity, type));
         }
-        return components;
+        return addedComponents;
+    }
+
+    private <C extends Component> C instantiateAndRegisterComponent(Entity entity, Class<C> componentType) {
+        C component = instantiateComponentOfType(componentType);
+        component.setEntity(entity);
+        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+        return component;
     }
 
     public final <C extends Component> C addAndPerform(Entity entity, Class<C> type, Consumer<C> action) {
@@ -81,12 +65,12 @@ public class ComponentManager {
 
     @SafeVarargs
     public final List<? extends Component> get(Entity entity, Class<? extends Component>... types) {
-        List<Component> components = new ArrayList<>(types.length);
+        List<Component> foundComponents = new ArrayList<>(types.length);
         for (Class<? extends Component> type : types) {
             Component component = container.get(entity, type);
-            components.add(component);
+            foundComponents.add(component);
         }
-        return components;
+        return foundComponents;
     }
 
     public final boolean has(Entity entity, Class<? extends Component> type) {
@@ -100,23 +84,22 @@ public class ComponentManager {
 
         C component = container.get(entity, type);
 
-        //systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
+        systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
 
-        component.setActivity(false);
-        systemManager.getSystemByComponentType(type).removeComponent(component);
-
+        //component.setActivity(false);
+        //systemManager.getSystemByComponentType(type).removeComponent(component);
 
         return component;
     }
 
     @SafeVarargs
     public final List<? extends Component> remove(Entity entity, Class<? extends Component>... types) {
-        List<Component> components = new ArrayList<>();
+        List<Component> removedComponents = new ArrayList<>();
         for (Class<? extends Component> type : types) {
             Component remove = remove(entity, type);
-            components.add(remove);
+            removedComponents.add(remove);
         }
-        return components;
+        return removedComponents;
     }
 
     public final <C extends Component> Collection<C> getAllByType(Class<C> type) {

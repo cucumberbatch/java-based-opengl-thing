@@ -247,8 +247,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         cameraMovementSpeed = leftShiftKeyIsHeld ? cameraMovementSpeed + deltaTime * 4.7f : 1f;
 
-        Transform componentTransform = cameraControls.getTransform();
-        Vector3f vec3f = vec3f();
+        Transform componentTransform = cm.get(cameraControls.getEntity(), Transform.class);
+        Vector3f  vec3f = vec3f();
 
         // up-down movement
         // note: incorrect

@@ -1,7 +1,7 @@
 package org.north.core.system;
 
 import org.north.core.architecture.entity.ComponentContainer;
-import org.north.core.architecture.entity.MapBasedComponentContainer;
+//import org.north.core.architecture.entity.MapBasedComponentContainer;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
@@ -107,6 +107,7 @@ public class Pipeline implements ISystem, Runnable {
         // todo: load scene from file (game data deserialization)
         scene = new Scene("test scene");
         composeScene(new DefaultSceneComposer());
+        //applyDeferredCommands();
 
         while (window.shouldNotClose() && !stopped) {
             try {
@@ -172,7 +173,7 @@ public class Pipeline implements ISystem, Runnable {
         boolean hasComponentsToInit = false;
         Stopwatch.start();
         for (InitProcess process : systemManager.getProcessList(InitProcess.class)) {
-            System<? extends Component> system = (System<? extends Component>) process;
+            System  <? extends Component> system   = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();
@@ -401,7 +402,8 @@ public class Pipeline implements ISystem, Runnable {
                         }
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
-                        component.setState(ComponentState.READY_TO_INIT_STATE);
+                        throw new RuntimeException("Something went wrong in frame updating", e);
+                        //component.setState(ComponentState.READY_TO_INIT_STATE);
                     }
                 }
             }
@@ -510,7 +512,8 @@ public class Pipeline implements ISystem, Runnable {
                         process.render(component, graphics);
                     } catch (ComponentNotFoundException | NullPointerException e) {
                         // Logger.error(e);
-                        component.setState(ComponentState.READY_TO_INIT_STATE);
+                        throw new RuntimeException("Something went wrong in rendering", e);
+                        //component.setState(ComponentState.READY_TO_INIT_STATE);
                     } catch (ShaderUniformNotFoundException e) {
                         // Logger.error(String.format("Error while trying to find shader uniform with name '%s' in shader '%s'",
 //                                e.getUniformName(), e.getShaderName()));

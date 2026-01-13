@@ -1,6 +1,7 @@
 package org.north.core.system;
 
 import org.north.core.component.MeshRenderer;
+import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.*;
 import org.north.core.graphics.shader.Shader;
@@ -24,8 +25,10 @@ public class MeshRendererSystem
         VertexArray vertexArray = meshRenderer.mesh.vertexArray;
         int renderType = meshRenderer.renderType;
 
+        Transform transform = cm.get(meshRenderer.getEntity(), Transform.class);
+
         graphics.enable(shader);
-        graphics.prepareShader(shader, meshRenderer);
+        graphics.prepareShader(shader, transform, meshRenderer);
         vertexArray.render(renderType);
         graphics.disable(shader);
 

@@ -21,11 +21,11 @@ public class Table<E> {
     private final ReadWriteLock lock;
 
     public Table(Archetype archetype, Class<?>[] types) {
-        this.archetype = archetype;
+        this.archetype    = archetype;
         this.chunkStorage = new IdentityHashMap<>();
-
-        this.entityIds = new ArrayList<>();
-        this.entityIdSet = new HashSet<>();
+        
+        this.entityIds    = new ArrayList<>();
+        this.entityIdSet  = new HashSet<>();
 
         this.lock = new ReentrantReadWriteLock();
 
@@ -59,7 +59,7 @@ public class Table<E> {
         private final Collection<Table<E>> tables;
 
         private ComponentAccessor<E, ?>[] accessors;
-        private Lock tableLock;
+        private Lock                      tableLock;
 
         public QueryResult(Collection<Table<E>> tables) {
             this.tables = tables;
@@ -91,22 +91,24 @@ public class Table<E> {
 
         @Override
         public Iterator<E> iterator() {
-            return new QueryResultIterator();
+            return new QueryResultIterator(tables);
         }
         
         private class QueryResultIterator implements Iterator<E> {
             private final Iterator<Table<E>> tableIterator;
 
             private Iterator<E> entityIterator;
-            private E entity;
+            private E           entity;
 
-            QueryResultIterator() {
+            QueryResultIterator(Collection<Table<E>> tables) {
                 this.tableIterator = tables.iterator();
-                Table<E> table = tableIterator.next();
-                tableLock = table.readLock();
+                Table<E> table     = tableIterator.next();
+
+                tableLock          = table.readLock();
                 tableLock.lock();
+                
                 this.entityIterator = table.entityIterator();
-                this.entity = entityIterator.next();
+                this.entity         = entityIterator.next();
 
                 lockAccessors(table);
                 notifyAccessors();
@@ -185,7 +187,7 @@ public class Table<E> {
                 this.columnLock.unlock();
             }
             Column<T> column = table.getColumn(type);
-            this.columnLock = getColumnLock(column, accessType);
+            this.columnLock  = getColumnLock(column, accessType);
             this.columnLock.lock();
             this.componentIterator = column.componentIterator();
         }

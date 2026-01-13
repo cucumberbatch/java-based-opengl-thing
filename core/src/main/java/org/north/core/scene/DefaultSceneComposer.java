@@ -22,8 +22,8 @@ public class DefaultSceneComposer implements SceneComposer {
 //        initCubeAndCamera(sceneRoot, cm);
 //        initReferenceScene(sceneRoot, cm);
 //        testScene(sceneRoot, cm);
-//        initSpaceshipOnScreen(sceneRoot, cm);
-        testManyTransparentCubesGrid(sceneRoot, cm);
+        initSpaceshipOnScreen(sceneRoot, cm);
+//        testManyTransparentCubesGrid(sceneRoot, cm);
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {
@@ -33,7 +33,7 @@ public class DefaultSceneComposer implements SceneComposer {
         cm.add(camera, Transform.class, Camera.class, CameraControls.class);
         root.add(camera);
 
-        int N = 8;
+        int N = 2;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < N; k++) {
@@ -48,7 +48,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
                     cm.addAndPerform(cube, MeshRenderer.class, meshRenderer -> {
                         meshRenderer.shader = new SimpleColorShader();
-                        meshRenderer.mesh = PredefinedMeshes.CUBE;
+                        meshRenderer.mesh   = PredefinedMeshes.CUBE;
                         meshRenderer.color.set(0, 0, 0, 0f);
                     });
 
@@ -72,7 +72,7 @@ public class DefaultSceneComposer implements SceneComposer {
         cm.addAndPerform(testCube, MeshRenderer.class, meshRenderer -> {
             meshRenderer.shader = new SimpleColorShader();
 //            meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-            meshRenderer.mesh = PredefinedMeshes.CUBE;
+            meshRenderer.mesh   = PredefinedMeshes.CUBE;
             meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
         });
 
@@ -92,8 +92,8 @@ public class DefaultSceneComposer implements SceneComposer {
     private void initCubeAndCamera(TreeNode<Entity> root, ComponentManager cm) {
         Entity camera = new Entity("camera");
         Entity center = new Entity("center");
-        Entity left = new Entity("left");
-        Entity right = new Entity("right");
+        Entity left   = new Entity("left");
+        Entity right  = new Entity("right");
 
         root.add(camera);
         root.add(center);
@@ -101,21 +101,21 @@ public class DefaultSceneComposer implements SceneComposer {
         root.add(right);
 
         List<? extends Component> components;
-        Transform transform;
+        Transform    transform;
         MeshRenderer renderer;
 
         components = cm.add(camera, Transform.class, Camera.class, CameraControls.class);
 
-        components.get(0).getTransform().moveTo(0, 0, 1);
+        ((Transform) components.get(0)).moveTo(0, 0, 1);
 
 
         components = cm.add(center, Transform.class, MeshRenderer.class);
 
         renderer = (MeshRenderer) components.get(1);
-        renderer.mesh = PredefinedMeshes.QUAD;
-        renderer.color = new Vector4f(1, 1, 1, 1);
-        renderer.shader = new TextureShader();
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.mesh       = PredefinedMeshes.QUAD;
+        renderer.color      = new Vector4f(1, 1, 1, 1);
+        renderer.shader     = new TextureShader();
+        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
@@ -127,11 +127,11 @@ public class DefaultSceneComposer implements SceneComposer {
         //        transform.scale = new Vector3f(0.5f, 0.2f, 0.2f);
 
         renderer = (MeshRenderer) components.get(1);
-        renderer.mesh = PredefinedMeshes.QUAD;
-        renderer.color = new Vector4f(1, 1, 1, 1);
-        renderer.shader = new TextureShader();
+        renderer.mesh       = PredefinedMeshes.QUAD;
+        renderer.color      = new Vector4f(1, 1, 1, 1);
+        renderer.shader     = new TextureShader();
         //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         //        renderer.texture = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
@@ -144,9 +144,9 @@ public class DefaultSceneComposer implements SceneComposer {
         //        transform.scale = new Vector3f(0.2f, 0.2f, 0.2f);
 
         renderer = (MeshRenderer) components.get(1);
-        renderer.mesh = PredefinedMeshes.CUBE;
-        renderer.shader = new SimpleColorShader();
-        renderer.color = new Vector4f(1, 0, 0, 1);
+        renderer.mesh       = PredefinedMeshes.CUBE;
+        renderer.shader     = new SimpleColorShader();
+        renderer.color      = new Vector4f(1, 0, 0, 1);
         //        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
@@ -160,8 +160,8 @@ public class DefaultSceneComposer implements SceneComposer {
 
         MeshRenderer renderer = (MeshRenderer) componentList.get(1);
         renderer.shader = new SimpleColorShader();
-        renderer.color = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
-        renderer.mesh = PredefinedMeshes.QUAD;
+        renderer.color  = new Vector4f(0.25f, 0.5f, 0.8f, 1f);
+        renderer.mesh   = PredefinedMeshes.QUAD;
 
         root.add(referenceBox);
 
@@ -175,7 +175,7 @@ public class DefaultSceneComposer implements SceneComposer {
     }
 
     private void initSpaceshipOnScreen(TreeNode<Entity> root, ComponentManager cm) {
-        Transform transform;
+        Transform    transform;
         MeshRenderer renderer;
 
         // TV Screen object
@@ -184,7 +184,7 @@ public class DefaultSceneComposer implements SceneComposer {
         transform.rescaleTo(new Vector3f(2, 2, 2));
 
         renderer = cm.add(tvScreen, MeshRenderer.class);
-        renderer.shader = new TextureShader();
+        renderer.shader  = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
 
         // Player spaceship in the middle of the screen
@@ -194,7 +194,7 @@ public class DefaultSceneComposer implements SceneComposer {
         transform.rescaleTo(0.2f, 0.2f, 0.2f);
 
         renderer = cm.add(player, MeshRenderer.class);
-        renderer.shader = new TextureShader();
+        renderer.shader  = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
 
         cm.add(player, CloudEmitter.class);
@@ -228,7 +228,7 @@ public class DefaultSceneComposer implements SceneComposer {
         transform.rescaleTo(new Vector3f(2, 2, 2));
 
         renderer = cm.add(background, MeshRenderer.class);
-        renderer.shader = new TextureShader();
+        renderer.shader  = new TextureShader();
         renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
 
         // Camera
