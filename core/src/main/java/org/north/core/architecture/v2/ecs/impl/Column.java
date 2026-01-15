@@ -1,4 +1,4 @@
-package org.north.core.architecture.v2.component;
+package org.north.core.architecture.v2.ecs.impl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -7,7 +7,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Column<T> {
+final class Column<T> {
 
     //
     // todo: optimization
@@ -17,24 +17,17 @@ public class Column<T> {
     //  через SparseSet (вероятно, он будет находится в Table<E>)
     //
 
-    private static final int DEFAULT_CAPACITY = 1024;
-
-    private final T[] components;
-    private final int capacity;
+    private final T[]           components;
+    private final int           capacity;
     private final ReadWriteLock lock;
 
     private int size;
 
-
-    public Column(Class<T> componentType) {
-        this(DEFAULT_CAPACITY, componentType);
-    }
-
-    public Column(int capacity, Class<T> componentType) {
-        this.size = 0;
-        this.capacity = capacity;
+    Column(int capacity, Class<T> componentType) {
+        this.size       = 0;
+        this.capacity   = capacity;
         this.components = instantiateComponents(capacity, componentType);
-        this.lock = new ReentrantReadWriteLock();
+        this.lock       = new ReentrantReadWriteLock();
     }
 
     @SuppressWarnings("unchecked")

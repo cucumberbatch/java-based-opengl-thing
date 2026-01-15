@@ -1,20 +1,23 @@
-package org.north.core.architecture.v2.component;
+package org.north.core.architecture.v2.ecs.impl;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Objects;
 
-public class Archetype {
-    private final BitSet mask;
+final class Archetype {
+    private final Class<?>[] componentTypes;
+    private final BitSet     mask;
 
-    public Archetype(BitSet mask) {
-        this.mask = mask;
+    public Archetype(Class<?>[] componentTypes, BitSet mask) {
+        this.componentTypes = componentTypes;
+        this.mask           = mask;
     }
 
     public boolean isSame(Archetype archetype) {
         return mask.equals(archetype.mask);
     }
 
-    public boolean isContains(Archetype archetype) {
+    public boolean contains(Archetype archetype) {
         BitSet checkingMask = (BitSet) mask.clone();
         checkingMask.and(archetype.mask);
         return checkingMask.equals(archetype.mask);
@@ -31,5 +34,13 @@ public class Archetype {
     @Override
     public int hashCode() {
         return Objects.hashCode(mask);
+    }
+
+    @Override
+    public String toString() {
+        return "Archetype{" +
+                "componentTypes=" + Arrays.toString(componentTypes) +
+                ", mask=" + mask +
+                '}';
     }
 }
