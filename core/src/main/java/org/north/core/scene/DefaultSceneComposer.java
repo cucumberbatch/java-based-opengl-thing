@@ -19,11 +19,11 @@ import java.util.List;
 public class DefaultSceneComposer implements SceneComposer {
     @Override
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
-//        initCubeAndCamera(sceneRoot, cm);
-//        initReferenceScene(sceneRoot, cm);
-//        testScene(sceneRoot, cm);
-        initSpaceshipOnScreen(sceneRoot, cm);
-//        testManyTransparentCubesGrid(sceneRoot, cm);
+        // initCubeAndCamera(sceneRoot, cm);
+        // initReferenceScene(sceneRoot, cm);
+        // testScene(sceneRoot, cm);
+        // initSpaceshipOnScreen(sceneRoot, cm);
+        testManyTransparentCubesGrid(sceneRoot, cm);
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {

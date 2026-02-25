@@ -26,11 +26,9 @@ public class LocalResourceLoader implements ResourceLoader {
 
     @Override
     public String loadAsString(String path) throws IOException {
-        try (InputStream resourceStream = loadAsStream(path)) {
-            try (BufferedInputStream bufferedStream = new BufferedInputStream(resourceStream)) {
-                log.info("Resource '{}' is loaded!", path);
-                return new String(bufferedStream.readAllBytes());
-            }
+        try (BufferedInputStream bufferedStream = new BufferedInputStream(loadAsStream(path))) {
+            log.info("Resource '{}' is loaded!", path);
+            return new String(bufferedStream.readAllBytes());
         }
     }
 

@@ -25,16 +25,18 @@ public class RigidBody2d extends AbstractComponent {
 
     @Override
     public String toString() {
-        return "\nmass:                " + mass +
-                "\ncenterOfMass:        " + centerOfMass +
-                "\nvelocity:            " + velocity +
-                "\nacceleration:        " + acceleration +
-                "\nangularVelocity:     " + angularVelocity +
-                "\nangularAcceleration: " + angularAcceleration +
-                "\nisGravitational:     " + isGravitational +
-                "\nfrictionFactor:      " + frictionFactor +
-                "\nrestoringForce:      " + restoringForce +
-                "\nspringFactor:        " + springFactor;
+        return "RigidBody2d{" +
+                "mass=" + mass +
+                ",centerOfMass=" + centerOfMass +
+                ",velocity=" + velocity +
+                ",acceleration=" + acceleration +
+                ",angularVelocity=" + angularVelocity +
+                ",angularAcceleration=" + angularAcceleration +
+                ",isGravitational=" + isGravitational +
+                ",frictionFactor=" + frictionFactor +
+                ",restoringForce=" + restoringForce +
+                ",springFactor=" + springFactor +
+                "}";
     }
 
 }

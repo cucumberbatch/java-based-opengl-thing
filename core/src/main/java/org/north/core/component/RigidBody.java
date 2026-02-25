@@ -64,14 +64,16 @@ public class RigidBody extends AbstractComponent {
 
     @Override
     public String toString() {
-        return "\nmass:                " + mass +
-                "\ncenterOfMass:        " + centerOfMass +
-                "\nvelocity:            " + velocity +
-                "\nacceleration:        " + acceleration +
-                "\nangularVelocity:     " + angularVelocity +
-                "\nangularAcceleration: " + angularAcceleration +
-                "\nisGravitational:     " + isGravitational +
-                "\nfrictionFactor:      " + frictionFactor;
+        return "RigidBody{" +
+                "mass=" + mass +
+                ",centerOfMass=" + centerOfMass +
+                ",velocity=" + velocity +
+                ",acceleration=" + acceleration +
+                ",angularVelocity=" + angularVelocity +
+                ",angularAcceleration=" + angularAcceleration +
+                ",isGravitational=" + isGravitational +
+                ",frictionFactor=" + frictionFactor +
+                "}";
     }
 
 }
