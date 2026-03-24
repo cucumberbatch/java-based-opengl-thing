@@ -154,6 +154,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                         projectionState = ProjectionState.INTERMEDIATE_TO_ORTHOGRAPHIC_VIEW_STATE;
                         projectionProgress = 0f;
                         break;
+                    default:
+                        break;
                 }
             }
 
@@ -182,6 +184,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE:
                     projectionState = ProjectionState.PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE;
                     projectionProgress = 0f;
+                    break;
+                default:
                     break;
             }
         }
@@ -216,8 +220,9 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                     projectionState = ProjectionState.INTERMEDIATE_VIEW_STATE;
                 }
                 break;
-
             }
+            default:
+                break;
         }
         graphics.projection = camera.projectionMatrix;
     }

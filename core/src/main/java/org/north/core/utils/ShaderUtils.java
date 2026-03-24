@@ -96,16 +96,8 @@ public class ShaderUtils {
         return program;
     }
 
-    private static int hashShaderPaths(String shader) {
-        return Objects.hash(shader);
-    }
-
-    private static int hashShaderPaths(String shader1, String shader2) {
-        return Objects.hash(shader1 + shader2);
-    }
-
-    private static int hashShaderPaths(String shader1, String shader2, String shader3) {
-        return Objects.hash(shader1 + shader2 + shader3);
+    private static int hashShaderPaths(String... paths) {
+        return Objects.hash(paths);
     }
 
 }

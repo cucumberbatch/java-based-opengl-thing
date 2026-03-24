@@ -1,4 +1,9 @@
 # Game engine dev tasks to do
+- [ ] Assets
+  - [ ] An asset manager with convenient API
+    - [ ] Textures
+    - [ ] Shaders
+    - [ ] Models
 - [ ] XML scene file loader
   - [ ] XML format of scene
   - [ ] Serialization/deserialization for various class versions
@@ -7,13 +12,15 @@
   - [ ] Multifunctional editor cursor (OpenGL window)
     - [ ] Editor scene game object cursor selection
     - [ ] Editor cursor states
-  - [ ] Separate editor window (Swing window)
+  - [ ] Separate editor window (Swing window, maybe... So, I think we can possibly make a simple CPU 2D renderer for editor window. There isn't gonna be fancy graphics or something, just isometric view without lighting)
     - [ ] Event bus
     - [ ] Console log
     - [ ] Inspector window (entities and components all in one)
     - [ ] Command line ?
 - [ ] Physics improvements
   - [ ] Chop world scene into squares/partitions and store them in tree (QuadTree/Octree)
+- [ ] Events and event listeners using an Origin<T> objects
+- [ ] Customizable pipeline builder
 - [ ] Graphics API
   - [x] Pass into `render()` system method an abstract `Graphics` object instead of `Window`
   - [ ] Implement OpenGL graphics engine API
@@ -29,9 +36,10 @@
   - [ ] Sounds and music controller API
   - [ ] Different kinds of hardware audio API support
 - [ ] Cross-platform-ness
-  - [ ] Create Maven profiles
+  - [ ] Create Maven profiles (I think we must separate all platform-dependent things into maven modules)
     - [ ] Windows
     - [ ] Linux
+    - [ ] Web (probably, using TeaVM)
     - [ ] Android
 - [ ] Optimization
   - [ ] A very memory expensive logger!!! Needs to rework or even replace with log4j2 + slf4j
