@@ -96,7 +96,7 @@ public class MapBasedComponentContainer implements ComponentContainer {
     }
 
     @Override
-    public Set<Class<? extends Component>> getComponentTypesSet(Entity entity) {
+    public Set<Class<? extends Component>> getComponentTypesByEntity(Entity entity) {
         assert(entity != null);
         
         Set<Class<? extends Component>> componentTypes = new HashSet<>();

@@ -41,17 +41,18 @@ public class DefaultSceneComposer implements SceneComposer {
                     final float x = i;
                     final float z = j;
                     final float y = k;
-                    cm.addAndPerform(cube, Transform.class, transform -> {
-                        transform.moveTo(0.5f * x, 0.5f * y, 0.5f * z);
-                        transform.rescaleTo(0.4999f, 0.4999f, 0.4999f);
-                    });
 
-                    cm.addAndPerform(cube, MeshRenderer.class, meshRenderer -> {
-                        meshRenderer.shader = new SimpleColorShader();
-                        meshRenderer.mesh   = PredefinedMeshes.CUBE;
-                        meshRenderer.color.set(0, 0, 0, 0f);
-                    });
+                    Transform transform = new Transform();
+                    transform.moveTo(0.5f * x, 0.5f * y, 0.5f * z);
+                    transform.rescaleTo(0.4999f, 0.4999f, 0.4999f);
+                    
+                    MeshRenderer meshRenderer = new MeshRenderer();
+                    meshRenderer.shader = new SimpleColorShader();
+                    meshRenderer.mesh   = PredefinedMeshes.CUBE;
+                    meshRenderer.color.set(0, 0, 0, 0f);
 
+                    cm.add(cube, transform);
+                    cm.add(cube, meshRenderer);
                     cm.add(cube, CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
 
                     root.add(cube);
@@ -64,17 +65,18 @@ public class DefaultSceneComposer implements SceneComposer {
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {
         Entity testCube = new Entity("test_cube");
 
-        cm.addAndPerform(testCube, Transform.class, transform -> {
-            transform.moveTo(0.5f, 0.5f, 0.5f);
-            transform.rescaleTo(0.8f, 0.8f, 0.8f);
-        });
+        Transform transform = new Transform();
+        transform.moveTo(0.5f, 0.5f, 0.5f);
+        transform.rescaleTo(0.8f, 0.8f, 0.8f);
 
-        cm.addAndPerform(testCube, MeshRenderer.class, meshRenderer -> {
-            meshRenderer.shader = new SimpleColorShader();
-//            meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
-            meshRenderer.mesh   = PredefinedMeshes.CUBE;
-            meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
-        });
+        MeshRenderer meshRenderer = new MeshRenderer();
+        meshRenderer.shader = new SimpleColorShader();
+        // meshRenderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        meshRenderer.mesh   = PredefinedMeshes.CUBE;
+        meshRenderer.color.set(0.42f, 0.42f, 0.54f, 0.5f);
+        
+        cm.add(testCube, transform);
+        cm.add(testCube, meshRenderer);
 
         Entity camera = new Entity("camera");
 

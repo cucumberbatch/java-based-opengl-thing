@@ -16,6 +16,6 @@ public interface ComponentContainer {
 
     <C extends Component> Collection<C> getComponentsByType(Class<C> type);
 
-    Set<Class<? extends Component>> getComponentTypesSet(Entity entity);
+    Set<Class<? extends Component>> getComponentTypesByEntity(Entity entity);
 
 }

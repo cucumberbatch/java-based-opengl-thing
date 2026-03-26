@@ -27,6 +27,13 @@ public class ComponentManager {
         systemManager.setCameraComponent(camera);
     }
 
+    public <C extends Component> C add(Entity entity, C component) {
+        if (entity == null || component == null) {
+            throw new IllegalArgumentException("Entity or component must not be null");
+        }
+        return registerComponent(entity, component);        
+    }
+
     public final <C extends Component> C add(Entity entity, Class<C> type) {
         if (entity == null || type == null) {
             throw new IllegalArgumentException("Entity or component class must not be null");
@@ -46,18 +53,11 @@ public class ComponentManager {
         return addedComponents;
     }
 
-    private <C extends Component> C instantiateAndRegisterComponent(Entity entity, Class<C> componentType) {
-        C component = instantiateComponentOfType(componentType);
-        component.setEntity(entity);
-        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
-        return component;
-    }
-
-    public final <C extends Component> C addAndPerform(Entity entity, Class<C> type, Consumer<C> action) {
-        C component = add(entity, type);
-        action.accept(component);
-        return component;
-    }
+    // public final <C extends Component> C addAndPerform(Entity entity, Class<C> type, Consumer<C> action) {
+    //     C component = add(entity, type);
+    //     action.accept(component);
+    //     return component;
+    // }
 
     public final <C extends Component> C get(Entity entity, Class<C> type) {
         return container.get(entity, type);
@@ -106,6 +106,11 @@ public class ComponentManager {
         return container.getComponentsByType(type);
     }
 
+    private <C extends Component> C instantiateAndRegisterComponent(Entity entity, Class<C> componentType) {
+        C component = instantiateComponentOfType(componentType);
+        return registerComponent(entity, component);
+    }
+
     private <C extends Component> C instantiateComponentOfType(Class<C> type) {
         try {
             return type.getConstructor().newInstance();
@@ -115,6 +120,12 @@ public class ComponentManager {
             );
             throw new RuntimeException(message, e);
         }
+    }
+
+    private <C extends Component> C registerComponent(Entity entity, C component) {
+        component.setEntity(entity);
+        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+        return component;
     }
 
 }

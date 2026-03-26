@@ -96,23 +96,23 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
 
             //cm.add(gasCloudEntity, Transform.class, MeshRenderer.class, GasCloud.class);
 
-            cm.addAndPerform(gasCloudEntity, Transform.class, transform -> {
-                Vector3f globalPos = movableWorldTransform.getGlobalPosition(new Vector3f());
-                
-                transform.moveTo(
-                    -globalPos.x / 5,
-                    -globalPos.y / 5,
-                    +globalPos.z
-                );
-                transform.rescaleTo(emittingScale);
-            });
+            Vector3f globalPos = movableWorldTransform.getGlobalPosition(new Vector3f());
+            Transform transform = new Transform();
+            transform.moveTo(
+                -globalPos.x / 5,
+                -globalPos.y / 5,
+                +globalPos.z
+            );
+            transform.rescaleTo(emittingScale);
 
-            cm.addAndPerform(gasCloudEntity, MeshRenderer.class, renderer -> {
-                renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
-                renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
-            });
+            MeshRenderer renderer = new MeshRenderer();
+            renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
+            renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+            
+            cm.add(gasCloudEntity, transform);
+            cm.add(gasCloudEntity, renderer);
 
-            cm.add(gasCloudEntity, GasCloud.class);
+            cm.add(gasCloudEntity, new GasCloud());
 
             //Transform transform = cm.get(gasCloudEntity, Transform.class);
             //Vector3f  globalPos = worldTransform.getGlobalPosition(new Vector3f());
