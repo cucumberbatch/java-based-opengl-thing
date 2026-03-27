@@ -4,15 +4,9 @@ import org.north.core.component.Component;
 import org.north.core.exception.ComponentAlreadyExistsException;
 import org.north.core.exception.ComponentNotFoundException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.*;
 
 public class MapBasedComponentContainer implements ComponentContainer {
-    private static final
-    Logger log = LoggerFactory.getLogger(MapBasedComponentContainer.class);
-    
     
     private final
     Map<Class<? extends Component>, Map<Entity, ? extends Component>> componentByEntityStorage;
@@ -26,27 +20,25 @@ public class MapBasedComponentContainer implements ComponentContainer {
         this.componentByTypeStorage   = new IdentityHashMap<>();
     }
 
+    private <C extends Component> C tryGetComponent(Entity entity, Class<C> type) {
+        Map<Entity, ? extends Component> componentsMap = this.componentByEntityStorage.get(type);
+        return (componentsMap != null) ? type.cast(componentsMap.get(entity)) : null;
+    }
+    
     @Override
     public boolean has(Entity entity, Class<? extends Component> type) {
         assert(entity != null);
         assert(type   != null);
         
-        Map<Entity, ? extends Component> componentsMap = componentByEntityStorage.get(type);
-        return componentsMap == null || !componentsMap.containsKey(entity);
+        return tryGetComponent(entity, type) != null;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <C extends Component> C get(Entity entity, Class<C> type) {
         assert(entity != null);
         assert(type   != null);
         
-        Map<Entity, ? extends Component> componentsMap = componentByEntityStorage.get(type);
-        C component;
-        if (componentsMap == null || (component = (C) componentsMap.get(entity)) == null) {
-            throw new ComponentNotFoundException(type);//"Component not found!");
-        }
-        return type.cast(component);
+        return tryGetComponent(entity, type);
     }
 
     @Override
