@@ -134,6 +134,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                         projectionProgress = 0f;
                         lastProjectionStateBeforeFocusLoss = ProjectionState.ORTHOGRAPHIC_VIEW_STATE;
                         break;
+                    default:
+                        break;
                 }
             }
             mouseCaptured = false;
@@ -264,7 +266,6 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 //                    .rotateX((float) Math.toRadians(-horizontalAngle))
                     .mul(deltaTime * cameraMovementSpeed);
 
-            log.info("delta is: {}, point is: {}", delta, point);
             componentTransform.moveRel(delta);
         }
         if (keyEIsHeld) {
@@ -274,7 +275,6 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 //                    .rotateY((float) Math.toRadians(verticalAngle))
                     .mul(deltaTime * cameraMovementSpeed);
 
-            log.info("delta is: {}, point is: {}", delta, point);
             componentTransform.moveRel(delta);
         }
 
@@ -312,6 +312,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
         return Math.min(Math.max(angle, lowest), highest);
     }
 
+    // TODO: Move this window callback into another place where it will fit, not the camera stuff
     public static class WindowSizeCallback implements GLFWWindowSizeCallbackI {
         private final Graphics graphics;
 

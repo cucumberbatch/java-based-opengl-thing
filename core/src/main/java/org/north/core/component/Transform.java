@@ -2,32 +2,34 @@ package org.north.core.component;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.north.core.management.data.AxisAlignedBoundingBox;
-import org.north.core.physics.collision.MovementListener;
-import org.north.core.component.ComponentState;
-
-import java.util.Iterator;
+import org.north.core.architecture.entity.Entity;
 
 /**
  * The main component of each game object that tells about its position, rotation and scale
  *
  * @author cucumberbatch
  */
-public class Transform extends AbstractComponent implements Iterable<Transform>, AxisAlignedBoundingBox {
+public class Transform extends AbstractComponent {
     public Transform parent;
 
     private Vector3f position = new Vector3f(0, 0, 0);
     private Vector3f rotation = new Vector3f(0, 0, 0);
     private Vector3f scale    = new Vector3f(1, 1, 1);
 
-    public Vector3f cachedGlobalPosition = getGlobalPosition(new Vector3f());
+    private Vector3f globalPosition = new Vector3f(0, 0, 0);
+    private Vector3f globalRotation = new Vector3f(0, 0, 0);
+    private Vector3f globalScale    = new Vector3f(1, 1, 1);
 
-    private static final MovementListener EMPTY_MOVEMENT_LISTENER = (e, p1, p2) -> {};
-
-    private MovementListener movementListener = EMPTY_MOVEMENT_LISTENER;
+    private boolean globalDirty = true;
 
     public Transform() {
         super.setState(ComponentState.READY_TO_OPERATE_STATE);
+    }
+
+    @Override
+    public void setEntity(Entity entity) {
+        super.setEntity(entity);
+        entity.setTransform(this);
     }
 
     public Vector3f getPosition() {
@@ -43,55 +45,43 @@ public class Transform extends AbstractComponent implements Iterable<Transform>,
     }
 
     public void moveTo(Vector3f position) {
-        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
-            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position));
-        }
-        this.position.set(position);
-        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
-    }
-
-    public void moveTo(float x, float y, float z) {
-        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
-            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z));
-        }
-        this.position.set(x, y, z);
-        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
+        this.moveTo(position.x, position.y, position.z);
     }
 
     public void moveRel(Vector3f position) {
-        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
-            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(position).add(this.position));
-        }
-        this.position.add(position);
-        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
-    }
-
-    public void moveRel(float x, float y, float z) {
-        if (EMPTY_MOVEMENT_LISTENER != movementListener) {
-            movementListener.registerMovement(this.getEntity(), new Vector3f(this.position), new Vector3f(x, y, z).add(this.position));
-        }
-        this.position.add(x, y, z);
-        this.cachedGlobalPosition = getGlobalPosition(this.cachedGlobalPosition);
+        this.moveRel(position.x, position.y, position.z);
     }
 
     public void rescaleTo(Vector3f scale) {
-        this.scale.set(scale);
+        this.rescaleTo(scale.x, scale.y, scale.z);
+    }
+
+    public void rescaleRel(Vector3f scale) {
+        this.rescaleRel(scale.x, scale.y, scale.z);
+    }
+
+    public void moveTo(float x, float y, float z) {
+        this.position.set(x, y, z);
+        markGlobalDirty();
+    }
+
+    public void moveRel(float x, float y, float z) {
+        this.position.add(x, y, z);
+        markGlobalDirty();
     }
 
     public void rescaleTo(float x, float y, float z) {
         this.scale.set(x, y, z);
-    }
-
-    public void rescaleRel(Vector3f scale) {
-        this.scale.add(scale);
+        markGlobalDirty();
     }
 
     public void rescaleRel(float x, float y, float z) {
         this.scale.add(x, y, z);
+        markGlobalDirty();
     }
 
-    public void setTransformListener(MovementListener movementListener) {
-        this.movementListener = movementListener;
+    private void markGlobalDirty() {
+        this.globalDirty = true;
     }
 
     /**
@@ -103,30 +93,45 @@ public class Transform extends AbstractComponent implements Iterable<Transform>,
      */
     @Deprecated(forRemoval = true)
     public Matrix4f getLocalModelMatrix() {
-        return getLocalModelMatrix(new Matrix4f());
+        return getLocalModelMatrix(this, new Matrix4f().identity());
     }
 
-    public Matrix4f getLocalModelMatrix(Matrix4f destination) {
-        return destination.identity()
-                .translate(position.x, position.y, position.z)
-                .rotateX(rotation.x)
-                .rotateY(rotation.y)
-                .rotateZ(rotation.z)
-                .scale(scale.x, scale.y, scale.z);
+    private Matrix4f getLocalModelMatrix(Transform transform, Matrix4f destination) {
+        return destination
+                .translate(transform.position)
+                .rotateX((float) Math.toRadians(transform.rotation.x))
+                .rotateY((float) Math.toRadians(transform.rotation.y))
+                .rotateZ((float) Math.toRadians(transform.rotation.z))
+                .scale(transform.scale);
     }
 
     public Matrix4f getGlobalModelMatrix(Matrix4f destination) {
         destination = destination.identity();
-        for (Transform it = this; it != null; it = it.parent)
-            destination.translate(it.position).rotateX(it.rotation.x).rotateY(it.rotation.y).rotateZ(it.rotation.z).scale(it.scale);
+
+        int depth = 0;
+        Transform root = this;
+        while (root.parent != null) {
+            depth++;
+            root = root.parent;
+        }
+
+        Transform[] chain = new Transform[depth + 1];
+        Transform current = this;
+        while (current.parent != null) {
+            chain[depth--] = current;
+            current = current.parent;
+        }
+        chain[0] = root;
+        
+        for (Transform transform : chain) {
+            destination = getLocalModelMatrix(transform, destination);
+        }
+        
         return destination;
     }
 
     public Vector3f getGlobalPosition(Vector3f destination) {
-        destination = destination.zero();
-        for (Transform it = this; it != null; it = it.parent)
-            destination.add(it.position);
-        return destination;
+        return this.getGlobalModelMatrix(new Matrix4f()).getTranslation(destination);
     }
 
     public Vector3f getGlobalRotation(Vector3f destination) {
@@ -140,6 +145,7 @@ public class Transform extends AbstractComponent implements Iterable<Transform>,
         return getGlobalModelMatrix(new Matrix4f()).getScale(destination);
     }
 
+    @Deprecated
     public Transform getGlobalTransform() {
         Transform gTransform = new Transform();
         for (Transform it = this; it != null; it = it.parent) {
@@ -153,88 +159,13 @@ public class Transform extends AbstractComponent implements Iterable<Transform>,
     @Override
     public String toString() {
         return "Transform{" +
-                "pos=" + position +
-                ", rot=" + rotation +
-                ", scl=" + scale +
+                "localPos=" + position +
+                ", localRot=" + rotation +
+                ", localScl=" + scale +
+                ", globalPos=" + globalPosition +
+                ", globalRot=" + globalRotation +
+                ", globalScl=" + globalScale +
                 '}';
     }
-
-    //    @Override
-//    public String toString() {
-//        return  "\nposition: " + position +
-//                "\nrotation: " + rotation +
-//                "\nscale:    " + scale +
-//                super.toString();
-//    }
-
-    public Iterator<Transform> iterator() {
-        return new Iterator<>() {
-            Transform next = Transform.this;
-
-            @Override
-            public boolean hasNext() {
-                return next != null;
-            }
-
-            @Override
-            public Transform next() {
-                Transform transform = next;
-                next = next.parent;
-                return transform;
-            }
-        };
-    }
-
-    //todo: probably, in all aabb getters below we need to take a global position and scale
-    // or just use something like callbacks when entity was moved to perform octree update
-    // in a separate thread
-    @Override
-    public float xMin() {
-        return position.x - scale.x;
-    }
-
-    @Override
-    public float xMax() {
-        return position.x + scale.x;
-    }
-
-    @Override
-    public float yMin() {
-        return position.y - scale.y;
-    }
-
-    @Override
-    public float yMax() {
-        return position.y + scale.y;
-    }
-
-    @Override
-    public float zMin() {
-        return position.z - scale.z;
-    }
-
-    @Override
-    public float zMax() {
-        return position.z + scale.z;
-    }
-
-    /*
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        out.writeObject(position);
-        out.writeObject(rotation);
-        out.writeObject(scale);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        position = (Vector3f) in.readObject();
-        rotation = (Vector3f) in.readObject();
-        scale = (Vector3f) in.readObject();
-    }
-
-     */
 
 }

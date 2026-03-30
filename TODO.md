@@ -1,4 +1,16 @@
 # Game engine dev tasks to do
+
+## High priority
+- [ ] Transform components are broken, the hierarchy of entities does not affects the rendering
+- [ ] Perform a huge refactor of a whole engine, remove unnecessary things
+  - [ ] Change the type of an Entity id to a simple primitive, don't overengineer things if they aren't necessary
+  - [ ] Rethink the Node (TreeNode) thing to be more like a collection interface rather than a smart node, the Node (TreeNode) itself must be a simple struct which will be used by a Tree collection
+  - [ ] Maybe, don't use ever the TreeNode on Entity, because the Entity must be flat as a data structure, all other fancy hierarchy things can be implemented later using components and EntityManager
+  - [ ] An Entity must be just a relatively simple class with id and EntityManager/ComponentManager reference, and also must have a bunch of helper methods to work with components of that entity, at least for a while...
+  - [ ] An EntityManager (or a ComponentManager, who is the boss, idk) must have something for a component bulk instantiation process, and a pool of removed/unused components to be able to reuse them. Probably, that would be a north.depot task for improvement
+    - [ ] A code generation thing for a bulk component instantiation, which will use a compile-time generated constructors
+
+## Medium/Low priority
 - [ ] Assets
   - [ ] An asset manager with convenient API
     - [ ] Textures
@@ -36,7 +48,7 @@
   - [ ] Sounds and music controller API
   - [ ] Different kinds of hardware audio API support
 - [ ] Cross-platform-ness
-  - [ ] Create Maven profiles (I think we must separate all platform-dependent things into maven modules)
+  - [ ] Create Maven (or Gradle) profiles (I think we must separate all platform-dependent things into maven/gradle modules)
     - [ ] Windows
     - [ ] Linux
     - [ ] Web (probably, using TeaVM)

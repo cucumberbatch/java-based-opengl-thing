@@ -24,7 +24,8 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
 
     @Override
     public void init(MeshCollider meshCollider) {
-        cm.get(meshCollider.getEntity(), Transform.class).setTransformListener(new MeshMovementListener());
+        Transform t = cm.get(meshCollider.getEntity(), Transform.class);
+        // t.setTransformListener(new MeshMovementListener());
     }
 
     @Override

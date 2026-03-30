@@ -10,6 +10,7 @@ import java.util.function.Predicate;
  * of {@link TreeNode} interface to have access to this functionality
  * @param <Node> a type of data, that needs to be represented as a tree
  */
+// TODO: Rethink the node thing to be more like a collection interface rather than a smart node, the node itself must be a simple struct which will be used by a tree collection
 public interface TreeNode<Node extends TreeNode<Node>> extends Iterable<Node>, Serializable {
 
     /**

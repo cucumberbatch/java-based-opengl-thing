@@ -12,7 +12,7 @@ import org.north.core.component.ComponentState;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
-import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.management.data.AxisAlignedBoundingBox;
 import org.north.core.management.data.OctreeNode;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
@@ -41,7 +41,7 @@ public class SystemManager implements Resettable {
     public final ComponentHandlerScanner scanner;
     public final ApplicationContext applicationContext;
     public final EntityDistanceToCameraComparator cameraDistanceComparator;
-    public final OctreeNode<Transform> spatialTree;
+    public final OctreeNode<AxisAlignedBoundingBox> spatialTree;
 
     private final ComponentContainer componentContainer;
 
@@ -150,9 +150,12 @@ public class SystemManager implements Resettable {
             component.setState(ComponentState.READY_TO_OPERATE_STATE);
         }
 
-        if (component instanceof Transform) {
-            spatialTree.insert((Transform) component);
-        }
+        // TODO: Return the collision handling feature in the future
+        // 
+        // if (component instanceof Transform) {
+        //     spatialTree.insert((Transform) component);
+        // }
+        // 
 
         componentContainer.add(entity, component);
         return (C) component; //system.addComponent(component);
@@ -188,7 +191,7 @@ public class SystemManager implements Resettable {
         if (deferredCommands.isEmpty()) return;
         for (DeferredCommand command : deferredCommands) {
             command.execute(this);
-            log.info("executed deferred command: {}", command);
+//            log.info("executed deferred command: {}", command);
         }
         deferredCommands.clear();
     }
@@ -204,6 +207,7 @@ public class SystemManager implements Resettable {
         Collection<Collision> foundCollisions = spatialTree.getAllCollisions();
     }
 
+    // TODO: Camera logic must be existed in other place, not in a SystemManager
     static class EntityDistanceToCameraComparator implements Comparator<Component> {
         private Vector3f cameraPosition;
         private final ComponentContainer componentContainer;
@@ -222,12 +226,15 @@ public class SystemManager implements Resettable {
             return this.cameraPosition != null;
         }
 
+        private final Vector3f o1Position = new Vector3f();
+        private final Vector3f o2Position = new Vector3f();
+
         @Override
         public int compare(Component o1, Component o2) {
             Transform t1 = componentContainer.get(o1.getEntity(), Transform.class);
             Transform t2 = componentContainer.get(o2.getEntity(), Transform.class);
-            float o1Distance = t1.cachedGlobalPosition.distance(cameraPosition);
-            float o2Distance = t2.cachedGlobalPosition.distance(cameraPosition);
+            float o1Distance = t1.getGlobalPosition(o1Position).distance(cameraPosition);
+            float o2Distance = t2.getGlobalPosition(o2Position).distance(cameraPosition);
             return Float.compare(o2Distance, o1Distance);
         }
     }

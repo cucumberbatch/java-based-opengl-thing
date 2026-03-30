@@ -17,13 +17,20 @@ import java.util.UUID;
  *
  * @author cucumberbatch
  */
+// TODO: get rid of TreeNode things, an Entity must be plain object without any unnecessary hierarchy. A hierarchy can be achieved by usage of specific components in future
 public class Entity
         extends LinkedTreeNode<Entity>
         implements Identifiable<UUID>, Externalizable {
 
+    // TODO: the type of id can be just a simple int or long primitive, an int could be ok
     public UUID id;
+
+    // TODO: move entity name into separate component, make names of limited length, i.e.: FixedString8, FixedString16, and so on. Also, make FixedString classes implement CharSequence to better Java ecosystem integration
     public String name;
 
+    // TODO:
+
+    // TODO: remove hardcoded reference to Transform component, Transform is not necessarily must be present for all of the entities
     public Transform transform;
 
     public Entity(String name) {
@@ -54,17 +61,23 @@ public class Entity
     }
 
     public Transform getTransform() {
-        return transform;
+        return this.transform;
+    }
+
+    public void setTransform(Transform transform) {
+        this.transform = transform;
     }
 
     @Override
     public boolean add(Entity entity) {
+        Transform entityTransform = entity.getTransform();
+        if (entityTransform != null) {
+            entityTransform.parent = this.transform;
+
+            // We make relative translation by zero to simply mark a transform component as dirty, so the next getGlobal... something will cause global cache update
+            entityTransform.moveRel(0, 0, 0);
+        }
         return super.add(entity);
-//        if (parent != null && parent.transform != null && super.add(entity)) {
-//            transform.parent = parent.transform;
-//            return true;
-//        }
-//        return false;
     }
 
     @Override
@@ -80,10 +93,7 @@ public class Entity
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(id);
         out.writeUTF(name);
-//        out.writeObject(getTransform());
-//        out.writeObject(components);
         out.writeObject(parent);
-        //        out.writeObject(daughters);
     }
 
     @Override
@@ -92,10 +102,7 @@ public class Entity
             throws IOException, ClassNotFoundException {
         id = (UUID) in.readObject();
         name = in.readUTF();
-//        transform = (Transform) in.readObject();
-//        components = (Map<Class<? extends Component>, Component>) in.readObject();
         parent = (Entity) in.readObject();
-        //        daughters = (List<Entity>) in.readObject();
     }
 
     @Override
