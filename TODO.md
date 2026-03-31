@@ -3,7 +3,7 @@
 ## High priority
 - [ ] Transform components are broken, the hierarchy of entities does not affects the rendering
 - [ ] Perform a huge refactor of a whole engine, remove unnecessary things
-  - [ ] Change the type of an Entity id to a simple primitive, don't overengineer things if they aren't necessary
+  - [x] Change the type of an Entity id to a simple primitive, don't overengineer things if they aren't necessary
   - [ ] Rethink the Node (TreeNode) thing to be more like a collection interface rather than a smart node, the Node (TreeNode) itself must be a simple struct which will be used by a Tree collection
   - [ ] Maybe, don't use ever the TreeNode on Entity, because the Entity must be flat as a data structure, all other fancy hierarchy things can be implemented later using components and EntityManager
   - [ ] An Entity must be just a relatively simple class with id and EntityManager/ComponentManager reference, and also must have a bunch of helper methods to work with components of that entity, at least for a while...

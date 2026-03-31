@@ -2,14 +2,8 @@ package org.north.core.architecture.entity;
 
 import org.north.core.architecture.tree.v2.LinkedTreeNode;
 import org.north.core.component.Transform;
-import org.north.core.management.data.Identifiable;
-import org.north.core.management.data.IdentifierAlreadySetException;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Entity is an object that contains a collection of components
@@ -19,37 +13,24 @@ import java.util.UUID;
  */
 // TODO: get rid of TreeNode things, an Entity must be plain object without any unnecessary hierarchy. A hierarchy can be achieved by usage of specific components in future
 public class Entity
-        extends LinkedTreeNode<Entity>
-        implements Identifiable<UUID>, Externalizable {
+        extends LinkedTreeNode<Entity> {
 
-    // TODO: the type of id can be just a simple int or long primitive, an int could be ok
-    public UUID id;
+    private static final AtomicInteger idSequence = new AtomicInteger(1);
+
+    public int id;
 
     // TODO: move entity name into separate component, make names of limited length, i.e.: FixedString8, FixedString16, and so on. Also, make FixedString classes implement CharSequence to better Java ecosystem integration
     public String name;
-
-    // TODO:
 
     // TODO: remove hardcoded reference to Transform component, Transform is not necessarily must be present for all of the entities
     public Transform transform;
 
     public Entity(String name) {
-        UUID id = UUID.randomUUID();
-        this.id = id;
-        this.name = name != null ? name : id.toString();
-    }
+        if (name == null || name.isBlank())
+            throw new IllegalArgumentException("Entity name must be present as a non blank string in a constructor argument");
 
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(UUID id) throws IdentifierAlreadySetException {
-        if (this.id == null)
-            throw new IdentifierAlreadySetException();
-
-        this.id = id;
+        this.id   = idSequence.getAndIncrement();
+        this.name = name;
     }
 
     public String getName() {
@@ -90,40 +71,20 @@ public class Entity
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(id);
-        out.writeUTF(name);
-        out.writeObject(parent);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void readExternal(ObjectInput in)
-            throws IOException, ClassNotFoundException {
-        id = (UUID) in.readObject();
-        name = in.readUTF();
-        parent = (Entity) in.readObject();
-    }
-
-    @Override
-    public String toString() {
-        return name;
-//        return "Entity{" +
-//                "name='" + name + '\'' +
-//                ", daughters=" + getSubtrees() +
-//                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Entity entity = (Entity) o;
-        return id.equals(entity.id);
+        Entity other = (Entity) o;
+        return this.id == other.id;
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Entity{id='" + id + '}';
     }
 }
