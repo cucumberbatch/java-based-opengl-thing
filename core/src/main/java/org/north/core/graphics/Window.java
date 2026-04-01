@@ -11,10 +11,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import org.north.core.config.ApplicationProperties;
-import org.north.core.physics.collision.MeshMovementListener;
 import org.north.core.system.CameraControlsSystem;
 import org.north.core.system.Input;
-import org.north.core.system.Pipeline;
 import org.north.core.utils.Stopwatch;
 
 import java.nio.IntBuffer;
@@ -142,9 +140,6 @@ public class Window {
 
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null).free();
-
-        // when we hit an exit button in application we need to stop all threads
-        MeshMovementListener.shutdownThreadExecution();
 
         log.info("Window destruction process ended");
     }

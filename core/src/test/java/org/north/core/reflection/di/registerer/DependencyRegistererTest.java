@@ -3,6 +3,7 @@ package org.north.core.reflection.di.registerer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.north.core.reflection.di.DependencyRegisterer;
 import org.north.core.reflection.di.Inject;
 
 class DependencyRegistererTest {

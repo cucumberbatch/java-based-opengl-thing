@@ -1,8 +1,9 @@
 package org.north.core.management;
 
-import org.north.core.architecture.entity.ComponentContainer;
-import org.north.core.architecture.entity.MapBasedComponentContainer;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.component.management.ComponentContainer;
+import org.north.core.component.management.MapBasedComponentContainer;
+import org.north.core.entity.Entity;
+import org.north.core.reflection.scanner.SystemComponentPair;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
@@ -78,7 +79,7 @@ public class SystemManager implements Resettable {
     private void loadComponentSystemsFromPackage(String packagePath) {
         try {
             // Logger.info(String.format("Searching for systems from package '%s'...", packagePath));
-            List<ComponentHandlerScanner.SystemComponentPair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
+            List<SystemComponentPair<?, ?>> annotatedClassesInPackage = scanner.getAnnotatedClassesInPackage(packagePath);
             annotatedClassesInPackage.forEach(pair -> componentToSystemAssociations.put(pair.component, pair.system));
 
             List<String> classNames = annotatedClassesInPackage.stream()

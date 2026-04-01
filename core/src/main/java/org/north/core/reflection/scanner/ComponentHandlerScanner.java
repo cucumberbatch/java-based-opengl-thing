@@ -17,30 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class ComponentHandlerScanner {
-
-    public static class SystemComponentPair<S extends System<C>, C extends Component> {
-        public Class<S> system;
-        public Class<C> component;
-
-        public SystemComponentPair(Class<S> system, Class<C> component) {
-            this.system = system;
-            this.component = component;
-        }
-
-        @Override
-        public String toString() {
-            return "Pair{" +
-                    "system=" + system.getName() +
-                    ", component=" + component.getName() +
-                    '}';
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(ComponentHandlerScanner.class);
     private final ClassLoader classLoader;
 
@@ -69,7 +49,10 @@ public class ComponentHandlerScanner {
         File packageDir = new File(packagePath);
         if (packageDir.isDirectory()) {
             File[] files = packageDir.listFiles();
-            for (File file : Objects.requireNonNull(files)) {
+            if (files == null)
+                throw new ClassNotFoundException("No files were found at path " + packageDir.getAbsolutePath());
+
+            for (File file : files) {
                 String filePath = packageName + "/" + file.getName();
                 loadAndAddIfClass(filePath, classes);
             }
@@ -88,11 +71,11 @@ public class ComponentHandlerScanner {
         }
     }
 
-    public List<Class<?>> loadAllClassesFromPackage(String packageName) throws ClassNotFoundException, FileNotFoundException, IOException {
+    public List<Class<?>> loadAllClassesFromPackage(String packageName) throws ClassNotFoundException, IOException {
         packageName = new String(packageName.getBytes(), StandardCharsets.UTF_8);
         URL packageUrl = classLoader.getResource(packageName);
 
-        if (Objects.isNull(packageUrl)) {
+        if (packageUrl == null) {
             throw new FileNotFoundException("Package " + packageName + " not found!");
         }
 
@@ -128,7 +111,7 @@ public class ComponentHandlerScanner {
                     @SuppressWarnings("rawtypes") Class<? extends System> systemClass = loadedClass.asSubclass(System.class);
 
                     ComponentHandler componentHandlerAnnotation = loadedClass.getAnnotation(ComponentHandler.class);
-                    if (Objects.isNull(componentHandlerAnnotation)) continue;
+                    if (componentHandlerAnnotation == null) continue;
                     Class<? extends Component> componentClass = componentHandlerAnnotation.value();
 
                     @SuppressWarnings({"rawtypes", "unchecked"}) SystemComponentPair<?, ?> componentSystemPair = new SystemComponentPair<>(systemClass, componentClass);

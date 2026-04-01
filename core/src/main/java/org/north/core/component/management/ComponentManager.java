@@ -1,9 +1,10 @@
-package org.north.core.architecture.entity;
+package org.north.core.component.management;
 
 import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
+import org.north.core.entity.Entity;
 import org.north.core.management.SystemManager;
 import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.RemoveComponentDeferredCommand;
@@ -11,7 +12,6 @@ import org.north.core.reflection.di.Inject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class ComponentManager {
     private final SystemManager      systemManager;

@@ -1,8 +1,6 @@
 package org.north.core.component;
 
-import org.north.core.architecture.entity.Entity;
-
-import java.util.UUID;
+import org.north.core.entity.Entity;
 
 public abstract class AbstractComponent implements Component {
 

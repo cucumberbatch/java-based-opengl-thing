@@ -2,7 +2,7 @@ package org.north.core.component;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 
 /**
  * The main component of each game object that tells about its position, rotation and scale

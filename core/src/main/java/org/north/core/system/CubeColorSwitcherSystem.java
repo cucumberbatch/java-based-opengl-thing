@@ -1,7 +1,7 @@
 package org.north.core.system;
 
 import org.joml.Vector4f;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.component.CubeColorSwitcher;
 import org.north.core.component.MeshRenderer;
 import org.north.core.context.ApplicationContext;

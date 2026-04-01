@@ -1,21 +1,18 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.ComponentContainer;
+import org.north.core.component.management.ComponentContainer;
 //import org.north.core.architecture.entity.MapBasedComponentContainer;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.north.core.architecture.entity.ComponentManager;
-import org.north.core.architecture.entity.Entity;
-import org.north.core.architecture.tree.v2.TreeNode;
+import org.north.core.component.management.ComponentManager;
+import org.north.core.entity.Entity;
+import org.north.core.entity.tree.TreeNode;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
-import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
-import org.north.core.editor.ui.ComponentInspector;
 import org.north.core.exception.ComponentNotFoundException;
 import org.north.core.exception.ShaderUniformNotFoundException;
 import org.north.core.graphics.Graphics;
@@ -23,18 +20,13 @@ import org.north.core.graphics.Window;
 import org.north.core.management.FrameTiming;
 import org.north.core.management.SystemManager;
 import org.north.core.management.data.AxisAlignedBoundingBox;
-import org.north.core.physics.collision.Colliding;
 import org.north.core.physics.collision.Collision;
-import org.north.core.physics.collision.CollisionPair;
 import org.north.core.physics.collision.CollisionState;
-import org.north.core.reflection.di.Inject;
 import org.north.core.scene.DefaultSceneComposer;
-import org.north.core.scene.Scene;
 import org.north.core.scene.SceneComposer;
 import org.north.core.system.process.*;
 import org.north.core.utils.Stopwatch;
 
-import javax.swing.*;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,8 +49,6 @@ public class Pipeline implements ISystem, Runnable {
 
     private final boolean editorEnabled;
     private final boolean smoothStopAndStartUpdateProcess;
-
-    private Scene scene;
 
     enum UpdateFlowState { RUNNING, STOPPED, RUN_TO_STOP, STOP_TO_RUN }
 
@@ -96,16 +86,10 @@ public class Pipeline implements ISystem, Runnable {
 
     }
 
-    public void setScene(Scene scene) {
-        this.scene = scene;
-    }
-
     @Override
     public void run() {
         // Logger.info("Game loop started");
 
-        // todo: load scene from file (game data deserialization)
-        scene = new Scene("test scene");
         composeScene(new DefaultSceneComposer());
         //applyDeferredCommands();
 

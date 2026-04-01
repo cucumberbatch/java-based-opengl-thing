@@ -3,7 +3,7 @@ package org.north.core.system;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.component.*;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;

@@ -1,9 +1,8 @@
 package org.north.core.physics.collision;
 
 import org.north.core.management.data.AxisAlignedBoundingBox;
-import org.north.core.management.data.Stateful;
 
-public class Collision implements Stateful<CollisionState> {
+public class Collision {
     private AxisAlignedBoundingBox a;
     private AxisAlignedBoundingBox b;
     private CollisionPair pair;
@@ -73,7 +72,6 @@ public class Collision implements Stateful<CollisionState> {
         this.isModified = modified;
     }
 
-    @Override
     public CollisionState getState() {
         return state;
     }
@@ -82,10 +80,13 @@ public class Collision implements Stateful<CollisionState> {
      * Changes collision state and also sets {@code isModified} to {@code true}
      * @param state new state of collision
      */
-    @Override
     public void setState(CollisionState state) {
         this.state = state;
         this.isModified = true;
+    }
+
+    public boolean inState(CollisionState state) {
+        return getState().equals(state);
     }
 
     public void swapAB() {

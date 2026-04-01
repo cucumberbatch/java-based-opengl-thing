@@ -3,7 +3,7 @@ package org.north.core.system;
 import org.lwjgl.opengl.GL30;
 import org.north.core.component.Button;
 import org.north.core.component.VisualCursor;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;

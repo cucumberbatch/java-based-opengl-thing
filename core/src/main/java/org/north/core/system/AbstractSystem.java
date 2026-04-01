@@ -1,11 +1,11 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.ComponentContainer;
-import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.component.management.ComponentContainer;
+import org.north.core.component.management.ComponentManager;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.component.Component;
 import org.north.core.context.ApplicationContext;
 import org.north.core.exception.ComponentAlreadyExistsException;

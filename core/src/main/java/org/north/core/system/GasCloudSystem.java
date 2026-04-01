@@ -1,9 +1,8 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.component.MeshRenderer;
 import org.north.core.component.GasCloud;
-import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.reflection.ComponentHandler;

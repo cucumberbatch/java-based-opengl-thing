@@ -2,7 +2,7 @@ package org.north.core.system;
 
 import org.north.core.component.MeshCollider;
 import org.north.core.component.VisualCursor;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.*;
 import org.north.core.physics.collision.Collision;

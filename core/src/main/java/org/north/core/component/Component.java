@@ -1,9 +1,8 @@
 package org.north.core.component;
 
-import org.north.core.architecture.entity.Entity;
-import org.north.core.management.data.Stateful;
+import org.north.core.entity.Entity;
 
-public interface Component extends Stateful<ComponentState> {
+public interface Component {
 
     default String getSimpleName() {
         return this.getClass().getSimpleName();
@@ -17,6 +16,14 @@ public interface Component extends Stateful<ComponentState> {
 
     default void switchActivity() {
         setActivity(!isActive());
+    }
+
+    ComponentState getState();
+
+    void setState(ComponentState state);
+
+    default boolean inState(ComponentState state) {
+        return getState().equals(state);
     }
 
     default Transform getTransform() {

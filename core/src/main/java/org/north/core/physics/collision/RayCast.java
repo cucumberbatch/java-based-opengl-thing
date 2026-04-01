@@ -1,8 +1,8 @@
 package org.north.core.physics.collision;
 
 import org.joml.Vector3f;
-import org.north.core.architecture.entity.ComponentManager;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.component.management.ComponentManager;
+import org.north.core.entity.Entity;
 import org.north.core.component.Transform;
 import org.north.core.physics.Sphere;
 

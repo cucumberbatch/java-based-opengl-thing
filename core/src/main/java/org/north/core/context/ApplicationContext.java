@@ -1,6 +1,6 @@
 package org.north.core.context;
 
-import org.north.core.reflection.di.registerer.DependencyRegisterer;
+import org.north.core.reflection.di.DependencyRegisterer;
 
 public class ApplicationContext {
     private final DependencyRegisterer dependencyRegisterer;

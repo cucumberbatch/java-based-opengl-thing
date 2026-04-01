@@ -1,6 +1,7 @@
-package org.north.core.architecture.entity;
+package org.north.core.component.management;
 
 import org.north.core.component.Component;
+import org.north.core.entity.Entity;
 
 import java.util.Collection;
 import java.util.Set;

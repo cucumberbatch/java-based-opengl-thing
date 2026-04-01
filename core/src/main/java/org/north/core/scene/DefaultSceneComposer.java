@@ -4,10 +4,9 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.north.core.architecture.entity.ComponentContainer;
-import org.north.core.architecture.entity.ComponentManager;
-import org.north.core.architecture.entity.Entity;
-import org.north.core.architecture.tree.v2.TreeNode;
+import org.north.core.component.management.ComponentManager;
+import org.north.core.entity.Entity;
+import org.north.core.entity.tree.TreeNode;
 import org.north.core.component.*;
 import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Texture;
@@ -31,6 +30,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         Entity camera = new Entity("camera");
         cm.add(camera, Transform.class, Camera.class, CameraControls.class);
+        SimpleColorShader shader = new SimpleColorShader();
         root.add(camera);
 
         int N = 2;
@@ -47,7 +47,7 @@ public class DefaultSceneComposer implements SceneComposer {
                     transform.rescaleTo(0.4999f, 0.4999f, 0.4999f);
                     
                     MeshRenderer meshRenderer = new MeshRenderer();
-                    meshRenderer.shader = new SimpleColorShader();
+                    meshRenderer.shader = shader;
                     meshRenderer.mesh   = PredefinedMeshes.CUBE;
                     meshRenderer.color.set(0, 0, 0, 0f);
 

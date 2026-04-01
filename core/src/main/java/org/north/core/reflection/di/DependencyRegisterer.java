@@ -1,6 +1,4 @@
-package org.north.core.reflection.di.registerer;
-
-import org.north.core.reflection.di.Inject;
+package org.north.core.reflection.di;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;

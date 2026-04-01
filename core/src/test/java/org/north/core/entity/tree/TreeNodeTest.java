@@ -1,4 +1,4 @@
-package org.north.core.architecture.tree.v2;
+package org.north.core.entity.tree;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

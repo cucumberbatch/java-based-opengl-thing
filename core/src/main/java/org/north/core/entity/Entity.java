@@ -1,6 +1,6 @@
-package org.north.core.architecture.entity;
+package org.north.core.entity;
 
-import org.north.core.architecture.tree.v2.LinkedTreeNode;
+import org.north.core.entity.tree.LinkedTreeNode;
 import org.north.core.component.Transform;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Entity
         extends LinkedTreeNode<Entity> {
 
+    // TODO: move idSequence to the EntityManager or something and add a specific constructor with id
     private static final AtomicInteger idSequence = new AtomicInteger(1);
 
     public int id;
@@ -55,7 +56,7 @@ public class Entity
         if (entityTransform != null) {
             entityTransform.parent = this.transform;
 
-            // We make relative translation by zero to simply mark a transform component as dirty, so the next getGlobal... something will cause global cache update
+            // We make relative translation by zero to simply mark a transform component as dirty, so the next getGlobal... method call will cause global cache update
             entityTransform.moveRel(0, 0, 0);
         }
         return super.add(entity);

@@ -1,11 +1,10 @@
 package org.north.core;
 
-import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.component.management.ComponentManager;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Window;
 import org.north.core.management.SystemManager;
-import org.north.core.scene.Scene;
 import org.north.core.system.Pipeline;
 
 /**

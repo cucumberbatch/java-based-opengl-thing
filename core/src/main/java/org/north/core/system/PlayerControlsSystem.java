@@ -3,7 +3,7 @@ package org.north.core.system;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.component.PlayerControls;
 import org.north.core.component.RigidBody;
-import org.north.core.architecture.entity.Entity;
+import org.north.core.entity.Entity;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;

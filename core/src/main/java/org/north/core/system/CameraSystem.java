@@ -1,6 +1,6 @@
 package org.north.core.system;
 
-import org.north.core.architecture.entity.ComponentManager;
+import org.north.core.component.management.ComponentManager;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.component.Camera;

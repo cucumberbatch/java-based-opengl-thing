@@ -1,4 +1,4 @@
-package org.north.core.architecture.tree.v2;
+package org.north.core.entity.tree;
 
 import java.io.Serializable;
 import java.util.*;

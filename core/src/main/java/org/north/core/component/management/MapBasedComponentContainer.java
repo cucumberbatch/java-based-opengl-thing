@@ -1,8 +1,8 @@
-package org.north.core.architecture.entity;
+package org.north.core.component.management;
 
 import org.north.core.component.Component;
+import org.north.core.entity.Entity;
 import org.north.core.exception.ComponentAlreadyExistsException;
-import org.north.core.exception.ComponentNotFoundException;
 
 import java.util.*;
 

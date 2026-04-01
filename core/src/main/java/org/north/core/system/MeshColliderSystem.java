@@ -3,7 +3,6 @@ package org.north.core.system;
 import org.north.core.component.MeshCollider;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
-import org.north.core.physics.collision.MeshMovementListener;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InitProcess;
@@ -25,7 +24,6 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
     @Override
     public void init(MeshCollider meshCollider) {
         Transform t = cm.get(meshCollider.getEntity(), Transform.class);
-        // t.setTransformListener(new MeshMovementListener());
     }
 
     @Override

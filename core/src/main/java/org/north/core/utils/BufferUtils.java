@@ -12,8 +12,8 @@ import java.util.Map;
 public class BufferUtils {
     private static final Logger log = LoggerFactory.getLogger(BufferUtils.class);
 
-    private static final Map<Integer, ByteBuffer> BYTE_BUFFER_STORAGE = new HashMap<>();
-    private static final Map<Integer, IntBuffer> INT_BUFFER_STORAGE = new HashMap<>();
+    private static final Map<Integer, ByteBuffer>  BYTE_BUFFER_STORAGE  = new HashMap<>();
+    private static final Map<Integer, IntBuffer>   INT_BUFFER_STORAGE   = new HashMap<>();
     private static final Map<Integer, FloatBuffer> FLOAT_BUFFER_STORAGE = new HashMap<>();
 
     private static final float[] M4F_BUFFER_ARRAY = new float[16];
