@@ -5,6 +5,7 @@ import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.entity.Entity;
+import org.north.core.management.CommandApplier;
 import org.north.core.management.SystemManager;
 import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.RemoveComponentDeferredCommand;
@@ -16,11 +17,13 @@ import java.util.*;
 public class ComponentManager {
     private final SystemManager      systemManager;
     private final ComponentContainer container;
+    private final CommandApplier     commandApplier;
 
     @Inject
     public ComponentManager(ApplicationContext context) {     
-        this.container     = context.getDependency(ComponentContainer.class);
-        this.systemManager = context.getDependency(SystemManager.class);
+        this.container      = context.getDependency(ComponentContainer.class);
+        this.systemManager  = context.getDependency(SystemManager.class);
+        this.commandApplier = context.getDependency(CommandApplier.class);
     }
 
     public void setCameraComponent(Camera camera) {
@@ -84,7 +87,7 @@ public class ComponentManager {
 
         C component = container.get(entity, type);
 
-        systemManager.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
+        commandApplier.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
 
         //component.setActivity(false);
         //systemManager.getSystemByComponentType(type).removeComponent(component);
@@ -124,7 +127,7 @@ public class ComponentManager {
 
     private <C extends Component> C registerComponent(Entity entity, C component) {
         component.setEntity(entity);
-        systemManager.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
+        commandApplier.addDeferredCommand(new AddComponentDeferredCommand(entity, component));
         return component;
     }
 

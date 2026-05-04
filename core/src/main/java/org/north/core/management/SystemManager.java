@@ -16,7 +16,6 @@ import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
-import org.north.core.system.command.DeferredCommand;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.Process;
 import org.north.core.system.process.RenderProcess;
@@ -36,7 +35,6 @@ public class SystemManager implements Resettable {
     public final Map<Class<? extends Component>, System<?>> systemMap;
     public final List<System<?>> systemList;
     public final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
-    public final Queue<DeferredCommand> deferredCommands;
     public final ComponentHandlerScanner scanner;
     public final ApplicationContext applicationContext;
     public final EntityDistanceToCameraComparator cameraDistanceComparator;
@@ -48,7 +46,6 @@ public class SystemManager implements Resettable {
     public SystemManager(ApplicationContext context) {
         applicationContext            = context;
         scanner                       = new ComponentHandlerScanner();
-        deferredCommands              = new LinkedList<>();
         componentToSystemAssociations = new IdentityHashMap<>();
         collisions  = new ArrayList<>();
         systemList  = new ArrayList<>();
@@ -180,19 +177,6 @@ public class SystemManager implements Resettable {
         return components;
     }
 
-    public void addDeferredCommand(DeferredCommand command) {
-        deferredCommands.add(command);
-    }
-
-    public void applyDeferredCommands() {
-        if (deferredCommands.isEmpty()) return;
-        for (DeferredCommand command : deferredCommands) {
-            command.execute(this);
-//            log.info("executed deferred command: {}", command);
-        }
-        deferredCommands.clear();
-    }
-
     @Override
     public void reset() {
         for (System<?> system : systemList) {
@@ -200,6 +184,7 @@ public class SystemManager implements Resettable {
         }
     }
 
+    // todo: move to a specific system for collision registration/handling
     public void registerCollisions() {
     }
 

@@ -2,6 +2,7 @@ package org.north.core.system;
 
 import org.north.core.component.management.ComponentContainer;
 //import org.north.core.architecture.entity.MapBasedComponentContainer;
+import org.north.core.management.CommandApplier;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -42,6 +43,7 @@ public class Pipeline implements ISystem, Runnable {
     private final Graphics graphics;
     private final ComponentManager componentManager;
     private final SystemManager systemManager;
+    private final CommandApplier commandApplier;
     private final FrameTiming timingContext;
     private final Input input;
 
@@ -63,6 +65,7 @@ public class Pipeline implements ISystem, Runnable {
         this.graphics = context.getDependency(Graphics.class);
         this.componentManager = context.getDependency(ComponentManager.class);
         this.systemManager = context.getDependency(SystemManager.class);
+        this.commandApplier = context.getDependency(CommandApplier.class);
         this.timingContext = new FrameTiming(65);
         this.input = context.getDependency(Input.class);
 
@@ -516,7 +519,7 @@ public class Pipeline implements ISystem, Runnable {
 
 
     private void applyDeferredCommands() {
-        systemManager.applyDeferredCommands();
+        commandApplier.applyDeferredCommands();
     }
 
 }
