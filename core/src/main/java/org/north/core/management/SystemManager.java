@@ -13,8 +13,6 @@ import org.north.core.component.ComponentState;
 import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
-import org.north.core.management.data.AxisAlignedBoundingBox;
-import org.north.core.management.data.OctreeNode;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
@@ -42,7 +40,6 @@ public class SystemManager implements Resettable {
     public final ComponentHandlerScanner scanner;
     public final ApplicationContext applicationContext;
     public final EntityDistanceToCameraComparator cameraDistanceComparator;
-    public final OctreeNode<AxisAlignedBoundingBox> spatialTree;
 
     private final ComponentContainer componentContainer;
 
@@ -53,7 +50,6 @@ public class SystemManager implements Resettable {
         scanner                       = new ComponentHandlerScanner();
         deferredCommands              = new LinkedList<>();
         componentToSystemAssociations = new IdentityHashMap<>();
-        spatialTree = new OctreeNode<>(new Vector3f(0, 0, 0), new Vector3f(8, 8, 8));
         collisions  = new ArrayList<>();
         systemList  = new ArrayList<>();
         systemMap   = new IdentityHashMap<>();
@@ -205,7 +201,6 @@ public class SystemManager implements Resettable {
     }
 
     public void registerCollisions() {
-        Collection<Collision> foundCollisions = spatialTree.getAllCollisions();
     }
 
     // TODO: Camera logic must be existed in other place, not in a SystemManager

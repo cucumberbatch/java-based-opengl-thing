@@ -2,6 +2,8 @@ package org.north.core.management.data;
 
 import org.joml.Vector3f;
 
+import java.util.Objects;
+
 class AABB implements AxisAlignedBoundingBox {
 
     private Vector3f nearBottomLeft;
@@ -40,6 +42,24 @@ class AABB implements AxisAlignedBoundingBox {
     @Override
     public float zMax() {
         return farTopRight.z;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AABB other = (AABB) obj;
+        return Float.compare(other.xMin(), xMin()) == 0 &&
+                Float.compare(other.xMax(), xMax()) == 0 &&
+                Float.compare(other.yMin(), yMin()) == 0 &&
+                Float.compare(other.yMax(), yMax()) == 0 &&
+                Float.compare(other.zMin(), zMin()) == 0 &&
+                Float.compare(other.zMax(), zMax()) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(xMin(), xMax(), yMin(), yMax(), zMin(), zMax());
     }
 
     @Override

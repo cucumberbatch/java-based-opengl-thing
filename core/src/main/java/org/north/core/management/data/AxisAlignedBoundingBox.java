@@ -1,12 +1,9 @@
 package org.north.core.management.data;
 
 public interface AxisAlignedBoundingBox {
-    float xMin();
-    float xMax();
-    float yMin();
-    float yMax();
-    float zMin();
-    float zMax();
+    float xMin(); float xMax();
+    float yMin(); float yMax();
+    float zMin(); float zMax();
 
     default boolean isIntersects(AxisAlignedBoundingBox other) {
         return this.xMin() <= other.xMax() && this.xMax() >= other.xMin()
