@@ -51,6 +51,7 @@ public class Pipeline implements ISystem, Runnable {
 
     private final boolean editorEnabled;
     private final boolean smoothStopAndStartUpdateProcess;
+    private final CameraAwareService cameraAwareService;
 
     enum UpdateFlowState { RUNNING, STOPPED, RUN_TO_STOP, STOP_TO_RUN }
 
@@ -80,6 +81,7 @@ public class Pipeline implements ISystem, Runnable {
         try {
 //            context.addDependency(ComponentContainer.class, componentContainer);
             this.componentContainer = context.getDependency(ComponentContainer.class);
+            cameraAwareService = context.getDependency(CameraAwareService.class);
             this.rootNode =
                     context.addDependency(Entity.class, new Entity("root"));
         } catch (ReflectiveOperationException e) {
@@ -487,7 +489,7 @@ public class Pipeline implements ISystem, Runnable {
         // which means that components of different render groups would be sorted only in certain group,
         // not in the whole world context, so it can cause a lot of graphical bugs for more than one render system
         for (RenderProcess process : systemManager.getProcessList(RenderProcess.class)) {
-            List<? extends Component> components = systemManager.sortComponentsByDistanceToCamera(process);
+            List<? extends Component> components = cameraAwareService.sortComponentsByDistanceToCamera(process);
             for (Component component : components) {
                 if (component.isActive() && component.inState(ComponentState.READY_TO_OPERATE_STATE)) {
                     // Logger.trace(String.format(

@@ -1,12 +1,10 @@
 package org.north.core.component.management;
 
-import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.entity.Entity;
 import org.north.core.management.CommandApplier;
-import org.north.core.management.SystemManager;
 import org.north.core.system.command.AddComponentDeferredCommand;
 import org.north.core.system.command.RemoveComponentDeferredCommand;
 import org.north.core.reflection.di.Inject;
@@ -15,19 +13,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class ComponentManager {
-    private final SystemManager      systemManager;
     private final ComponentContainer container;
     private final CommandApplier     commandApplier;
 
     @Inject
     public ComponentManager(ApplicationContext context) {     
         this.container      = context.getDependency(ComponentContainer.class);
-        this.systemManager  = context.getDependency(SystemManager.class);
         this.commandApplier = context.getDependency(CommandApplier.class);
-    }
-
-    public void setCameraComponent(Camera camera) {
-        systemManager.setCameraComponent(camera);
     }
 
     public <C extends Component> C add(Entity entity, C component) {
@@ -56,12 +48,6 @@ public class ComponentManager {
         return addedComponents;
     }
 
-    // public final <C extends Component> C addAndPerform(Entity entity, Class<C> type, Consumer<C> action) {
-    //     C component = add(entity, type);
-    //     action.accept(component);
-    //     return component;
-    // }
-
     public final <C extends Component> C get(Entity entity, Class<C> type) {
         return container.get(entity, type);
     }
@@ -88,9 +74,6 @@ public class ComponentManager {
         C component = container.get(entity, type);
 
         commandApplier.addDeferredCommand(new RemoveComponentDeferredCommand(entity, component));
-
-        //component.setActivity(false);
-        //systemManager.getSystemByComponentType(type).removeComponent(component);
 
         return component;
     }

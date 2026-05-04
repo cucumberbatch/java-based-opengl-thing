@@ -6,11 +6,8 @@ import org.north.core.entity.Entity;
 import org.north.core.reflection.scanner.SystemComponentPair;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import org.joml.Vector3f;
-import org.north.core.component.Camera;
 import org.north.core.component.Component;
 import org.north.core.component.ComponentState;
-import org.north.core.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.context.ApplicationContext;
 import org.north.core.physics.collision.Collision;
@@ -18,7 +15,6 @@ import org.north.core.reflection.scanner.ComponentHandlerScanner;
 import org.north.core.system.System;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.Process;
-import org.north.core.system.process.RenderProcess;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,22 +22,21 @@ import java.util.stream.Collectors;
 public class SystemManager implements Resettable {
     private static final Logger log = LoggerFactory.getLogger(SystemManager.class);
 
-    /**
-     * Collisions that was registered in an octree during a frame computation
-     */
-    public final List<Collision> collisions;
-
+    public final ApplicationContext applicationContext;
+    public final ComponentHandlerScanner scanner;
+    public final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
     public final Map<Class<? extends Process>, List<Process>> processMap;
     public final Map<Class<? extends Component>, System<?>> systemMap;
     public final List<System<?>> systemList;
-    public final Map<Class<? extends Component>, Class<? extends System<?>>> componentToSystemAssociations;
-    public final ComponentHandlerScanner scanner;
-    public final ApplicationContext applicationContext;
-    public final EntityDistanceToCameraComparator cameraDistanceComparator;
 
     private final ComponentContainer componentContainer;
 
-    private Camera camera;
+
+    // ----- unrelated to a SystemManager things ------
+    // --- collisions ---
+    public final List<Collision> collisions;
+    // -------------------
+
 
     public SystemManager(ApplicationContext context) {
         applicationContext            = context;
@@ -54,7 +49,6 @@ public class SystemManager implements Resettable {
 
         try {
             componentContainer       = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
-            cameraDistanceComparator = new EntityDistanceToCameraComparator(componentContainer);
        } catch (ReflectiveOperationException e) {
             log.error("Failed to create and register component container instance!");
             throw new RuntimeException(e);
@@ -97,10 +91,6 @@ public class SystemManager implements Resettable {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void setCameraComponent(Camera camera) {
-        this.camera = camera;
     }
 
     public System<?> getSystemByComponentType(Class<? extends Component> componentType) {
@@ -155,28 +145,6 @@ public class SystemManager implements Resettable {
         return (C) component; //system.addComponent(component);
     }
 
-    private Map<RenderProcess<?>, List<? extends Component>> scm = new IdentityHashMap<>();
-
-    public List<? extends Component> sortComponentsByDistanceToCamera(RenderProcess<?> process) {
-        if (camera == null) return Collections.emptyList();
-        if (!cameraDistanceComparator.isCameraSet()) {
-            Transform transform = componentContainer.get(camera.getEntity(), Transform.class);
-            cameraDistanceComparator.setCameraPosition(transform.getPosition());
-        }
-
-        List<? extends Component> components;
-        if (scm.containsKey(process)) {
-            components = scm.get(process);
-        } else {
-            System<? extends Component> system = (System<? extends Component>) process;
-            components = system.getComponentList();
-            scm.put(process, components);
-        }
-
-        components.sort(cameraDistanceComparator);
-        return components;
-    }
-
     @Override
     public void reset() {
         for (System<?> system : systemList) {
@@ -184,40 +152,9 @@ public class SystemManager implements Resettable {
         }
     }
 
-    // todo: move to a specific system for collision registration/handling
+    // todo: refactor, move to a specific system for collision registration/handling
     public void registerCollisions() {
     }
 
-    // TODO: Camera logic must be existed in other place, not in a SystemManager
-    static class EntityDistanceToCameraComparator implements Comparator<Component> {
-        private Vector3f cameraPosition;
-        private final ComponentContainer componentContainer;
-
-        public EntityDistanceToCameraComparator(ComponentContainer componentContainer) {
-            this.componentContainer = componentContainer;
-        }
-
-        //note: we need to be careful because of passing a reference to camera position only once at the start of Camera component life,
-        // so if we accidentally replace Transform.position vec instance we loose all position changes and scene will be rendered in wrong order
-        public void setCameraPosition(Vector3f cameraPosition) {
-            this.cameraPosition = cameraPosition;
-        }
-
-        public boolean isCameraSet() {
-            return this.cameraPosition != null;
-        }
-
-        private final Vector3f o1Position = new Vector3f();
-        private final Vector3f o2Position = new Vector3f();
-
-        @Override
-        public int compare(Component o1, Component o2) {
-            Transform t1 = componentContainer.get(o1.getEntity(), Transform.class);
-            Transform t2 = componentContainer.get(o2.getEntity(), Transform.class);
-            float o1Distance = t1.getGlobalPosition(o1Position).distance(cameraPosition);
-            float o2Distance = t2.getGlobalPosition(o2Position).distance(cameraPosition);
-            return Float.compare(o2Distance, o1Distance);
-        }
-    }
 
 }

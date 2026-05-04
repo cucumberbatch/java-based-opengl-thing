@@ -1,6 +1,5 @@
 package org.north.core.system;
 
-import org.north.core.component.management.ComponentManager;
 import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.component.Camera;
@@ -19,12 +18,12 @@ public class CameraSystem extends AbstractSystem<Camera>
     public static Matrix4f INTERMEDIATE_MATRIX = new Matrix4f();
     public static Matrix4f ORTHOGRAPHIC_MATRIX = new Matrix4f();
 
-    private final ComponentManager componentManager;
+    private final CameraAwareService cameraAwareService;
 
     @Inject
     public CameraSystem(ApplicationContext context) {
         super(Camera.class, context);
-        this.componentManager = context.getDependency(ComponentManager.class);
+        cameraAwareService = context.getDependency(CameraAwareService.class);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class CameraSystem extends AbstractSystem<Camera>
         camera.at.set(1.0f, 0.0f, -1.0f).add(camera.eye);
         camera.projectionMatrix = PERSPECTIVE_MATRIX;
 
-        componentManager.setCameraComponent(camera);
+        cameraAwareService.setCameraComponent(camera);
     }
 
     @Override
