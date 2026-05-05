@@ -16,7 +16,6 @@ import org.north.core.system.process.UpdateProcess;
 public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
         implements InitProcess<PlayerControls>, InputHandleProcess<PlayerControls>, UpdateProcess<PlayerControls> {
 
-    private Entity physicalBody;
     private RigidBody rigidBody;
     private boolean gravitationalState = false;
     private boolean keyIIsPressed;
@@ -43,7 +42,7 @@ public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
             rigidBody.isGravitational = gravitationalState;
             rigidBody.velocity.set(0);
             rigidBody.acceleration.set(0);
-            cm.get(physicalBody, Transform.class).moveTo(0f, 0f, 0f);
+            cm.get(rigidBody.getEntity(), Transform.class).moveTo(0f, 0f, 0f);
         }
     }
 }
