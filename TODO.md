@@ -1,13 +1,13 @@
 # Game engine dev tasks to do
 
 ## High priority
-- [ ] Transform components are broken, the hierarchy of entities does not affects the rendering
+- [x] Transform components are broken, the hierarchy of entities does not affects the rendering (the actual problem was different, the component attachment logic with searching for related system was incorrect)
 - [x] Change the type of an Entity id to a simple primitive, don't overengineer things if they aren't necessary
 - [ ] Rethink the Node (TreeNode) thing to be more like a collection interface rather than a smart node, the Node (TreeNode) itself must be a simple struct which will be used by a Tree collection
 - [ ] Maybe, don't use ever the TreeNode on Entity, because the Entity must be flat as a data structure, all other fancy hierarchy things can be implemented later using components and EntityManager
 - [ ] An Entity must be just a relatively simple class with id and EntityManager/ComponentManager reference, and also must have a bunch of helper methods to work with components of that entity, at least for a while...
+  - [ ] Remove hardcoded reference to Transform component, Transform is not necessarily must be present for all of the entities
 - [ ] Move entity name into separate component, make names of limited length, i.e.: FixedString8, FixedString16, and so on. Also, make FixedString classes implement CharSequence to better Java ecosystem integration
-- [ ] Remove hardcoded reference to Transform component, Transform is not necessarily must be present for all of the entities
 - [ ] An EntityManager (or a ComponentManager, who is the boss, idk) must have something for a component bulk instantiation process, and a pool of removed/unused components to be able to reuse them. Probably, that would be a north.depot task for improvement
     - [ ] A code generation thing for a bulk component instantiation, which will use a compile-time generated constructors
 

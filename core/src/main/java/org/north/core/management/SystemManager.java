@@ -34,6 +34,7 @@ public class SystemManager implements Resettable {
 
     // ----- unrelated to a SystemManager things ------
     // --- collisions ---
+    // todo: refactor, and also refactor Pipeline - extract all the collision handling logic into separate systems and add two new pipeline stages, something like preUpdate and postUpdate, which will be firing on each frame
     public final List<Collision> collisions;
     // -------------------
 
@@ -101,14 +102,13 @@ public class SystemManager implements Resettable {
     public <C extends Component> C addComponent(C component) {
         Entity entity = component.getEntity();
         Class<? extends Component> componentClass = component.getClass();
-        Class<? extends System<?>> systemClass    = null;
-        System<?> system;
+        Class<? extends System<?>> systemClass = componentToSystemAssociations.get(componentClass);
+        System<?> system = systemMap.get(componentClass);
 
         // initialize system if it is not
-        if ((system = systemMap.get(componentClass)) == null) {
+        if (system == null) {
             try {
                 //                System<?> system = initializer.initSystem(componentToSystemAssociations.get(componentClass));
-                systemClass = componentToSystemAssociations.get(componentClass);
                 if (systemClass != null) {
                     system = applicationContext.addDependency(systemClass);
                     systemMap.put(componentClass, system);
