@@ -52,13 +52,13 @@ public class Entity
 
     @Override
     public boolean add(Entity entity) {
-        Transform entityTransform = entity.getTransform();
-        if (entityTransform != null) {
-            entityTransform.parent = this.transform;
-
-            // We make relative translation by zero to simply mark a transform component as dirty, so the next getGlobal... method call will cause global cache update
-            entityTransform.moveRel(0, 0, 0);
-        }
+//        Transform entityTransform = entity.getTransform();
+//        if (entityTransform != null) {
+//            entityTransform.parent = this.transform;
+//
+//            // We make relative translation by zero to simply mark a transform component as dirty, so the next getGlobal... method call will cause global cache update
+//            entityTransform.moveRel(0, 0, 0);
+//        }
         return super.add(entity);
     }
 
@@ -86,6 +86,6 @@ public class Entity
 
     @Override
     public String toString() {
-        return "Entity{id='" + id + '}';
+        return "Entity{id=" + id + "}";
     }
 }
