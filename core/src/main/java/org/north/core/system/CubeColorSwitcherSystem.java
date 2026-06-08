@@ -1,6 +1,8 @@
 package org.north.core.system;
 
+import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.north.core.component.Transform;
 import org.north.core.entity.Entity;
 import org.north.core.component.CubeColorSwitcher;
 import org.north.core.component.MeshRenderer;
@@ -36,6 +38,8 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
 //            float r = rnd.nextFloat();
 //            float g = rnd.nextFloat();
 //            float b = rnd.nextFloat();
+//            renderer.color.set(r, g, b, 1f);
+
             renderer.color.set(turnedOnCubeColor);
             component.acc = 0f;
             component.switched = true;

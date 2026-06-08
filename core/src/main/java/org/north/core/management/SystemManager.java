@@ -49,8 +49,8 @@ public class SystemManager implements Resettable {
         processMap  = new IdentityHashMap<>();
 
         try {
-            componentContainer       = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
-       } catch (ReflectiveOperationException e) {
+            componentContainer = context.addDependency(ComponentContainer.class, new MapBasedComponentContainer());
+        } catch (ReflectiveOperationException e) {
             log.error("Failed to create and register component container instance!");
             throw new RuntimeException(e);
         }
@@ -83,9 +83,9 @@ public class SystemManager implements Resettable {
 
     private void initProcessMap(String processPackageName) {
         try {
-            log.info("processPackageName: " + processPackageName);
+            log.info("process package name: {}", processPackageName);
             List<Class<? extends Process>> processClasses = scanner.getAllProcessClasses(processPackageName);
-            log.info("found process classes: " + processClasses);
+            log.info("found {} process classes: {}", processClasses.size(), processClasses);
             for (Class<? extends Process> processClass : processClasses) {
                 processMap.put(processClass, new ArrayList<>());
             }
