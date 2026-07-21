@@ -83,7 +83,7 @@ public class Pipeline implements ISystem, Runnable {
             this.componentContainer = context.getDependency(ComponentContainer.class);
             cameraAwareService = context.getDependency(CameraAwareService.class);
             this.rootNode =
-                    context.addDependency(Entity.class, new Entity("root"));
+                    context.addDependency(Entity.class, new Entity("root", componentManager));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -147,6 +147,7 @@ public class Pipeline implements ISystem, Runnable {
 
     private void composeScene(SceneComposer composer) {
         componentManager.add((Entity) rootNode, Transform.class);
+        applyDeferredCommands();
         composer.compose(rootNode, componentManager);
     }
 

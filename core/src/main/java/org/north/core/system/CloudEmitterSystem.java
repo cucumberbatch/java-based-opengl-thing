@@ -90,7 +90,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         }
 
         if (moving && acc > 1) {
-            Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++);
+            Entity gasCloudEntity = new Entity("gas_cloud_" + gasCloudEntityNumber++, cm);
 
             movableWorld.add(gasCloudEntity);
 

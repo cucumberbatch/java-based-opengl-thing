@@ -10,7 +10,7 @@ import org.north.core.entity.Entity;
  * @author cucumberbatch
  */
 public class Transform extends AbstractComponent {
-    public Transform parent;
+    public Transform parentTransform;
 
     private Vector3f position = new Vector3f(0, 0, 0);
     private Vector3f rotation = new Vector3f(0, 0, 0);
@@ -23,13 +23,22 @@ public class Transform extends AbstractComponent {
     private boolean globalDirty = true;
 
     public Transform() {
+        this(null);
+    }
+
+    public Transform(Transform parentTransform) {
+        this.parentTransform = parentTransform;
         super.setState(ComponentState.READY_TO_OPERATE_STATE);
     }
 
     @Override
     public void setEntity(Entity entity) {
         super.setEntity(entity);
-        entity.setTransform(this);
+//        entity.setTransform(this);
+    }
+
+    public void setParent(Transform parentTransform) {
+        this.parentTransform = parentTransform;
     }
 
     public Vector3f getPosition() {
@@ -110,16 +119,16 @@ public class Transform extends AbstractComponent {
 
         int depth = 0;
         Transform root = this;
-        while (root.parent != null) {
+        while (root.parentTransform != null) {
             depth++;
-            root = root.parent;
+            root = root.parentTransform;
         }
 
         Transform[] chain = new Transform[depth + 1];
         Transform current = this;
-        while (current.parent != null) {
+        while (current.parentTransform != null) {
             chain[depth--] = current;
-            current = current.parent;
+            current = current.parentTransform;
         }
         chain[0] = root;
         
@@ -131,24 +140,27 @@ public class Transform extends AbstractComponent {
     }
 
     public Vector3f getGlobalPosition(Vector3f destination) {
-        return this.getGlobalModelMatrix(new Matrix4f()).getTranslation(destination);
+        globalPosition.set(getGlobalModelMatrix(new Matrix4f()).getTranslation(destination));
+        return destination;
     }
 
     public Vector3f getGlobalRotation(Vector3f destination) {
         destination = destination.zero();
-        for (Transform it = this; it != null; it = it.parent)
+        for (Transform it = this; it != null; it = it.parentTransform)
             destination.rotateX(it.rotation.x).rotateY(it.rotation.y).rotateZ(it.rotation.z);
+        globalRotation.set(destination);
         return destination;
     }
 
     public Vector3f getGlobalScale(Vector3f destination) {
-        return getGlobalModelMatrix(new Matrix4f()).getScale(destination);
+        globalScale.set(getGlobalModelMatrix(new Matrix4f()).getScale(destination));
+        return destination;
     }
 
     @Deprecated
     public Transform getGlobalTransform() {
         Transform gTransform = new Transform();
-        for (Transform it = this; it != null; it = it.parent) {
+        for (Transform it = this; it != null; it = it.parentTransform) {
             gTransform.position.add(it.position);
             gTransform.rotation.add(it.rotation);
             gTransform.scale.mul(it.scale);
