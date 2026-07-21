@@ -74,7 +74,7 @@ public class Input {
         return cursorPosition.y;
     }
 
-    public static class KeyboardInput extends GLFWKeyCallback {
+    public static class KeyboardInputCallback extends GLFWKeyCallback {
         private final Input input = Input.getInstance();
 
         @Override
@@ -92,7 +92,7 @@ public class Input {
         }
     }
 
-    public static class MouseInput extends GLFWMouseButtonCallback {
+    public static class MouseInputCallback extends GLFWMouseButtonCallback {
         private final Input input = Input.getInstance();
 
         @Override
@@ -107,7 +107,7 @@ public class Input {
         }
     }
 
-    public static class CursorPositionInput extends GLFWCursorPosCallback {
+    public static class CursorPositionCallback extends GLFWCursorPosCallback {
         private final Input input = Input.getInstance();
 
         @Override

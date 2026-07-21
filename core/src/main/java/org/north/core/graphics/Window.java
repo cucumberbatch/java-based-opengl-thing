@@ -73,9 +73,9 @@ public class Window {
             throw new RuntimeException("Failed to create the GLFW window");
 
         // Setting up input callback handlers
-        GLFW.glfwSetKeyCallback(window, new Input.KeyboardInput());
-        GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInput());
-        GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionInput());
+        GLFW.glfwSetKeyCallback(window, new Input.KeyboardInputCallback());
+        GLFW.glfwSetMouseButtonCallback(window, new Input.MouseInputCallback());
+        GLFW.glfwSetCursorPosCallback(window, new Input.CursorPositionCallback());
         GLFW.glfwSetWindowSizeCallback(window, new CameraControlsSystem.WindowSizeCallback(graphics));
 
 
