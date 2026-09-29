@@ -19,11 +19,6 @@ public class AddComponentDeferredCommand implements DeferredCommand {
     }
 
     @Override
-    public CommandType getType() {
-        return CommandType.ADD_COMPONENT;
-    }
-
-    @Override
     public String toString() {
         return "AddComponentDeferredCommand{" +
                 "entity=" + entity +
