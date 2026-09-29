@@ -36,7 +36,7 @@ import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 import static org.north.core.system.Pipeline.UpdateFlowState.*;
 
-public class Pipeline implements ISystem, Runnable {
+public class Pipeline implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Pipeline.class);
 
     private final Window window;
@@ -151,7 +151,6 @@ public class Pipeline implements ISystem, Runnable {
         composer.compose(rootNode, componentManager);
     }
 
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void init() throws RuntimeException {
         // todo: needs to check for adding new components in runtime and checks for running out of components
@@ -347,7 +346,6 @@ public class Pipeline implements ISystem, Runnable {
     float runFactor = 1;
 
     //todo: performance
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void update(final float deltaTime) {
 //        Stopwatch.start();
