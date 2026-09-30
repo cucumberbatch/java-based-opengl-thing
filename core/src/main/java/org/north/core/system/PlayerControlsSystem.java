@@ -3,18 +3,17 @@ package org.north.core.system;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.component.PlayerControls;
 import org.north.core.component.RigidBody;
-import org.north.core.entity.Entity;
 import org.north.core.component.Transform;
 import org.north.core.context.ApplicationContext;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.InputHandleProcess;
+import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
 @ComponentHandler(PlayerControls.class)
 public class PlayerControlsSystem extends AbstractSystem<PlayerControls>
-        implements InitProcess<PlayerControls>, InputHandleProcess<PlayerControls>, UpdateProcess<PlayerControls> {
+        implements InitProcess<PlayerControls>, InputHandlerProcess<PlayerControls>, UpdateProcess<PlayerControls> {
 
     private RigidBody rigidBody;
     private boolean gravitationalState = false;

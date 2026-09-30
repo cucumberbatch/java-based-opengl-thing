@@ -9,7 +9,7 @@ import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
 import org.north.core.shape.Rectangle;
-import org.north.core.system.process.CollisionHandlingProcess;
+import org.north.core.system.process.CollisionHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 import org.joml.Vector4f;
@@ -19,7 +19,7 @@ import org.joml.Vector2f;
 //  not local vectors
 @ComponentHandler(VisualCursor.class)
 public class VisualCursorSystem extends AbstractSystem<VisualCursor>
-        implements InitProcess<VisualCursor>, UpdateProcess<VisualCursor>, CollisionHandlingProcess<VisualCursor> {
+        implements InitProcess<VisualCursor>, UpdateProcess<VisualCursor>, CollisionHandlerProcess<VisualCursor> {
 
     public static final int IDLE_CURSOR_STATE          = 0;
     public static final int HOVER_CURSOR_STATE         = 1;

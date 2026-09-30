@@ -8,7 +8,7 @@ import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.InputHandleProcess;
+import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 import org.joml.Matrix4f;
@@ -25,7 +25,7 @@ import static java.lang.Math.PI;
 
 @ComponentHandler(CameraControls.class)
 public class CameraControlsSystem extends AbstractSystem<CameraControls>
-        implements InitProcess<CameraControls>, InputHandleProcess<CameraControls>, UpdateProcess<CameraControls> { //}, RenderProcess<CameraControls> {
+        implements InitProcess<CameraControls>, InputHandlerProcess<CameraControls>, UpdateProcess<CameraControls> { //}, RenderProcess<CameraControls> {
 
     private static final float MAX_CAMERA_ANGLE = 89.986f;
 

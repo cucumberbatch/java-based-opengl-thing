@@ -11,7 +11,7 @@ import org.north.core.graphics.VertexArray;
 import org.north.core.physics.collision.Collision;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.CollisionHandlingProcess;
+import org.north.core.system.process.CollisionHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.RenderProcess;
 import org.north.core.system.process.UpdateProcess;
@@ -22,7 +22,7 @@ import java.util.Random;
 @ComponentHandler(Button.class)
 public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<Button>,
                                                                     UpdateProcess<Button>,
-                                                                    CollisionHandlingProcess<Button>,
+                                                                    CollisionHandlerProcess<Button>,
                                                                     RenderProcess<Button> {
 
     public enum ButtonState {

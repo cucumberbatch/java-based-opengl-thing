@@ -2,7 +2,8 @@ package org.north.core.system.process;
 
 import org.north.core.component.Component;
 
-public interface InitProcess<ComponentInstance extends Component> extends Process {
+@FunctionalInterface
+public interface InitProcess<C extends Component> extends Process {
 
     /**
      * An interface method that allows the executions of initialize
@@ -13,6 +14,6 @@ public interface InitProcess<ComponentInstance extends Component> extends Proces
      * @throws RuntimeException if a runtime exception occurs..
      * @author cucumberbatch
      */
-    void init(ComponentInstance component) throws RuntimeException;
+    void init(C component) throws RuntimeException;
 
 }

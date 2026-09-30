@@ -47,21 +47,21 @@ public class CameraAwareService {
         return components;
     }
 
-    static class CameraDistanceComparator implements Comparator<Component> {
+    private static class CameraDistanceComparator implements Comparator<Component> {
         private Vector3f cameraPosition;
         private final ComponentContainer componentContainer;
 
-        public CameraDistanceComparator(ComponentContainer componentContainer) {
+        private CameraDistanceComparator(ComponentContainer componentContainer) {
             this.componentContainer = componentContainer;
         }
 
         //note: we need to be careful because of passing a reference to camera position only once at the start of Camera component life,
         // so if we accidentally replace Transform.position vec instance we loose all position changes and scene will be rendered in wrong order
-        public void setCameraPosition(Vector3f cameraPosition) {
+        private void setCameraPosition(Vector3f cameraPosition) {
             this.cameraPosition = cameraPosition;
         }
 
-        public boolean isCameraSet() {
+        private boolean isCameraSet() {
             return this.cameraPosition != null;
         }
 

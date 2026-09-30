@@ -3,7 +3,8 @@ package org.north.core.system.process;
 import org.north.core.component.Component;
 import org.north.core.graphics.Graphics;
 
-public interface RenderProcess<ComponentInstance extends Component> extends Process {
+@FunctionalInterface
+public interface RenderProcess<C extends Component> extends Process {
 
     /**
      * An interface method that renders component content
@@ -11,6 +12,6 @@ public interface RenderProcess<ComponentInstance extends Component> extends Proc
      * @param graphics a graphics api for rendering objects
      * @author cucumberbatch
      */
-    void render(ComponentInstance component, Graphics graphics);
+    void render(C component, Graphics graphics);
 
 }

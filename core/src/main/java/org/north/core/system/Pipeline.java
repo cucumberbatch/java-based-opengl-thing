@@ -221,7 +221,7 @@ public class Pipeline implements Runnable {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void handleInput() {
-        for (InputHandleProcess process : systemManager.getProcessList(InputHandleProcess.class)) {
+        for (InputHandlerProcess process : systemManager.getProcessList(InputHandlerProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -405,7 +405,7 @@ public class Pipeline implements Runnable {
     private void handleCollisionEnter() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
+        for (CollisionHandlerProcess process : systemManager.getProcessList(CollisionHandlerProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -429,7 +429,7 @@ public class Pipeline implements Runnable {
     private void handleCollisionHold() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
+        for (CollisionHandlerProcess process : systemManager.getProcessList(CollisionHandlerProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {
@@ -453,7 +453,7 @@ public class Pipeline implements Runnable {
     private void handleCollisionExit() {
 //        Stopwatch.start();
 
-        for (CollisionHandlingProcess process : systemManager.getProcessList(CollisionHandlingProcess.class)) {
+        for (CollisionHandlerProcess process : systemManager.getProcessList(CollisionHandlerProcess.class)) {
             System<? extends Component> system = (System<? extends Component>) process;
             Iterator<? extends Component> iterator = system.getComponentIterator();
             while (iterator.hasNext()) {

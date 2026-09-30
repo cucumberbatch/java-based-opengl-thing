@@ -3,7 +3,8 @@ package org.north.core.system.process;
 import org.north.core.component.Component;
 import org.north.core.system.Input;
 
-public interface InputHandleProcess<ComponentInstance extends Component> extends Process {
+@FunctionalInterface
+public interface InputHandlerProcess<C extends Component> extends Process {
 
     /**
      * An interface method that helps to handle input events for selected component
@@ -12,5 +13,5 @@ public interface InputHandleProcess<ComponentInstance extends Component> extends
      * @param input is an input context that contains an input events
      * @author cucumberbatch
      */
-    void handleInput(ComponentInstance component, Input input);
+    void handleInput(C component, Input input);
 }

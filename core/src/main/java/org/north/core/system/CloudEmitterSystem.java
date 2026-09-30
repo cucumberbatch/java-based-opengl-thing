@@ -9,7 +9,7 @@ import org.north.core.graphics.shader.AtlasTextureAnimationShader;
 import org.north.core.graphics.Texture;
 import org.north.core.reflection.ComponentHandler;
 import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.InputHandleProcess;
+import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
@@ -17,7 +17,7 @@ import static org.joml.Math.*;
 
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
-        implements InitProcess<CloudEmitter>, InputHandleProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
+        implements InitProcess<CloudEmitter>, InputHandlerProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
     private float acc = 0;
     private long  gasCloudEntityNumber = 0;
 
