@@ -1,7 +1,7 @@
 package org.north.core.graphics.shader;
 
-import org.north.core.component.MeshRenderer;
-import org.north.core.component.Transform;
+import org.north.core.scene.component.MeshRenderer;
+import org.north.core.scene.component.Transform;
 import org.north.core.graphics.Graphics;
 
 public class PBRShader extends AbstractGLShader {

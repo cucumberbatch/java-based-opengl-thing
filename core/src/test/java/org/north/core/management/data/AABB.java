@@ -1,6 +1,7 @@
 package org.north.core.management.data;
 
 import org.joml.Vector3f;
+import org.north.core.physics.spatial.AxisAlignedBoundingBox;
 
 import java.util.Objects;
 

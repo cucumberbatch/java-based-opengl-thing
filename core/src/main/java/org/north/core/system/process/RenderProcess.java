@@ -1,6 +1,6 @@
 package org.north.core.system.process;
 
-import org.north.core.component.Component;
+import org.north.core.scene.component.Component;
 import org.north.core.graphics.Graphics;
 
 @FunctionalInterface

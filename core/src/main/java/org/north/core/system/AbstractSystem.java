@@ -1,17 +1,17 @@
 package org.north.core.system;
 
-import org.north.core.component.management.ComponentContainer;
-import org.north.core.component.management.ComponentManager;
-import org.north.core.asset.AssetService;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 import org.joml.Vector3f;
-import org.north.core.entity.Entity;
-import org.north.core.component.Component;
-import org.north.core.context.ApplicationContext;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.asset.AssetService;
 import org.north.core.exception.ComponentAlreadyExistsException;
-import org.north.core.management.memory.Pool;
-import org.north.core.management.memory.Vector3fPool;
+import org.north.core.utils.Pool;
+import org.north.core.utils.Vector3fPool;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.Component;
+import org.north.core.scene.component.management.ComponentContainer;
+import org.north.core.scene.component.management.ComponentManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 

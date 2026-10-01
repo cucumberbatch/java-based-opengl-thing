@@ -1,11 +1,11 @@
 package org.north.core.system;
 
 import org.joml.Vector3f;
-import org.north.core.component.Camera;
-import org.north.core.component.Component;
-import org.north.core.component.Transform;
-import org.north.core.component.management.ComponentContainer;
-import org.north.core.reflection.di.Inject;
+import org.north.core.architecture.Inject;
+import org.north.core.scene.component.Camera;
+import org.north.core.scene.component.Component;
+import org.north.core.scene.component.Transform;
+import org.north.core.scene.component.management.ComponentContainer;
 import org.north.core.system.process.RenderProcess;
 
 import java.util.*;

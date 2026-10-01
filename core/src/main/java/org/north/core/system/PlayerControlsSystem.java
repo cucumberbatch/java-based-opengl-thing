@@ -1,12 +1,12 @@
 package org.north.core.system;
 
 import org.lwjgl.glfw.GLFW;
-import org.north.core.component.PlayerControls;
-import org.north.core.component.RigidBody;
-import org.north.core.component.Transform;
-import org.north.core.context.ApplicationContext;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
+import org.north.core.scene.component.PlayerControls;
+import org.north.core.scene.component.RigidBody;
+import org.north.core.scene.component.Transform;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
 import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;

@@ -1,13 +1,12 @@
 package org.north.core.system;
 
-import org.north.core.component.Component;
-import org.north.core.management.Resettable;
+import org.north.core.scene.component.Component;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public interface System<C extends Component> extends Resettable {
+public interface System<C extends Component> {
 
     Iterator<C> getComponentIterator();
 
@@ -18,4 +17,6 @@ public interface System<C extends Component> extends Resettable {
     C addComponent(Component component);
 
     C removeComponent(Component component);
+
+    void reset();
 }

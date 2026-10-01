@@ -3,6 +3,7 @@ package org.north.core.shape;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.joml.Vector2f;
+import org.north.core.physics.shape.Rectangle;
 
 class RectangleTest {
 

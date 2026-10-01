@@ -1,14 +1,12 @@
 package org.north.core.system;
 
-import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.north.core.component.Transform;
-import org.north.core.entity.Entity;
-import org.north.core.component.CubeColorSwitcher;
-import org.north.core.component.MeshRenderer;
-import org.north.core.context.ApplicationContext;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.CubeColorSwitcher;
+import org.north.core.scene.component.MeshRenderer;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
 import org.north.core.system.process.UpdateProcess;
 
 import java.util.Random;

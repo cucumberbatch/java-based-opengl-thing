@@ -115,7 +115,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.north.core.MainThread</mainClass>
+                            <mainClass>org.north.core.architecture.MainThread</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -1,21 +1,21 @@
 package org.north.core.system;
 
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
-import org.north.core.component.Button;
-import org.north.core.component.VisualCursor;
-import org.north.core.entity.Entity;
-import org.north.core.context.ApplicationContext;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.VertexArray;
 import org.north.core.physics.collision.Collision;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.Button;
+import org.north.core.scene.component.VisualCursor;
 import org.north.core.system.process.CollisionHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.RenderProcess;
 import org.north.core.system.process.UpdateProcess;
-import org.joml.Vector4f;
 
 import java.util.Random;
 

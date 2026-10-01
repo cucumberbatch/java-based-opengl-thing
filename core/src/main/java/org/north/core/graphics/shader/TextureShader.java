@@ -1,8 +1,8 @@
 package org.north.core.graphics.shader;
 
 import org.joml.Matrix4f;
-import org.north.core.component.MeshRenderer;
-import org.north.core.component.Transform;
+import org.north.core.scene.component.MeshRenderer;
+import org.north.core.scene.component.Transform;
 import org.north.core.graphics.Graphics;
 
 public class TextureShader extends AbstractGLShader {

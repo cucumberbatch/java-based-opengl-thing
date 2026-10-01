@@ -1,10 +1,9 @@
 package org.north.core.physics.collision;
 
 import org.joml.Vector3f;
-import org.north.core.component.management.ComponentManager;
-import org.north.core.entity.Entity;
-import org.north.core.component.Transform;
-import org.north.core.physics.Sphere;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.Transform;
+import org.north.core.scene.component.management.ComponentManager;
 
 public class RayCast {
     private final Vector3f origin;

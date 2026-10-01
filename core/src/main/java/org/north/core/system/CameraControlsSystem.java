@@ -1,13 +1,13 @@
 package org.north.core.system;
 
-import org.north.core.component.Camera;
-import org.north.core.component.CameraControls;
-import org.north.core.component.Transform;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
+import org.north.core.scene.component.Camera;
+import org.north.core.scene.component.CameraControls;
+import org.north.core.scene.component.Transform;
 import org.north.core.config.ApplicationProperties;
-import org.north.core.context.ApplicationContext;
 import org.north.core.graphics.Graphics;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
 import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;

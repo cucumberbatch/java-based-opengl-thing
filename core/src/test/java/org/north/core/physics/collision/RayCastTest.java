@@ -3,7 +3,6 @@ package org.north.core.physics.collision;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.north.core.physics.Sphere;
 
 class RayCastTest {
 

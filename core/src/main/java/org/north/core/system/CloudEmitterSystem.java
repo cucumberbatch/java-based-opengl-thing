@@ -2,15 +2,15 @@ package org.north.core.system;
 
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.north.core.component.*;
-import org.north.core.entity.Entity;
-import org.north.core.context.ApplicationContext;
-import org.north.core.graphics.shader.AtlasTextureAnimationShader;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
 import org.north.core.graphics.Texture;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
-import org.north.core.system.process.InputHandlerProcess;
+import org.north.core.graphics.shader.AtlasTextureAnimationShader;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.*;
 import org.north.core.system.process.InitProcess;
+import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.UpdateProcess;
 
 import static org.joml.Math.*;

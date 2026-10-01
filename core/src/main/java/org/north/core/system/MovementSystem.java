@@ -1,9 +1,9 @@
 package org.north.core.system;
 
-import org.north.core.component.MovementComponent;
-import org.north.core.context.ApplicationContext;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
+import org.north.core.architecture.ApplicationContext;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
+import org.north.core.scene.component.MovementComponent;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 

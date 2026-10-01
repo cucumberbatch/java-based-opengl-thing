@@ -1,12 +1,12 @@
 package org.north.core.system;
 
-import org.north.core.entity.Entity;
-import org.north.core.component.MeshRenderer;
-import org.north.core.component.GasCloud;
-import org.north.core.context.ApplicationContext;
+import org.north.core.scene.Entity;
+import org.north.core.scene.component.MeshRenderer;
+import org.north.core.scene.component.GasCloud;
+import org.north.core.architecture.ApplicationContext;
 import org.north.core.graphics.shader.AtlasTextureAnimationShader;
-import org.north.core.reflection.ComponentHandler;
-import org.north.core.reflection.di.Inject;
+import org.north.core.architecture.ComponentHandler;
+import org.north.core.architecture.Inject;
 import org.north.core.system.process.UpdateProcess;
 
 @ComponentHandler(GasCloud.class)

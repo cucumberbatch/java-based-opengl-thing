@@ -1,6 +1,6 @@
 package org.north.core.physics.collision;
 
-import org.north.core.management.data.AxisAlignedBoundingBox;
+import org.north.core.physics.spatial.AxisAlignedBoundingBox;
 
 public class Collision {
     private AxisAlignedBoundingBox a;

@@ -3,6 +3,8 @@ package org.north.core.management.data;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.north.core.physics.spatial.AxisAlignedBoundingBox;
+import org.north.core.physics.spatial.Octree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
