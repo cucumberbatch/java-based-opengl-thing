@@ -107,7 +107,7 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
 
             MeshRenderer renderer = new MeshRenderer();
             renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
-            renderer.texture = assetService.get("core/src/main/resources/assets/textures/cloud-sprites-atlas.png", Texture.class);
+            renderer.texture = assetService.get(Texture.class, "assets/textures/cloud-sprites-atlas.png");
             
             cm.add(gasCloudEntity, transform);
             cm.add(gasCloudEntity, renderer);

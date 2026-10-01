@@ -11,7 +11,8 @@ public class SimpleAssetService implements AssetService {
     private final Map<Class<?>, AssetLoader<?>> loaderRegistry = new ConcurrentHashMap<>();
 
     public SimpleAssetService(Graphics graphics) {
-        loaderRegistry.put(Texture.class, new TextureAssetLoader(graphics));
+        ResourceLoader resourceLoader = new LocalResourceLoader();
+        loaderRegistry.put(Texture.class, new TextureAssetLoader(resourceLoader, graphics));
     }
 
     @Override
@@ -21,7 +22,7 @@ public class SimpleAssetService implements AssetService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Asset> T get(String path, Class<T> type) {
+    public <T extends Asset> T get(Class<T> type, String path) {
         return ((AssetLoader<T>) loaderRegistry.get(type)).get(path, this);
     }
 

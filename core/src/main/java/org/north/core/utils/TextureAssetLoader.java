@@ -7,16 +7,18 @@ import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.IntBuffer;
 
 public class TextureAssetLoader extends AssetLoader<Texture> {
     private static final Logger log = LoggerFactory.getLogger(TextureAssetLoader.class);
+    private final ResourceLoader resourceLoader;
     private final Graphics graphics;
 
-    public TextureAssetLoader(Graphics graphics) {
+    public TextureAssetLoader(ResourceLoader resourceLoader, Graphics graphics) {
+        this.resourceLoader = resourceLoader;
         this.graphics = graphics;
     }
 
@@ -26,7 +28,7 @@ public class TextureAssetLoader extends AssetLoader<Texture> {
         int width;
         int height;
 
-        try (FileInputStream stream = new FileInputStream(assetPath)) {
+        try (InputStream stream = resourceLoader.loadAsStream(assetPath)) {
             BufferedImage image = ImageIO.read(stream);
             width = image.getWidth();
             height = image.getHeight();
@@ -62,7 +64,7 @@ public class TextureAssetLoader extends AssetLoader<Texture> {
     }
 
     @Override
-    protected void unload(Texture asset) {
-        graphics.deleteTexture(asset.getId());
+    protected void unload(Texture texture) {
+        graphics.deleteTexture(texture.getId());
     }
 }

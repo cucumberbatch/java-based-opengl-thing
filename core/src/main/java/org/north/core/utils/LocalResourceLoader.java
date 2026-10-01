@@ -21,13 +21,13 @@ public class LocalResourceLoader implements ResourceLoader {
 
     @Override
     public InputStream loadAsStream(String path) {
+        log.info("Loading resource '{}' ...", path);
         return classLoader.getResourceAsStream(path);
     }
 
     @Override
     public String loadAsString(String path) throws IOException {
         try (BufferedInputStream bufferedStream = new BufferedInputStream(loadAsStream(path))) {
-            log.info("Resource '{}' is loaded!", path);
             return new String(bufferedStream.readAllBytes());
         }
     }

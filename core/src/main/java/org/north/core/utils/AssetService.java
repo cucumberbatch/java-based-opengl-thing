@@ -4,5 +4,5 @@ import org.north.core.management.Asset;
 
 public interface AssetService extends AutoCloseable {
     <T extends Asset> void registerAssetLoader(Class<T> type, AssetLoader<T> assetLoader);
-    <T extends Asset> T get(String path, Class<T> type);
+    <T extends Asset> T get(Class<T> type, String path);
 }
