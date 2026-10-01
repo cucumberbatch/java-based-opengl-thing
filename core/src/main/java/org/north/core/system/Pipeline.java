@@ -3,6 +3,8 @@ package org.north.core.system;
 import org.north.core.component.management.ComponentContainer;
 //import org.north.core.architecture.entity.MapBasedComponentContainer;
 import org.north.core.management.CommandApplier;
+import org.north.core.utils.AssetService;
+import org.north.core.utils.SimpleAssetService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -53,6 +55,8 @@ public class Pipeline implements Runnable {
     private final boolean smoothStopAndStartUpdateProcess;
     private final CameraAwareService cameraAwareService;
 
+    private final AssetService assetService;
+
     enum UpdateFlowState { RUNNING, STOPPED, RUN_TO_STOP, STOP_TO_RUN }
 
     private UpdateFlowState updateFlowState = RUNNING;
@@ -80,6 +84,7 @@ public class Pipeline implements Runnable {
 
         try {
 //            context.addDependency(ComponentContainer.class, componentContainer);
+            this.assetService = context.addDependency(AssetService.class, new SimpleAssetService(graphics));
             this.componentContainer = context.getDependency(ComponentContainer.class);
             cameraAwareService = context.getDependency(CameraAwareService.class);
             this.rootNode =
@@ -95,7 +100,7 @@ public class Pipeline implements Runnable {
     public void run() {
         // Logger.info("Game loop started");
 
-        composeScene(new DefaultSceneComposer());
+        composeScene(new DefaultSceneComposer(assetService));
         //applyDeferredCommands();
 
         while (window.shouldNotClose() && !stopped) {

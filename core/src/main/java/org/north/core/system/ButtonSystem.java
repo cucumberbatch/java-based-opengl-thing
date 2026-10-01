@@ -37,7 +37,7 @@ public class ButtonSystem extends AbstractSystem<Button> implements InitProcess<
 
     @Override
     public void init(Button button) throws RuntimeException {
-        button.buttonTexture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        button.buttonTexture = assetService.get("core/src/main/resources/assets/textures/screen-frame-1024.png", Texture.class);
         button.buttonOnHoverColor = new Vector4f(
                 new Random().nextFloat(),
                 new Random().nextFloat(),

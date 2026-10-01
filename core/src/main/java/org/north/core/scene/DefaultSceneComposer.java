@@ -12,10 +12,17 @@ import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.shader.SimpleColorShader;
 import org.north.core.graphics.shader.TextureShader;
+import org.north.core.utils.AssetService;
 
 import java.util.List;
 
 public class DefaultSceneComposer implements SceneComposer {
+    private final AssetService assetService;
+
+    public DefaultSceneComposer(AssetService assetService) {
+        this.assetService = assetService;
+    }
+
     @Override
     public void compose(final TreeNode<Entity> sceneRoot, final ComponentManager cm) {
         // initCubeAndCamera(sceneRoot, cm);
@@ -123,7 +130,7 @@ public class DefaultSceneComposer implements SceneComposer {
         renderer.mesh       = PredefinedMeshes.QUAD;
         renderer.color      = new Vector4f(1, 1, 1, 1);
         renderer.shader     = new TextureShader();
-        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.texture    = assetService.get("core/src/main/resources/assets/textures/screen-frame-1024.png", Texture.class);
         //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
@@ -139,7 +146,7 @@ public class DefaultSceneComposer implements SceneComposer {
         renderer.color      = new Vector4f(1, 1, 1, 1);
         renderer.shader     = new TextureShader();
         //        renderer.texture2 = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
-        renderer.texture    = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.texture    = assetService.get("core/src/main/resources/assets/textures/screen-frame-1024.png", Texture.class);
         //        renderer.texture = new Texture("core/src/main/resources/assets/textures/Capture001.png");
         renderer.renderType = GL11.GL_TRIANGLES;
 
@@ -193,7 +200,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         renderer = cm.add(tvScreen, MeshRenderer.class);
         renderer.shader  = new TextureShader();
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-frame-1024.png");
+        renderer.texture = assetService.get("core/src/main/resources/assets/textures/screen-frame-1024.png", Texture.class);
 
         // Player spaceship in the middle of the screen
         Entity player = new Entity("player", cm);
@@ -203,7 +210,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         renderer = cm.add(player, MeshRenderer.class);
         renderer.shader  = new TextureShader();
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/spaceship-16.png");
+        renderer.texture = assetService.get("core/src/main/resources/assets/textures/spaceship-16.png", Texture.class);
 
         cm.add(player, CloudEmitter.class);
 
@@ -237,7 +244,7 @@ public class DefaultSceneComposer implements SceneComposer {
 
         renderer = cm.add(background, MeshRenderer.class);
         renderer.shader  = new TextureShader();
-        renderer.texture = new Texture("core/src/main/resources/assets/textures/screen-background-1024.png");
+        renderer.texture = assetService.get("core/src/main/resources/assets/textures/screen-background-1024.png", Texture.class);
 
         // Camera
         Entity camera = new Entity("camera", cm);

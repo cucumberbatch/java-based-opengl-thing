@@ -14,8 +14,20 @@ import org.north.core.graphics.shader.Shader;
 import org.north.core.utils.BufferUtils;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
 
 public class Graphics {
     public Window window;
@@ -37,6 +49,20 @@ public class Graphics {
 
     public long getWindow() {
         return window.getWindow();
+    }
+
+    public int createTexture(int width, int height, IntBuffer imageBuffer) {
+        int textureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return textureId;
+    }
+
+    public void deleteTexture(int textureId) {
+        glDeleteTextures(textureId);
     }
 
     public int generateLineVertexBuffer() {
@@ -132,7 +158,7 @@ public class Graphics {
     }
 
     public void setUniform(Shader shader, String name, Texture texture) throws ShaderUniformNotFoundException {
-        texture.bind();
+        GL20.glBindTexture(GL_TEXTURE_2D, texture.getId());
         GL20.glActiveTexture(activeTextureCount);
         GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
         GL20.glUniform1i(getUniformLocation(shader, name), activeTextureCount);
@@ -190,7 +216,7 @@ public class Graphics {
     }
 
     public void setUniform(int uniformPointer, Texture texture) throws ShaderUniformNotFoundException {
-        texture.bind();
+        GL20.glBindTexture(GL_TEXTURE_2D, texture.getId());
         GL20.glActiveTexture(activeTextureCount);
         GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
         GL20.glUniform1i(uniformPointer, activeTextureCount);

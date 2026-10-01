@@ -2,6 +2,7 @@ package org.north.core.system;
 
 import org.north.core.component.management.ComponentContainer;
 import org.north.core.component.management.ComponentManager;
+import org.north.core.utils.AssetService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;
@@ -23,6 +24,7 @@ public abstract class AbstractSystem<C extends Component> implements System<C> {
     private final ComponentContainer container;
     
     protected final ComponentManager cm;
+    protected final AssetService     assetService;
     protected final Entity           sceneRoot;
 
 
@@ -30,6 +32,7 @@ public abstract class AbstractSystem<C extends Component> implements System<C> {
         this.componentType = componentType;
         this.container     = context.getDependency(ComponentContainer.class);
         this.cm            = context.getDependency(ComponentManager.class);
+        this.assetService  = context.getDependency(AssetService.class);
         this.sceneRoot     = context.getDependency(Entity.class);
         this.vector3fPool  = context.getDependency(Vector3fPool.class);
     }
