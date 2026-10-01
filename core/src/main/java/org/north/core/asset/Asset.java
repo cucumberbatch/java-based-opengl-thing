@@ -1,4 +1,4 @@
-package org.north.core.management;
+package org.north.core.asset;
 
 @FunctionalInterface
 public interface Asset {

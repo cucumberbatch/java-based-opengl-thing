@@ -29,6 +29,7 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
 
+//todo: this class is gonna be an OpenGL implementation of a future Graphics interface
 public class Graphics {
     public Window window;
 

@@ -2,7 +2,7 @@ package org.north.core.system;
 
 import org.north.core.component.management.ComponentContainer;
 import org.north.core.component.management.ComponentManager;
-import org.north.core.utils.AssetService;
+import org.north.core.asset.AssetService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.joml.Vector3f;

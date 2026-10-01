@@ -1,6 +1,8 @@
-package org.north.core.utils;
+package org.north.core.graphics;
 
 import org.lwjgl.opengl.GL20;
+import org.north.core.io.LocalResourceLoader;
+import org.north.core.io.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

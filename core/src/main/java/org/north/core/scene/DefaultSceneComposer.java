@@ -12,7 +12,7 @@ import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.shader.SimpleColorShader;
 import org.north.core.graphics.shader.TextureShader;
-import org.north.core.utils.AssetService;
+import org.north.core.asset.AssetService;
 
 import java.util.List;
 
@@ -28,8 +28,8 @@ public class DefaultSceneComposer implements SceneComposer {
         // initCubeAndCamera(sceneRoot, cm);
         // initReferenceScene(sceneRoot, cm);
         // testScene(sceneRoot, cm);
-         initSpaceshipOnScreen(sceneRoot, cm);
-//        testManyTransparentCubesGrid(sceneRoot, cm);
+        // initSpaceshipOnScreen(sceneRoot, cm);
+        testManyTransparentCubesGrid(sceneRoot, cm);
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {

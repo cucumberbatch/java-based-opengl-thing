@@ -1,6 +1,6 @@
-package org.north.core.utils;
+package org.north.core.asset;
 
-import org.north.core.management.Asset;
+import org.north.core.asset.loader.AssetLoader;
 
 public interface AssetService extends AutoCloseable {
     <T extends Asset> void registerAssetLoader(Class<T> type, AssetLoader<T> assetLoader);

@@ -1,8 +1,11 @@
-package org.north.core.utils;
+package org.north.core.asset;
 
+import org.north.core.asset.loader.AssetLoader;
+import org.north.core.io.LocalResourceLoader;
+import org.north.core.asset.loader.TextureAssetLoader;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;
-import org.north.core.management.Asset;
+import org.north.core.io.ResourceLoader;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

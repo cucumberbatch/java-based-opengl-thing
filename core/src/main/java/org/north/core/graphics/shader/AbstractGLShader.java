@@ -1,6 +1,6 @@
 package org.north.core.graphics.shader;
 
-import org.north.core.utils.OldResourceManager;
+import org.north.core.graphics.ShaderLoader;
 
 import java.io.*;
 
@@ -15,7 +15,7 @@ public abstract class AbstractGLShader implements Shader, Externalizable {
     protected void load(String vertexShaderPath, String fragmentShaderPath) {
         this.vertexShaderPath = vertexShaderPath;
         this.fragmentShaderPath = fragmentShaderPath;
-        OldResourceManager resourceManager = OldResourceManager.getInstance();
+        ShaderLoader resourceManager = ShaderLoader.getInstance();
         id = resourceManager.loadShader(vertexShaderPath, fragmentShaderPath);
     }
 

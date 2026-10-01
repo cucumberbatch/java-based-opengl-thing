@@ -1,7 +1,9 @@
-package org.north.core.utils;
+package org.north.core.asset.loader;
 
+import org.north.core.asset.AssetService;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.shader.Shader;
+import org.north.core.io.ResourceLoader;
 
 public class ShaderAssetLoader extends AssetLoader<Shader> {
     private final ResourceLoader resourceLoader;

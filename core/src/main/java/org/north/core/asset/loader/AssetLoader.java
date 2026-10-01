@@ -1,6 +1,7 @@
-package org.north.core.utils;
+package org.north.core.asset.loader;
 
-import org.north.core.management.Asset;
+import org.north.core.asset.Asset;
+import org.north.core.asset.AssetService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

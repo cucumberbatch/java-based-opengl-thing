@@ -1,6 +1,6 @@
 package org.north.core.graphics;
 
-import org.north.core.management.Asset;
+import org.north.core.asset.Asset;
 
 public class Texture implements Asset {
     private final int textureId;

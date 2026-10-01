@@ -1,4 +1,4 @@
-package org.north.core.utils;
+package org.north.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
