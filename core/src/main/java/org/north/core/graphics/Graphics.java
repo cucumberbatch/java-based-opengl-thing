@@ -5,44 +5,27 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.north.core.scene.component.MeshRenderer;
-import org.north.core.scene.component.Transform;
+import org.lwjgl.opengl.GL32;
 import org.north.core.exception.ShaderUniformNotFoundException;
-import org.north.core.graphics.shader.Shader;
 import org.north.core.utils.BufferUtils;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_NEAREST;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
 
 //todo: this class is gonna be an OpenGL implementation of a future Graphics interface
 public class Graphics {
     public Window window;
 
-    public Shader previouslyRenderedShader = null;
-    public Texture  previouslyRenderedTexture = null;
-
     public Matrix4f projection = new Matrix4f().identity();
     public Matrix4f view = new Matrix4f().lookAt(new Vector3f(0, 0, -1), new Vector3f(0, 0, 1), new Vector3f(0, 1, 0));
 
-    private final Map<String, Integer> uniformLocationCache = new HashMap<>();
-    private int activeTextureCount;
-    private final int[] activeTextureBuff = new int[4];
-    private int enabledShaderId;
+    private final float[] matrixValues = new float[16];
 
     public Graphics(Window window) {
         this.window = window;
@@ -50,6 +33,93 @@ public class Graphics {
 
     public long getWindow() {
         return window.getWindow();
+    }
+
+    public int createShaderProgram(String vertexSource, String fragmentSource) {
+        int vertexShaderId = compileShader(GL20.GL_VERTEX_SHADER, vertexSource);
+        int fragmentShaderId = compileShader(GL20.GL_FRAGMENT_SHADER, fragmentSource);
+        int shaderProgramId = GL20.glCreateProgram();
+
+        GL20.glAttachShader(shaderProgramId, vertexShaderId);
+        GL20.glAttachShader(shaderProgramId, fragmentShaderId);
+
+        GL20.glLinkProgram(shaderProgramId);
+
+        if (GL20.glGetProgrami(shaderProgramId, GL20.GL_LINK_STATUS) == GL_FALSE) {
+            String infoLog = GL20.glGetProgramInfoLog(shaderProgramId);
+            GL20.glDeleteProgram(shaderProgramId);
+            GL20.glDeleteShader(vertexShaderId);
+            GL20.glDeleteShader(fragmentShaderId);
+            throw new IllegalStateException("Failed to link shader program! Reason: " + infoLog);
+        }
+
+        GL20.glValidateProgram(shaderProgramId);
+
+        GL20.glDeleteShader(fragmentShaderId);
+        GL20.glDeleteShader(vertexShaderId);
+
+        return shaderProgramId;
+    }
+
+    private int compileShader(int type, String shaderCode) {
+        int shaderId = GL20.glCreateShader(type);
+
+        GL20.glShaderSource(shaderId, shaderCode);
+        GL20.glCompileShader(shaderId);
+
+        int compileStatus = GL20.glGetShaderi(shaderId, GL20.GL_COMPILE_STATUS);
+        if (compileStatus == GL_FALSE) {
+            String infoLog = GL20.glGetShaderInfoLog(shaderId);
+            GL20.glDeleteShader(shaderId);
+            throw new IllegalStateException("Failed to compile shader! Reason: " + infoLog);
+        }
+
+        return shaderId;
+    }
+
+    public void deleteShaderProgram(int programId) {
+        GL20.glDeleteProgram(programId);
+    }
+
+    public void bindShaderProgram(int shaderId) {
+        GL20.glUseProgram(shaderId);
+    }
+
+    public int findUniformLocation(int shaderId, String name) {
+        return GL20.glGetUniformLocation(shaderId, name);
+    }
+
+    public int getUniformLocation(int shaderId, String name) {
+        int uniformLocation = findUniformLocation(shaderId, name);
+        if (uniformLocation == -1) {
+            throw new ShaderUniformNotFoundException(shaderId, name);
+        }
+        return uniformLocation;
+    }
+
+    public void setUniformInt(int uniformLocation, int value) {
+        GL20.glUniform1i(uniformLocation, value);
+    }
+
+    public void setUniformFloat(int uniformLocation, float value) {
+        GL20.glUniform1f(uniformLocation, value);
+    }
+
+    public void setUniformFloat(int uniformLocation, Vector2f vector2) {
+        GL20.glUniform2f(uniformLocation, vector2.x, vector2.y);
+    }
+
+    public void setUniformFloat(int uniformLocation, Vector3f vector3) {
+        GL20.glUniform3f(uniformLocation, vector3.x, vector3.y, vector3.z);
+    }
+
+    public void setUniformFloat(int uniformLocation, Vector4f vector4) {
+        GL20.glUniform4f(uniformLocation, vector4.x, vector4.y, vector4.z, vector4.w);
+    }
+
+    public void setUniformMatrixFloat(int uniformLocation, Matrix4f matrix4f) {
+        matrix4f.get(matrixValues);
+        GL20.glUniformMatrix4fv(uniformLocation, false, matrixValues);
     }
 
     public int createTexture(int width, int height, IntBuffer imageBuffer) {
@@ -66,189 +136,58 @@ public class Graphics {
         glDeleteTextures(textureId);
     }
 
-    public int generateLineVertexBuffer() {
-        // Create a vertex buffer
-        int vertexBuffer = GL30.glGenBuffers();
-        GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vertexBuffer);
-        FloatBuffer buffer = org.lwjgl.BufferUtils.createFloatBuffer(6);
-        buffer.put(new float[] {0, 0, 1, 0, 0, 1});
-        buffer.flip();
+    public void bindTexture(int textureId, int textureUnitSlot) {
+        GL13.glActiveTexture(GL13.GL_TEXTURE0 + textureUnitSlot);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+    }
+
+    public VertexArrayHandle createVertexArray() {
+        return new VertexArrayHandle(GL30.glGenVertexArrays());
+    }
+
+    public void bindVertexArray(VertexArrayHandle vao) {
+        GL30.glBindVertexArray(vao != null ? vao.id() : 0);
+    }
+
+    public BufferHandle createArrayBuffer(float[] data, int attributeIndex, int coordinateSize) {
+        int vbo = GL20.glGenBuffers();
+        GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vbo);
+
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(data);
         GL20.glBufferData(GL20.GL_ARRAY_BUFFER, buffer, GL20.GL_STATIC_DRAW);
 
-        // Set the vertex buffer as the current vertex array
+        GL20.glVertexAttribPointer(attributeIndex, coordinateSize, GL20.GL_FLOAT, false, 0, 0);
+        GL20.glEnableVertexAttribArray(attributeIndex);
+
         GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-
-        return vertexBuffer;
+        return new BufferHandle(vbo);
     }
 
-    public void drawLine(int vertexBuffer, int vertexCount) {
-        // Enable the vertex array
-        GL20.glEnableVertexAttribArray(vertexBuffer);
+    public BufferHandle createElementBuffer(byte[] indices) {
+        int ibo = GL20.glGenBuffers();
+        GL20.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-        // Set the vertex array to the vertex buffer
-        GL20.glVertexAttribPointer(0, 2, GL20.GL_FLOAT, false, 0, 0);
+        ByteBuffer buffer = BufferUtils.createByteBuffer(indices.length);
+        buffer.put(indices).flip();
 
-        // Draw the lines
-        GL11.glDrawArrays(GL11.GL_LINES, 0, vertexCount);
-
-        // Disable the vertex array
-        GL20.glDisableVertexAttribArray(vertexBuffer);
+        GL20.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER, buffer, GL20.GL_STATIC_DRAW);
+        // The element buffer stays bound to the currently bound vertex array.
+        return new BufferHandle(ibo);
     }
 
-    public void prepareShader(Shader shader, Transform transform, MeshRenderer renderer) {
-        activeTextureCount = GL20.GL_TEXTURE0;
-        shader.updateUniforms(this, transform, renderer);
+    public void deleteVertexArray(VertexArrayHandle vao) {
+        GL30.glDeleteVertexArrays(vao.id());
     }
 
-    public int getUniformLocation(Shader shader, String name) throws ShaderUniformNotFoundException {
-        Integer pointer;
-        if ((pointer = uniformLocationCache.get(name)) != null) {
-            return pointer;
-        }
-        pointer = GL20.glGetUniformLocation(shader.getId(), name);
-        if (pointer == -1) {
-            throw new ShaderUniformNotFoundException(name, this.getClass().getSimpleName());
-        } else {
-            uniformLocationCache.put(name, pointer);
-        }
-        return pointer;
+    public void deleteBuffer(BufferHandle buffer) {
+        GL20.glDeleteBuffers(buffer.id());
     }
 
-    public void setUniform(Shader shader, String name, int value) throws ShaderUniformNotFoundException {
-        GL20.glUniform1i(getUniformLocation(shader, name), value);
+    public void drawIndexed(VertexArrayHandle vao, int indexCount) {
+        GL30.glBindVertexArray(vao.id());
+        GL11.glEnable(GL32.GL_DEPTH_CLAMP);
+        GL11.glDrawElements(GL11.GL_TRIANGLES, indexCount, GL11.GL_UNSIGNED_BYTE, 0);
+        GL30.glBindVertexArray(0);
     }
 
-    public void setUniform(Shader shader, String name, float value) throws ShaderUniformNotFoundException {
-        GL20.glUniform1f(getUniformLocation(shader, name), value);
-    }
-
-    public void setUniform(Shader shader, String name, int x, int y) throws ShaderUniformNotFoundException {
-        GL20.glUniform2i(getUniformLocation(shader, name), x, y);
-    }
-
-    public void setUniform(Shader shader, String name, float x, float y) throws ShaderUniformNotFoundException {
-        GL20.glUniform2f(getUniformLocation(shader, name), x, y);
-    }
-
-    public void setUniform(Shader shader, String name, Vector2f vector2) throws ShaderUniformNotFoundException {
-        GL20.glUniform2f(getUniformLocation(shader, name), vector2.x, vector2.y);
-    }
-
-    public void setUniform(Shader shader, String name, int x, int y, int z) throws ShaderUniformNotFoundException {
-        GL20.glUniform3i(getUniformLocation(shader, name), x, y, z);
-    }
-
-    public void setUniform(Shader shader, String name, float x, float y, float z) throws ShaderUniformNotFoundException {
-        GL20.glUniform3f(getUniformLocation(shader, name), x, y, z);
-    }
-
-    public void setUniform(Shader shader, String name, Vector3f vector3) throws ShaderUniformNotFoundException {
-        GL20.glUniform3f(getUniformLocation(shader, name), vector3.x, vector3.y, vector3.z);
-    }
-
-    public void setUniform(Shader shader, String name, int x, int y, int z, int w) throws ShaderUniformNotFoundException {
-        GL20.glUniform4i(getUniformLocation(shader, name), x, y, z, w);
-    }
-
-    public void setUniform(Shader shader, String name, float x, float y, float z, float w) throws ShaderUniformNotFoundException {
-        GL20.glUniform4f(getUniformLocation(shader, name), x, y, z, w);
-    }
-
-    public void setUniform(Shader shader, String name, Vector4f vector4) throws ShaderUniformNotFoundException {
-        GL20.glUniform4f(getUniformLocation(shader, name), vector4.x, vector4.y, vector4.z, vector4.w);
-    }
-
-    public void setUniform(Shader shader, String name, Texture texture) throws ShaderUniformNotFoundException {
-        GL20.glBindTexture(GL_TEXTURE_2D, texture.getId());
-        GL20.glActiveTexture(activeTextureCount);
-        GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
-        GL20.glUniform1i(getUniformLocation(shader, name), activeTextureCount);
-        // Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
-//                texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
-        activeTextureCount++;
-    }
-
-    public void setUniform(Shader shader, String name, Matrix4f matrix4f) throws ShaderUniformNotFoundException {
-        GL20.glUniformMatrix4fv(getUniformLocation(shader, name), false, BufferUtils.createFloatBuffer(matrix4f));
-    }
-
-    public void setUniform(int uniformPointer, int value) throws ShaderUniformNotFoundException {
-        GL20.glUniform1i(uniformPointer, value);
-    }
-
-    public void setUniform(int uniformPointer, float value) throws ShaderUniformNotFoundException {
-        GL20.glUniform1f(uniformPointer, value);
-    }
-
-    public void setUniform(int uniformPointer, int x, int y) throws ShaderUniformNotFoundException {
-        GL20.glUniform2i(uniformPointer, x, y);
-    }
-
-    public void setUniform(int uniformPointer, float x, float y) throws ShaderUniformNotFoundException {
-        GL20.glUniform2f(uniformPointer, x, y);
-    }
-
-    public void setUniform(int uniformPointer, Vector2f vector2) throws ShaderUniformNotFoundException {
-        GL20.glUniform2f(uniformPointer, vector2.x, vector2.y);
-    }
-
-    public void setUniform(int uniformPointer, int x, int y, int z) throws ShaderUniformNotFoundException {
-        GL20.glUniform3i(uniformPointer, x, y, z);
-    }
-
-    public void setUniform(int uniformPointer, float x, float y, float z) throws ShaderUniformNotFoundException {
-        GL20.glUniform3f(uniformPointer, x, y, z);
-    }
-
-    public void setUniform(int uniformPointer, Vector3f vector3) throws ShaderUniformNotFoundException {
-        GL20.glUniform3f(uniformPointer, vector3.x, vector3.y, vector3.z);
-    }
-
-    public void setUniform(int uniformPointer, int x, int y, int z, int w) throws ShaderUniformNotFoundException {
-        GL20.glUniform4i(uniformPointer, x, y, z, w);
-    }
-
-    public void setUniform(int uniformPointer, float x, float y, float z, float w) throws ShaderUniformNotFoundException {
-        GL20.glUniform4f(uniformPointer, x, y, z, w);
-    }
-
-    public void setUniform(int uniformPointer, Vector4f vector4) throws ShaderUniformNotFoundException {
-        GL20.glUniform4f(uniformPointer, vector4.x, vector4.y, vector4.z, vector4.w);
-    }
-
-    public void setUniform(int uniformPointer, Texture texture) throws ShaderUniformNotFoundException {
-        GL20.glBindTexture(GL_TEXTURE_2D, texture.getId());
-        GL20.glActiveTexture(activeTextureCount);
-        GL20.glGetIntegerv(GL20.GL_ACTIVE_TEXTURE, activeTextureBuff);
-        GL20.glUniform1i(uniformPointer, activeTextureCount);
-        // Logger.debug(String.format("Bounded texture with id: %s attached to slot: %s. Active textures buffer: %s",
-//                texture.getId(), activeTextureCount, Arrays.toString(activeTextureBuff)));
-        activeTextureCount++;
-    }
-
-    public void setUniform(int uniformPointer, Matrix4f matrix4f) throws ShaderUniformNotFoundException {
-        GL20.glUniformMatrix4fv(uniformPointer, false, BufferUtils.createFloatBuffer(matrix4f));
-    }
-
-    private boolean isPreviouslyRenderedShader(Shader shader) {
-        return previouslyRenderedShader != null && previouslyRenderedShader.getId() == shader.getId();
-    }
-
-    private boolean isPreviouslyRenderedTexture(Texture texture) {
-        return previouslyRenderedTexture != null && previouslyRenderedTexture.getId() == texture.getId();
-    }
-
-    public void enable(Shader shader) {
-        if (enabledShaderId != shader.getId()) {
-            GL20.glUseProgram(shader.getId());
-            shader.enable();
-        }
-        enabledShaderId = shader.getId();
-    }
-
-    public void disable(Shader shader) {
-        GL20.glUseProgram(0);
-        shader.disable();
-        enabledShaderId = -1;
-    }
 }

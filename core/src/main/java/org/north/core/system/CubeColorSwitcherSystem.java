@@ -32,23 +32,24 @@ public class CubeColorSwitcherSystem extends AbstractSystem<CubeColorSwitcher> i
         } else*/
         Entity entity = component.getEntity();
         MeshRenderer renderer = cm.get(entity, MeshRenderer.class);
+        Vector4f color = renderer.material.getVector4("u_color");
         if (component.acc > MAX_ACC_VALUE) {
 //            float r = rnd.nextFloat();
 //            float g = rnd.nextFloat();
 //            float b = rnd.nextFloat();
-//            renderer.color.set(r, g, b, 1f);
+//            color.set(r, g, b, 1f);
 
-            renderer.color.set(turnedOnCubeColor);
+            color.set(turnedOnCubeColor);
             component.acc = 0f;
             component.switched = true;
         } else if (component.acc > MAX_ACC_VALUE * ((float) 8 / 9)) {
             // a bit of smoothness
-            renderer.color.lerp(turnedOnCubeColor, deltaTime * 10);
+            color.lerp(turnedOnCubeColor, deltaTime * 10);
         } else if (component.switched) {
-//            Vector4f color = renderer.color;
-//            renderer.color.set(color.x,color.y, color.z, color.w * 0.786f);
-            renderer.color.lerp(turnedOffCubeColor, deltaTime * 10);
-//            renderer.color.set(targetVec);
+//            Vector4f color = color;
+//            color.set(color.x,color.y, color.z, color.w * 0.786f);
+            color.lerp(turnedOffCubeColor, deltaTime * 10);
+//            color.set(targetVec);
 
 //            Transform transform = component.getTransform();
 //            float factor = (MAX_ACC_VALUE - component.acc) / MAX_ACC_VALUE;

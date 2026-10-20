@@ -22,7 +22,7 @@ public class Texture implements Asset {
     }
 
     @Override
-    public int getId() {
+    public int id() {
         return textureId;
     }
 }

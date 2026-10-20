@@ -68,6 +68,6 @@ public class TextureAssetLoader extends AssetLoader<Texture> {
 
     @Override
     protected void unload(Texture texture) {
-        graphics.deleteTexture(texture.getId());
+        graphics.deleteTexture(texture.id());
     }
 }

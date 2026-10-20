@@ -1,9 +1,8 @@
 package org.north.core.utils;
 
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryStack;
 
 import java.nio.*;
 import java.util.HashMap;
@@ -20,6 +19,13 @@ public class BufferUtils {
 
     private static final boolean newMemoryAllocation = true;
 
+    public static ByteBuffer createByteBuffer(int size) {
+        if (newMemoryAllocation) {
+            return org.lwjgl.BufferUtils.createByteBuffer(size);
+        }
+        return ByteBuffer.allocateDirect(size);
+    }
+
     public static ByteBuffer createByteBuffer(byte[] array) {
         ByteBuffer buffer;
         if ((buffer = BYTE_BUFFER_STORAGE.get(array.length)) != null) {
@@ -28,9 +34,7 @@ public class BufferUtils {
         }
 
         if (newMemoryAllocation) {
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                buffer = stack.malloc(array.length);
-            }
+            buffer = org.lwjgl.BufferUtils.createByteBuffer(array.length);
         } else {
             buffer = ByteBuffer.allocateDirect(array.length);
         }
@@ -70,13 +74,12 @@ public class BufferUtils {
     public static FloatBuffer createFloatBuffer(Matrix4f matrix4f) {
         FloatBuffer buffer;
         if ((buffer = FLOAT_BUFFER_STORAGE.get(16)) != null) {
+            buffer.clear();
             return matrix4f.get(buffer);
         }
 
         if (newMemoryAllocation) {
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                buffer = stack.mallocFloat(16);
-            }
+            buffer = org.lwjgl.BufferUtils.createFloatBuffer(16);
         } else {
             buffer = ByteBuffer.allocateDirect(16 << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
         }

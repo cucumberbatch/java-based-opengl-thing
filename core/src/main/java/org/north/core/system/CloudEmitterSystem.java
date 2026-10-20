@@ -1,12 +1,14 @@
 package org.north.core.system;
 
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.ApplicationContext;
 import org.north.core.architecture.ComponentHandler;
 import org.north.core.architecture.Inject;
+import org.north.core.graphics.Material;
 import org.north.core.graphics.Texture;
-import org.north.core.graphics.shader.AtlasTextureAnimationShader;
+import org.north.core.graphics.shader.Shader;
 import org.north.core.scene.Entity;
 import org.north.core.scene.component.*;
 import org.north.core.system.process.InitProcess;
@@ -18,6 +20,11 @@ import static org.joml.Math.*;
 @ComponentHandler(CloudEmitter.class)
 public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
         implements InitProcess<CloudEmitter>, InputHandlerProcess<CloudEmitter>, UpdateProcess<CloudEmitter> {
+    private static final String ATLAS_SHADER_PATH = "assets/shaders/atlas_texture_animation_shader";
+    private static final String ATLAS_TEXTURE_PATH = "assets/textures/cloud-sprites-atlas.png";
+    private static final int SPRITE_WIDTH = 12;
+    private static final int SPRITE_HEIGHT = 12;
+
     private float acc = 0;
     private long  gasCloudEntityNumber = 0;
 
@@ -106,8 +113,14 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
             transform.rescaleTo(emittingScale);
 
             MeshRenderer renderer = new MeshRenderer();
-            renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
-            renderer.texture = assetService.get(Texture.class, "assets/textures/cloud-sprites-atlas.png");
+            Shader shader = assetService.get(Shader.class, ATLAS_SHADER_PATH);
+            Texture texture = assetService.get(Texture.class, ATLAS_TEXTURE_PATH);
+            renderer.material = new Material(shader)
+                    .setTexture("u_texture", texture)
+                    .setInt("u_sprite_width", SPRITE_WIDTH)
+                    .setInt("u_sprite_height", SPRITE_HEIGHT)
+                    .setInt("u_sprite_index", 0)
+                    .setVector("u_color", new Vector4f(1f, 1f, 1f, 1f));
             
             cm.add(gasCloudEntity, transform);
             cm.add(gasCloudEntity, renderer);
@@ -125,8 +138,8 @@ public class CloudEmitterSystem extends AbstractSystem<CloudEmitter>
             //transform.rescaleTo(emittingScale);
 
             //MeshRenderer renderer = cm.get(gasCloudEntity, MeshRenderer.class);
-            //renderer.shader  = new AtlasTextureAnimationShader(6, 12, 12);
-            //renderer.texture = new Texture("core/src/main/resources/assets/textures/cloud-sprites-atlas.png");
+            //renderer.material = new Material(assetService.get(Shader.class, ATLAS_SHADER_PATH))
+            //        .setTexture("u_texture", assetService.get(Texture.class, ATLAS_TEXTURE_PATH));
 
             acc = 0;
         }

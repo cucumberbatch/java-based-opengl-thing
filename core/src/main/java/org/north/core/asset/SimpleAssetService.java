@@ -1,10 +1,12 @@
 package org.north.core.asset;
 
 import org.north.core.asset.loader.AssetLoader;
-import org.north.core.io.LocalResourceLoader;
+import org.north.core.asset.loader.ShaderAssetLoader;
 import org.north.core.asset.loader.TextureAssetLoader;
 import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Texture;
+import org.north.core.graphics.shader.Shader;
+import org.north.core.io.LocalResourceLoader;
 import org.north.core.io.ResourceLoader;
 
 import java.util.Map;
@@ -16,6 +18,7 @@ public class SimpleAssetService implements AssetService {
     public SimpleAssetService(Graphics graphics) {
         ResourceLoader resourceLoader = new LocalResourceLoader();
         loaderRegistry.put(Texture.class, new TextureAssetLoader(resourceLoader, graphics));
+        loaderRegistry.put(Shader.class, new ShaderAssetLoader(resourceLoader, graphics));
     }
 
     @Override
@@ -26,7 +29,11 @@ public class SimpleAssetService implements AssetService {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Asset> T get(Class<T> type, String path) {
-        return ((AssetLoader<T>) loaderRegistry.get(type)).get(path, this);
+        AssetLoader<T> assetLoader = (AssetLoader<T>) loaderRegistry.get(type);
+        if (assetLoader == null) {
+            throw new IllegalArgumentException("No asset loader registered for type " + type.getName());
+        }
+        return assetLoader.get(path, this);
     }
 
     @Override

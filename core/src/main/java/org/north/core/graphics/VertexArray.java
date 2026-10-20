@@ -40,6 +40,14 @@ public class VertexArray {
         glBindVertexArray(0);
     }
 
+    public int id() {
+        return vao;
+    }
+
+    public int indexCount() {
+        return count;
+    }
+
     public void render(int mode) {
         // bind
         glBindVertexArray(vao);
