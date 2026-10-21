@@ -135,10 +135,16 @@ public class Graphics {
     }
 
     public int createTexture(int width, int height, IntBuffer imageBuffer) {
+        return createTexture(width, height, imageBuffer, GL_NEAREST, GL_NEAREST);
+    }
+
+    public int createTexture(int width, int height, IntBuffer imageBuffer, int minFilter, int magFilter) {
         int textureId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_EDGE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
         glBindTexture(GL_TEXTURE_2D, 0);
         return textureId;

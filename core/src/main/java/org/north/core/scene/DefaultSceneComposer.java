@@ -31,8 +31,12 @@ public class DefaultSceneComposer implements SceneComposer {
         // initReferenceScene(sceneRoot, cm);
         // testScene(sceneRoot, cm);
         // initSpaceshipOnScreen(sceneRoot, cm);
-        initCursorDemoOverlay(sceneRoot, cm);
+
+        // Create the camera and world objects first so their update systems run before the cursor
+        // picking system. The cursor itself is created last and is still rendered on top because
+        // its renderer uses the screen-space render layer.
         testManyTransparentCubesGrid(sceneRoot, cm);
+        initCursorDemoOverlay(sceneRoot, cm);
     }
 
     private void initCursorDemoOverlay(TreeNode<Entity> root, ComponentManager cm) {
@@ -65,6 +69,25 @@ public class DefaultSceneComposer implements SceneComposer {
 
         cm.add(cursorEntity, visualCursor);
         root.add(cursorEntity);
+
+        createCursorLabel(root, cm, cursorEntity);
+    }
+
+    private void createCursorLabel(TreeNode<Entity> root, ComponentManager cm, Entity cursorEntity) {
+        // A screen-space label that displays the name of the entity under the cursor. It is added
+        // after the cursor so its update system runs after cursor picking has selected a target.
+        Entity labelEntity = new Entity("visual_cursor_label", cm);
+        cm.add(labelEntity, Transform.class);
+
+        MeshRenderer labelRenderer = cm.add(labelEntity, MeshRenderer.class);
+        labelRenderer.mesh = PredefinedMeshes.QUAD;
+        labelRenderer.screenSpace = true;
+        labelRenderer.renderOrder = 200;
+
+        VisualCursorLabel label = cm.add(labelEntity, VisualCursorLabel.class);
+        label.cursorEntity = cursorEntity;
+
+        root.add(labelEntity);
     }
 
     private void createUiButton(TreeNode<Entity> root,
@@ -132,11 +155,16 @@ public class DefaultSceneComposer implements SceneComposer {
                     MeshRenderer meshRenderer = new MeshRenderer();
                     meshRenderer.mesh = PredefinedMeshes.CUBE;
                     meshRenderer.material = new Material(shader)
-                            .setVector("u_color", new Vector4f(0f, 0f, 0f, 0f));
+                            .setVector("u_color", new Vector4f(0.3f, 0.3f, 0.3f, 1f));
 
                     cm.add(cube, transform);
                     cm.add(cube, meshRenderer);
-                    cm.add(cube, CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
+
+                    MeshCollider collider = cm.add(cube, MeshCollider.class);
+                    collider.space = MeshCollider.Space.WORLD;
+                    collider.selectable = true;
+
+//                    cm.add(cube, CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
 
                     root.add(cube);
 
@@ -144,6 +172,26 @@ public class DefaultSceneComposer implements SceneComposer {
                 }
             }
         }
+
+        Entity cursorEntity = new Entity("visual_cursor", cm);
+        Transform cursorTransform = cm.add(cursorEntity, Transform.class);
+        cursorTransform.moveTo(256f, 320f, 0f);
+
+        VisualCursor visualCursor = new VisualCursor();
+        visualCursor.center.set(256f, 320f);
+        visualCursor.previousCenter.set(256f, 320f);
+        visualCursor.targetCenter.set(256f, 320f);
+
+        MeshRenderer cursorRenderer = cm.add(cursorEntity, MeshRenderer.class);
+        cursorRenderer.mesh = PredefinedMeshes.QUAD;
+        cursorRenderer.screenSpace = false;
+        cursorRenderer.renderOrder = 100;
+        cursorRenderer.material = simpleColorMaterial(visualCursor.color);
+
+        cm.add(cursorEntity, visualCursor);
+        root.add(cursorEntity);
+
+        createCursorLabel(root, cm, cursorEntity);
     }
 
     private void testScene(TreeNode<Entity> root, ComponentManager cm) {

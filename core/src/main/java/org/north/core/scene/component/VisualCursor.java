@@ -12,8 +12,9 @@ import org.north.core.scene.Entity;
  * standard material/mesh pipeline. Its transform is expressed in window pixels while
  * {@link MeshRenderer#screenSpace} is enabled.</p>
  *
- * <p>Any entity that has a {@link MeshCollider} can act as a magnet target. This makes UI elements
- * and, later, projected scene objects share the same interaction path.</p>
+ * <p>Any entity that has a {@link MeshCollider} can act as a magnet target. Screen-space colliders
+ * are picked by pointer position, while world-space colliders are picked with a camera ray and
+ * their bounds are projected back into window pixels.</p>
  */
 public class VisualCursor extends AbstractComponent {
 
@@ -59,6 +60,12 @@ public class VisualCursor extends AbstractComponent {
 
     /** How fast the cursor color changes between idle and hover states. */
     public float colorSpeed = 12f;
+
+    /**
+     * Maximum size, in pixels, of a cursor magnetized to a world-space object. UI targets keep
+     * their real size; this limit only prevents a close 3D object from covering the whole screen.
+     */
+    public float maxWorldTargetSize = 220f;
 
     /** Replaces the operating system cursor with this visual cursor when possible. */
     public boolean hideSystemCursor = true;

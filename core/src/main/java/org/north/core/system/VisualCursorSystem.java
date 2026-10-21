@@ -1,18 +1,23 @@
 package org.north.core.system;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.north.core.architecture.ApplicationContext;
 import org.north.core.architecture.ComponentHandler;
 import org.north.core.architecture.Inject;
 import org.north.core.exception.ComponentNotFoundException;
+import org.north.core.graphics.Graphics;
 import org.north.core.graphics.Material;
 import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Window;
 import org.north.core.graphics.shader.Shader;
 import org.north.core.physics.shape.Rectangle;
+import org.north.core.physics.spatial.Aabb;
 import org.north.core.scene.Entity;
+import org.north.core.scene.SceneSpatialIndex;
 import org.north.core.scene.component.Button;
 import org.north.core.scene.component.MeshCollider;
 import org.north.core.scene.component.MeshRenderer;
@@ -27,8 +32,10 @@ import java.util.Collection;
  * Drives the physical visual cursor.
  *
  * <p>The cursor follows the pointer with a damped spring instead of being teleported. When the
- * pointer is over a {@link MeshCollider}, the cursor is magnetized to the collider rectangle and
- * grows/shrinks into its shape. Buttons are notified through their {@code hovered} flag.</p>
+ * pointer is over a screen-space {@link MeshCollider}, the cursor is magnetized to the collider
+ * rectangle. When no UI element is under the pointer, a camera ray is cast into the scene and the
+ * nearest world-space collider is selected. Its world bounds are projected back into window pixels
+ * and used as the new magnet rectangle.</p>
  */
 @ComponentHandler(VisualCursor.class)
 public class VisualCursorSystem extends AbstractSystem<VisualCursor>
@@ -36,9 +43,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     private static final String SHADER_PATH = "assets/shaders/simple_color_shader";
     private static final float  MAX_DELTA_TIME = 1f / 30f;
+    private static final float  MAX_PICK_DISTANCE = 1000f;
 
-    private final Input  input;
+    private final Input input;
     private final Window window;
+    private final Graphics graphics;
+    private final SceneSpatialIndex spatialIndex;
 
     private final Vector2f pointer        = new Vector2f();
     private final Vector2f desiredCenter  = new Vector2f();
@@ -47,11 +57,24 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
     private final Vector2f acceleration   = new Vector2f();
     private final Vector2f temporary      = new Vector2f();
 
+    private final Rectangle hoveredBounds = new Rectangle(new Vector2f(), new Vector2f());
+
+    private final Matrix4f viewProjection         = new Matrix4f();
+    private final Vector3f rayOrigin              = new Vector3f();
+    private final Vector3f rayDirection           = new Vector3f();
+    private final Vector3f rayFarPoint            = new Vector3f();
+    private final Vector3f corner                 = new Vector3f();
+    private final Vector4f clip                   = new Vector4f();
+    private final Aabb     rayQueryBounds         = new Aabb();
+    private final int[]    viewport               = new int[4];
+
     @Inject
     public VisualCursorSystem(ApplicationContext context) {
         super(VisualCursor.class, context);
-        this.input  = context.getDependency(Input.class);
-        this.window = context.getDependency(Window.class);
+        this.input        = context.getDependency(Input.class);
+        this.window       = context.getDependency(Window.class);
+        this.graphics     = context.getDependency(Graphics.class);
+        this.spatialIndex = context.getDependency(SceneSpatialIndex.class);
     }
 
     @Override
@@ -111,10 +134,15 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         cursor.previousHoveredEntity = cursor.hoveredEntity;
 
         if (target != null) {
-            target.body.getCenter(desiredCenter);
-            desiredSize.set(target.body.width(), target.body.height());
-            cursor.targetShape.topLeft.set(target.body.topLeft);
-            cursor.targetShape.bottomRight.set(target.body.bottomRight);
+            hoveredBounds.getCenter(desiredCenter);
+            desiredSize.set(hoveredBounds.width(), hoveredBounds.height());
+
+            if (target.space == MeshCollider.Space.WORLD) {
+                desiredSize.x = Math.min(desiredSize.x, cursor.maxWorldTargetSize);
+                desiredSize.y = Math.min(desiredSize.y, cursor.maxWorldTargetSize);
+            }
+
+            cursor.targetShape.setFromCenter(desiredCenter, desiredSize);
             setHoveredEntity(cursor, target.getEntity());
         } else {
             desiredCenter.set(pointer);
@@ -141,24 +169,24 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
         Entity cursorEntity = cursor.getEntity();
 
-        // Keep the current target while the pointer is inside it. This avoids target flickering
-        // when several rectangles overlap or when the pointer is exactly on a border.
+        // Keep the current screen-space target while the pointer is inside it. This avoids target
+        // flickering when rectangles overlap or when the pointer is exactly on a border. World
+        // targets do not need this: the camera ray is stable and is re-evaluated every frame.
         if (cursor.hoveredEntity != null) {
             MeshCollider current = cm.get(cursor.hoveredEntity, MeshCollider.class);
-            if (isUsable(current, cursorEntity) && current.body.isInside(pointer)) {
+            if (isScreenTarget(current, cursorEntity) && current.body.isInside(pointer)) {
+                copyBounds(current.body);
                 return current;
             }
         }
 
-        // A target is selected by the pointer only. The physical cursor rectangle is intentionally
-        // not used here: if it were, a large magnetized cursor placed between two buttons could
-        // overlap both of them, alternate between the two targets every frame and stay squeezed
-        // in the gap while both buttons flicker.
-        MeshCollider best = null;
+        // UI is an overlay: when the pointer is over a screen-space collider, it wins over any
+        // world object that happens to be behind it.
+        MeshCollider bestScreen = null;
         float bestScore = Float.MAX_VALUE;
 
         for (MeshCollider collider : colliders) {
-            if (!isUsable(collider, cursorEntity)) continue;
+            if (!isScreenTarget(collider, cursorEntity)) continue;
 
             Rectangle body = collider.body;
             if (!body.isInside(pointer)) continue;
@@ -167,19 +195,147 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
             float score = body.width() * body.height();
             if (score < bestScore) {
                 bestScore = score;
+                bestScreen = collider;
+            }
+        }
+
+        if (bestScreen != null) {
+            copyBounds(bestScreen.body);
+            return bestScreen;
+        }
+
+        return findWorldTarget(cursor, pointer, colliders);
+    }
+
+    private MeshCollider findWorldTarget(VisualCursor cursor,
+                                         Vector2f pointer,
+                                         Collection<MeshCollider> colliders) {
+        spatialIndex.rebuildIfDirty(colliders);
+        if (spatialIndex.isEmpty()) return null;
+
+        if (!updateCameraRay(pointer)) return null;
+
+        rayFarPoint.set(rayDirection).mul(MAX_PICK_DISTANCE).add(rayOrigin);
+        rayQueryBounds.setFromPoints(rayOrigin, rayFarPoint);
+
+        Entity cursorEntity = cursor.getEntity();
+        MeshCollider best = null;
+        float bestDistance = Float.POSITIVE_INFINITY;
+
+        for (MeshCollider collider : spatialIndex.query(rayQueryBounds)) {
+            if (!isWorldTarget(collider, cursorEntity)) continue;
+
+            float distance = collider.bounds.intersectRay(rayOrigin, rayDirection, MAX_PICK_DISTANCE);
+            if (distance < bestDistance) {
+                bestDistance = distance;
                 best = collider;
             }
+        }
+
+        if (best == null || !projectBounds(best.bounds)) {
+            return null;
         }
 
         return best;
     }
 
-    private boolean isUsable(MeshCollider collider, Entity cursorEntity) {
+    private boolean updateCameraRay(Vector2f pointer) {
+        int width  = window.getWidth();
+        int height = window.getHeight();
+        if (width <= 0 || height <= 0) return false;
+
+        viewProjection.set(graphics.projection).mul(graphics.view);
+
+        viewport[0] = 0;
+        viewport[1] = 0;
+        viewport[2] = width;
+        viewport[3] = height;
+
+        // GLFW reports the cursor from the top-left, while OpenGL/JOML unprojection expects
+        // window coordinates from the bottom-left.
+        //
+        // JOML's unprojectRay treats this matrix as the forward view-projection matrix and
+        // computes its inverse internally. Passing an already inverted matrix here produced rays
+        // that only hit objects near the window edges.
+        viewProjection.unprojectRay(
+                pointer.x,
+                height - pointer.y,
+                viewport,
+                rayOrigin,
+                rayDirection
+        );
+
+        float directionLengthSquared = rayDirection.lengthSquared();
+        if (directionLengthSquared <= 0.000001f) return false;
+
+        rayDirection.mul(1f / (float) Math.sqrt(directionLengthSquared));
+        return true;
+    }
+
+    private boolean projectBounds(Aabb bounds) {
+        int width  = window.getWidth();
+        int height = window.getHeight();
+        if (width <= 0 || height <= 0 || bounds == null || bounds.isEmpty()) return false;
+
+        viewProjection.set(graphics.projection).mul(graphics.view);
+
+        float minX = Float.POSITIVE_INFINITY;
+        float minY = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY;
+        float maxY = Float.NEGATIVE_INFINITY;
+
+        for (int cornerIndex = 0; cornerIndex < 8; cornerIndex++) {
+            float x = (cornerIndex & 1) == 0 ? bounds.xMin() : bounds.xMax();
+            float y = (cornerIndex & 2) == 0 ? bounds.yMin() : bounds.yMax();
+            float z = (cornerIndex & 4) == 0 ? bounds.zMin() : bounds.zMax();
+
+            corner.set(x, y, z);
+            clip.set(corner.x, corner.y, corner.z, 1f);
+            viewProjection.transform(clip);
+
+            if (clip.w <= 0.0001f) return false;
+
+            float ndcZ = clip.z / clip.w;
+            if (ndcZ < -1f || ndcZ > 1f) return false;
+
+            float screenX = ((clip.x / clip.w) * 0.5f + 0.5f) * width;
+            float screenY = (1f - ((clip.y / clip.w) * 0.5f + 0.5f)) * height;
+
+            minX = Math.min(minX, screenX);
+            minY = Math.min(minY, screenY);
+            maxX = Math.max(maxX, screenX);
+            maxY = Math.max(maxY, screenY);
+        }
+
+        if (maxX <= minX || maxY <= minY) return false;
+
+        hoveredBounds.topLeft.set(minX, minY);
+        hoveredBounds.bottomRight.set(maxX, maxY);
+        return true;
+    }
+
+    private void copyBounds(Rectangle source) {
+        hoveredBounds.topLeft.set(source.topLeft);
+        hoveredBounds.bottomRight.set(source.bottomRight);
+    }
+
+    private boolean isScreenTarget(MeshCollider collider, Entity cursorEntity) {
         return collider != null
                 && collider.isActive()
+                && collider.space == MeshCollider.Space.SCREEN
                 && collider.getEntity() != cursorEntity
                 && collider.body != null
                 && !collider.body.isEmpty();
+    }
+
+    private boolean isWorldTarget(MeshCollider collider, Entity cursorEntity) {
+        return collider != null
+                && collider.isActive()
+                && collider.space == MeshCollider.Space.WORLD
+                && collider.selectable
+                && collider.getEntity() != cursorEntity
+                && collider.bounds != null
+                && !collider.bounds.isEmpty();
     }
 
     private void setHoveredEntity(VisualCursor cursor, Entity entity) {

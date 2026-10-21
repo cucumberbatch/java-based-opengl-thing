@@ -1,13 +1,16 @@
 package org.north.core.system;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.north.core.scene.SceneSpatialIndex;
 import org.north.core.scene.component.MeshCollider;
 import org.north.core.scene.component.Transform;
 import org.north.core.architecture.ApplicationContext;
 import org.north.core.architecture.ComponentHandler;
 import org.north.core.architecture.Inject;
 import org.north.core.physics.shape.Rectangle;
+import org.north.core.physics.spatial.Aabb;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
 
@@ -15,18 +18,37 @@ import org.north.core.system.process.UpdateProcess;
 public class MeshColliderSystem extends AbstractSystem<MeshCollider>
         implements InitProcess<MeshCollider>, UpdateProcess<MeshCollider> {
 
-    private final Vector3f position = new Vector3f();
-    private final Vector3f scale    = new Vector3f();
+    private static final Aabb UNIT_BOUNDS =
+            new Aabb(-0.5f, 0.5f, -0.5f, 0.5f, -0.5f, 0.5f);
+
+    private final SceneSpatialIndex spatialIndex;
+
+    private final Vector3f position     = new Vector3f();
+    private final Vector3f scale        = new Vector3f();
+    private final Vector3f localCorner  = new Vector3f();
+    private final Vector3f worldCorner  = new Vector3f();
+    private final Vector3f min          = new Vector3f();
+    private final Vector3f max          = new Vector3f();
+    private final Matrix4f modelMatrix  = new Matrix4f();
 
     @Inject
     public MeshColliderSystem(ApplicationContext context) {
         super(MeshCollider.class, context);
+        this.spatialIndex = context.getDependency(SceneSpatialIndex.class);
     }
 
     @Override
     public void init(MeshCollider meshCollider) {
         Transform transform = cm.get(meshCollider.getEntity(), Transform.class);
         if (transform == null) return;
+
+        if (meshCollider.space == MeshCollider.Space.WORLD) {
+            if (meshCollider.localBounds == null || meshCollider.localBounds.isEmpty()) {
+                meshCollider.localBounds = new Aabb().set(UNIT_BOUNDS);
+            }
+            updateWorldBounds(meshCollider, transform);
+            return;
+        }
 
         if (meshCollider.body == null) {
             meshCollider.body = new Rectangle(new Vector2f(), new Vector2f());
@@ -45,10 +67,46 @@ public class MeshColliderSystem extends AbstractSystem<MeshCollider>
     @Override
     public void update(MeshCollider meshCollider, float deltaTime) {
         Transform transform = cm.get(meshCollider.getEntity(), Transform.class);
-        if (transform == null || meshCollider.body == null) return;
+        if (transform == null) return;
+
+        if (meshCollider.space == MeshCollider.Space.WORLD) {
+            updateWorldBounds(meshCollider, transform);
+            return;
+        }
+
+        if (meshCollider.body == null) return;
 
         transform.getGlobalPosition(position);
         meshCollider.body.moveTo(position.x, position.y);
+    }
+
+    private void updateWorldBounds(MeshCollider meshCollider, Transform transform) {
+        Aabb localBounds = meshCollider.localBounds;
+        if (localBounds == null || localBounds.isEmpty()) return;
+
+        transform.getGlobalModelMatrix(modelMatrix);
+
+        for (int cornerIndex = 0; cornerIndex < 8; cornerIndex++) {
+            float x = (cornerIndex & 1) == 0 ? localBounds.xMin() : localBounds.xMax();
+            float y = (cornerIndex & 2) == 0 ? localBounds.yMin() : localBounds.yMax();
+            float z = (cornerIndex & 4) == 0 ? localBounds.zMin() : localBounds.zMax();
+
+            localCorner.set(x, y, z);
+            modelMatrix.transformPosition(localCorner, worldCorner);
+
+            if (cornerIndex == 0) {
+                min.set(worldCorner);
+                max.set(worldCorner);
+            } else {
+                min.min(worldCorner);
+                max.max(worldCorner);
+            }
+        }
+
+        if (!meshCollider.bounds.matches(min, max)) {
+            meshCollider.bounds.setMinMax(min, max);
+            spatialIndex.invalidate();
+        }
     }
 
 }
