@@ -152,7 +152,7 @@ public class VisualCursorLabelSystem extends AbstractSystem<VisualCursorLabel>
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON
         );
 
-        graphics2D.setColor(new Color(55, 25, 25, 127));
+        graphics2D.setColor(new Color(21, 21, 21, 127));
         graphics2D.fillRect(0, 0, width, height);
 
         graphics2D.setFont(font);
@@ -215,13 +215,14 @@ public class VisualCursorLabelSystem extends AbstractSystem<VisualCursorLabel>
         float margin = label.screenMargin;
 
         float cursorHalfWidth = Math.max(1f, cursor.displaySize.x) / 2f;
+        float cursorHalfHeight = Math.max(1f, cursor.displaySize.y) / 2f;
 
         float x = cursor.center.x + cursorHalfWidth + label.offset + halfWidth;
         if (x + halfWidth > screenWidth - margin) {
             x = cursor.center.x - cursorHalfWidth - label.offset - halfWidth;
         }
 
-        float y = cursor.center.y;
+        float y = cursor.center.y - cursorHalfHeight + halfHeight;
 
         x = clamp(x, halfWidth + margin, screenWidth - halfWidth - margin);
         y = clamp(y, halfHeight + margin, screenHeight - halfHeight - margin);

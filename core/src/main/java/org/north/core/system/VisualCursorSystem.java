@@ -116,6 +116,8 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
 
     @Override
     public void update(VisualCursor cursor, float deltaTime) {
+        updateCursorMode(cursor);
+
         if (!cursor.visible) {
             cursor.displaySize.zero();
             updateShape(cursor);
@@ -163,6 +165,15 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
         syncTransform(cursor);
     }
 
+    private void updateCursorMode(VisualCursor cursor) {
+        if (input.isPressed(GLFW.GLFW_KEY_ESCAPE)) {
+            cursor.visible = true;
+        }
+        if (input.isPressed(GLFW.GLFW_MOUSE_BUTTON_1)) {
+            cursor.visible = false;
+        }
+    }
+
     private MeshCollider findHoveredTarget(VisualCursor cursor, Vector2f pointer) {
         Collection<MeshCollider> colliders = cm.getAllByType(MeshCollider.class);
         if (colliders == null || colliders.isEmpty()) return null;
@@ -177,6 +188,12 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
             if (isScreenTarget(current, cursorEntity) && current.body.isInside(pointer)) {
                 copyBounds(current.body);
                 return current;
+            }
+
+            // Light-up a hovered object with a MeshRenderer component
+            if (cm.has(cursor.hoveredEntity, MeshRenderer.class)) {
+                MeshRenderer renderer = cm.get(cursor.hoveredEntity, MeshRenderer.class);
+                renderer.material.setVector("u_color", new Vector4f(1, 1, 1, 0.1f));
             }
         }
 
@@ -418,5 +435,4 @@ public class VisualCursorSystem extends AbstractSystem<VisualCursor>
             GLFW.glfwSetInputMode(handle, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
         }
     }
-
 }

@@ -1,12 +1,8 @@
 package org.north.core.scene.component;
 
-import org.north.core.physics.collision.CollisionLayer;
 import org.north.core.physics.shape.Rectangle;
 import org.north.core.physics.spatial.Aabb;
 import org.joml.Vector2f;
-
-import java.util.EnumSet;
-import java.util.Set;
 
 public class MeshCollider extends AbstractComponent {
 
@@ -33,8 +29,5 @@ public class MeshCollider extends AbstractComponent {
 
     /** World colliders with this flag disabled are skipped by scene picking. */
     public boolean selectable = true;
-
-    public Set<CollisionLayer> layer = EnumSet.of(CollisionLayer.DEFAULT);
-    public boolean isStatic = false;
 
 }

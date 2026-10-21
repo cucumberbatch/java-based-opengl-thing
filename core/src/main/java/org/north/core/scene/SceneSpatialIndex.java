@@ -124,7 +124,6 @@ public class SceneSpatialIndex {
                 && collider.isActive()
                 && collider.space == MeshCollider.Space.WORLD
                 && collider.selectable
-                && collider.bounds != null
                 && !collider.bounds.isEmpty();
     }
 }

@@ -36,7 +36,7 @@ public class DefaultSceneComposer implements SceneComposer {
         // picking system. The cursor itself is created last and is still rendered on top because
         // its renderer uses the screen-space render layer.
         testManyTransparentCubesGrid(sceneRoot, cm);
-        initCursorDemoOverlay(sceneRoot, cm);
+//        initCursorDemoOverlay(sceneRoot, cm);
     }
 
     private void initCursorDemoOverlay(TreeNode<Entity> root, ComponentManager cm) {
@@ -138,7 +138,7 @@ public class DefaultSceneComposer implements SceneComposer {
         root.add(camera);
 
         Shader shader = shader("simple_color_shader");
-        int N = 2;
+        int N = 8;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < N; k++) {
@@ -164,7 +164,7 @@ public class DefaultSceneComposer implements SceneComposer {
                     collider.space = MeshCollider.Space.WORLD;
                     collider.selectable = true;
 
-//                    cm.add(cube, CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
+                    cm.add(cube, CubeColorSwitcher.class).acc = (x / N) * (y / N) * (z / N);
 
                     root.add(cube);
 
