@@ -19,18 +19,19 @@ public class CameraSystem extends AbstractSystem<Camera>
     public static Matrix4f ORTHOGRAPHIC_MATRIX = new Matrix4f();
 
     private final CameraAwareService cameraAwareService;
+    private final Graphics graphics;
 
     @Inject
     public CameraSystem(ApplicationContext context) {
         super(Camera.class, context);
         cameraAwareService = context.getDependency(CameraAwareService.class);
+        graphics = context.getDependency(Graphics.class);
     }
 
     @Override
     public void init(Camera camera) throws RuntimeException {
-        PERSPECTIVE_MATRIX   = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
-        INTERMEDIATE_MATRIX  = new Matrix4f().perspective(camera.angle * 1.125f, camera.ratio, camera.near, camera.far);
-        ORTHOGRAPHIC_MATRIX  = new Matrix4f().ortho(-1, 1, -1, 1, -1, 1);
+        camera.ratio = (float) graphics.window.getWidth() / Math.max(1, graphics.window.getHeight());
+        updateProjectionMatrices(camera);
 
         camera.eye.set(0f, -1f, 0f);
         camera.up.set(0f, 1f, 0f);
@@ -38,6 +39,19 @@ public class CameraSystem extends AbstractSystem<Camera>
         camera.projectionMatrix = PERSPECTIVE_MATRIX;
 
         cameraAwareService.setCameraComponent(camera);
+    }
+
+    /**
+     * Rebuilds the projection matrices from the camera parameters.
+     *
+     * <p>This must be called whenever the viewport aspect ratio changes. The matrices are stored
+     * statically for the existing projection transition code, but the camera's current projection
+     * matrix also has to be refreshed by the caller.</p>
+     */
+    public static void updateProjectionMatrices(Camera camera) {
+        PERSPECTIVE_MATRIX   = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
+        INTERMEDIATE_MATRIX  = new Matrix4f().perspective(camera.angle * 1.125f, camera.ratio, camera.near, camera.far);
+        ORTHOGRAPHIC_MATRIX  = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1f, 1f, -1f, 1f);
     }
 
     @Override

@@ -173,6 +173,8 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
     private final double SIN_OF_HALF_PI = Math.sin(HALF_PI);
 
     private void updateCameraProjection(Graphics graphics, float deltaTime) {
+        updateViewportProjection(graphics);
+
         if (key1IsPressed) {
             switch (projectionState) {
                 case ORTHOGRAPHIC_VIEW_STATE:
@@ -228,6 +230,64 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
                 break;
         }
         graphics.projection = camera.projectionMatrix;
+    }
+
+    /**
+     * Keeps the camera projection in sync with the actual window aspect ratio. Rebuilding the
+     * static matrices alone is not enough: {@link #updateCameraProjection} assigns
+     * {@code camera.projectionMatrix} to {@code graphics.projection} every frame, so this matrix
+     * has to be refreshed as well after a resize/fullscreen transition.
+     */
+    private void updateViewportProjection(Graphics graphics) {
+        if (camera == null) return;
+
+        int width  = graphics.window.getWidth();
+        int height = graphics.window.getHeight();
+        if (width <= 0 || height <= 0) return;
+
+        float aspect = (float) width / height;
+        if (Math.abs(camera.ratio - aspect) < 0.0001f) return;
+
+        camera.ratio = aspect;
+        CameraSystem.updateProjectionMatrices(camera);
+        resetProjectionMatrixForCurrentState();
+        graphics.projection = camera.projectionMatrix;
+    }
+
+    /**
+     * Re-applies the projection matrix for the current state after the aspect ratio changed. If a
+     * projection transition is in progress, it is restarted from its source matrix using the new
+     * aspect ratio, so no frame is rendered with the old aspect.
+     */
+    private void resetProjectionMatrixForCurrentState() {
+        switch (projectionState) {
+            case PERSPECTIVE_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.PERSPECTIVE_MATRIX;
+                break;
+            case ORTHOGRAPHIC_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.ORTHOGRAPHIC_MATRIX;
+                break;
+            case INTERMEDIATE_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.INTERMEDIATE_MATRIX;
+                break;
+            case PERSPECTIVE_TO_ORTHOGRAPHIC_VIEW_STATE:
+            case PERSPECTIVE_TO_INTERMEDIATE_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.PERSPECTIVE_MATRIX;
+                projectionProgress = 0f;
+                break;
+            case ORTHOGRAPHIC_TO_PERSPECTIVE_VIEW_STATE:
+            case ORTHOGRAPHIC_TO_INTERMEDIATE_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.ORTHOGRAPHIC_MATRIX;
+                projectionProgress = 0f;
+                break;
+            case INTERMEDIATE_TO_PERSPECTIVE_VIEW_STATE:
+            case INTERMEDIATE_TO_ORTHOGRAPHIC_VIEW_STATE:
+                camera.projectionMatrix = CameraSystem.INTERMEDIATE_MATRIX;
+                projectionProgress = 0f;
+                break;
+            default:
+                break;
+        }
     }
 
     private Vector2f virtualCursorPosition = new Vector2f();
@@ -326,19 +386,7 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
             Window.setSize(width, height);
             graphics.updateScreenProjection();
             GL30.glViewport(0, 0, width, height);
-
-            //todo: something is wrong there, maybe the first frame rendering goes faster than components initialization
-            if (camera == null) return;
-
             log.info("window size = {}w : {}h", width, height);
-            camera.ratio = (float) width / height;
-            CameraSystem.PERSPECTIVE_MATRIX = new Matrix4f().perspective(camera.angle, camera.ratio, camera.near, camera.far);
-            CameraSystem.ORTHOGRAPHIC_MATRIX = new Matrix4f().ortho(-camera.ratio, camera.ratio, -1, 1, -1, 1);
-
-            if (ProjectionState.PERSPECTIVE_VIEW_STATE == projectionState) graphics.projection = CameraSystem.PERSPECTIVE_MATRIX;
-            else if (ProjectionState.ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;
-
-            log.info("Aspect ratio: {} width: {} height: {}", camera.ratio, width, height);
         }
     }
 }
