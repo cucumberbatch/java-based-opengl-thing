@@ -98,14 +98,21 @@ public class Material {
     }
 
     public void apply(Graphics graphics) {
-        apply(graphics, null);
+        apply(graphics, null, graphics.projection, graphics.view);
     }
 
     public void apply(Graphics graphics, Matrix4f modelMatrix) {
+        apply(graphics, modelMatrix, graphics.projection, graphics.view);
+    }
+
+    public void apply(Graphics graphics,
+                      Matrix4f modelMatrix,
+                      Matrix4f projectionMatrix,
+                      Matrix4f viewMatrix) {
         graphics.bindShaderProgram(shader.id());
 
-        setUniformIfPresent(graphics, PROJECTION_UNIFORM, graphics.projection);
-        setUniformIfPresent(graphics, VIEW_UNIFORM, graphics.view);
+        setUniformIfPresent(graphics, PROJECTION_UNIFORM, projectionMatrix);
+        setUniformIfPresent(graphics, VIEW_UNIFORM, viewMatrix);
         if (modelMatrix != null) {
             setUniformIfPresent(graphics, MODEL_UNIFORM, modelMatrix);
         }

@@ -1,44 +1,27 @@
 package org.north.core.scene.component;
 
-import org.north.core.graphics.Texture;
-import org.north.core.graphics.VertexArray;
-import org.north.core.physics.shape.Rectangle;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
-import org.north.core.system.ButtonSystem;
 
+/**
+ * A rectangular UI button. Interaction is driven by {@link VisualCursor}: the cursor marks the
+ * button as hovered, and {@code ButtonSystem} smoothly blends its material color.
+ */
 public class Button extends AbstractComponent {
 
-    public float[] vertices = new float[]{
-            -0.5f, -0.5f, 0.0f,
-            -0.5f,  0.5f, 0.0f,
-            0.5f,  0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f
-    };
+    public final Vector4f buttonDefaultColor = new Vector4f(0.18f, 0.21f, 0.27f, 0.92f);
+    public final Vector4f buttonOnHoverColor = new Vector4f(0.27f, 0.58f, 0.86f, 1.0f);
+    public final Vector4f buttonColor        = new Vector4f(buttonDefaultColor);
 
-    public byte[] indices = new byte[]{
-            0, 1, 2, 2, 3, 0,
-    };
+    /** Exponential color transition speed. */
+    public float colorTransitionSpeed = 14f;
 
-    public float[] uv = new float[]{
-            0,  1,
-            0,  0,
-            1,  0,
-            1,  1
-    };
+    /** Screen-space buttons interpret their transform as window pixels. */
+    public boolean screenSpace = true;
 
-    public VertexArray vertexBuffer;
+    /** Additional rendering order inside the screen-space layer. */
+    public int renderOrder = 0;
 
-    public Vector4f buttonDefaultColor = new Vector4f(0.75f, 0.75f, 0.75f, 1.0f);
-    public Vector4f buttonOnHoverColor = new Vector4f(0.87f, 0.87f, 1.00f, 1.0f);
-    public Vector4f buttonColor        = new Vector4f(buttonDefaultColor);
-
-    public Rectangle buttonShape       = new Rectangle(new Vector2f().zero(), new Vector2f().zero());;
-    public Texture   buttonTexture;
-
-    public float transitionTimeLimit       = 1.2f;
-    public float transitionTimeAccumulator = 0.0f;
-
-    public ButtonSystem.ButtonState buttonState = ButtonSystem.ButtonState.IDLE_BUTTON_STATE;
+    /** Set by {@link org.north.core.system.VisualCursorSystem} while the cursor is over this button. */
+    public boolean hovered = false;
 
 }

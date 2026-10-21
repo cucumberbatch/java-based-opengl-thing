@@ -8,6 +8,7 @@ import org.north.core.scene.component.CameraControls;
 import org.north.core.scene.component.Transform;
 import org.north.core.config.ApplicationProperties;
 import org.north.core.graphics.Graphics;
+import org.north.core.graphics.Window;
 import org.north.core.system.process.InputHandlerProcess;
 import org.north.core.system.process.InitProcess;
 import org.north.core.system.process.UpdateProcess;
@@ -322,9 +323,12 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
 
         @Override
         public void invoke(long window, int width, int height) {
+            Window.setSize(width, height);
+            graphics.updateScreenProjection();
+            GL30.glViewport(0, 0, width, height);
+
             //todo: something is wrong there, maybe the first frame rendering goes faster than components initialization
             if (camera == null) return;
-            assert camera != null : "camera reference is null, cannot properly resize window";
 
             log.info("window size = {}w : {}h", width, height);
             camera.ratio = (float) width / height;
@@ -334,7 +338,6 @@ public class CameraControlsSystem extends AbstractSystem<CameraControls>
             if (ProjectionState.PERSPECTIVE_VIEW_STATE == projectionState) graphics.projection = CameraSystem.PERSPECTIVE_MATRIX;
             else if (ProjectionState.ORTHOGRAPHIC_VIEW_STATE == projectionState) graphics.projection = CameraSystem.ORTHOGRAPHIC_MATRIX;
 
-            GL30.glViewport(0, 0, width, height);
             log.info("Aspect ratio: {} width: {} height: {}", camera.ratio, width, height);
         }
     }

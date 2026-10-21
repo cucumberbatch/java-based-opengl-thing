@@ -25,10 +25,22 @@ public class Graphics {
     public Matrix4f projection = new Matrix4f().identity();
     public Matrix4f view = new Matrix4f().lookAt(new Vector3f(0, 0, -1), new Vector3f(0, 0, 1), new Vector3f(0, 1, 0));
 
+    /** Orthographic projection for UI elements whose coordinates are window pixels with a top-left origin. */
+    public final Matrix4f screenProjection = new Matrix4f().identity();
+    /** Identity view matrix used together with {@link #screenProjection}. */
+    public final Matrix4f screenView = new Matrix4f().identity();
+
     private final float[] matrixValues = new float[16];
 
     public Graphics(Window window) {
         this.window = window;
+        updateScreenProjection();
+    }
+
+    public void updateScreenProjection() {
+        float width  = Math.max(1, window.getWidth());
+        float height = Math.max(1, window.getHeight());
+        screenProjection.identity().ortho(0f, width, height, 0f, -1f, 1f);
     }
 
     public long getWindow() {

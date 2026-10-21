@@ -30,6 +30,11 @@ public class Window {
     public int getWidth() { return width; }
     public int getHeight() { return height; }
 
+    public static void setSize(int newWidth, int newHeight) {
+        width  = newWidth;
+        height = newHeight;
+    }
+
     private long window = -1;
     private final boolean vSync;
 

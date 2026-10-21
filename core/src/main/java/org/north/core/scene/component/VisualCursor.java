@@ -1,51 +1,79 @@
 package org.north.core.scene.component;
 
-import org.north.core.graphics.Texture;
-import org.north.core.graphics.VertexArray;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 import org.north.core.physics.shape.Rectangle;
+import org.north.core.scene.Entity;
 
+/**
+ * A physical, spring-driven rectangular cursor.
+ *
+ * <p>The cursor is a regular entity with a {@link MeshRenderer}, so it is rendered through the
+ * standard material/mesh pipeline. Its transform is expressed in window pixels while
+ * {@link MeshRenderer#screenSpace} is enabled.</p>
+ *
+ * <p>Any entity that has a {@link MeshCollider} can act as a magnet target. This makes UI elements
+ * and, later, projected scene objects share the same interaction path.</p>
+ */
 public class VisualCursor extends AbstractComponent {
 
-    public Vector2f initialTopLeftVertex     = new Vector2f(380.f, 320.f);
-    public Vector2f initialBottomRightVertex = new Vector2f(440.f, 480.f);
+    /** Cursor size in window pixels when it does not overlap any target. */
+    public final Vector2f idleSize = new Vector2f(18f, 18f);
 
-    public Rectangle idleCursorForm = new Rectangle(new Vector2f(0.f, 0.f), new Vector2f(10.f, 10.f));
+    /** Current center of the visual rectangle in window pixels. */
+    public final Vector2f center = new Vector2f();
 
+    /** Center at the previous physics step. Kept for debugging and custom integrations. */
+    public final Vector2f previousCenter = new Vector2f();
 
-    public float[] vertices = new float[]{
-            -0.5f, -0.5f, 0.0f,
-            -0.5f,  0.5f, 0.0f,
-             0.5f,  0.5f, 0.0f,
-             0.5f, -0.5f, 0.0f
-    };
+    /** Current cursor velocity in pixels per second. */
+    public final Vector2f velocity = new Vector2f();
 
-    public byte[] indices = new byte[]{
-            0, 1, 2, 2, 3, 0,
-    };
+    /** Center the cursor is currently attracted to. */
+    public final Vector2f targetCenter = new Vector2f();
 
-    public float[] uv = new float[]{
-            0,  1,
-            0,  0,
-            1,  0,
-            1,  1
-    };
+    /** Size the cursor is currently morphing into. */
+    public final Vector2f targetSize = new Vector2f(idleSize);
 
-    //todo: a vertex buffer must be in a Mesh object of a MeshRenderer component
-    public VertexArray vertexBuffer;
+    /** Current visual size in window pixels. */
+    public final Vector2f displaySize = new Vector2f(idleSize);
 
-    //todo: also a texture object must move into a MeshRenderer component
-    public Texture     texture;
+    /** Current cursor rectangle in window pixels. */
+    public final Rectangle shape = new Rectangle(new Vector2f(), new Vector2f());
 
-    // A visual cursor, which can addict or "magnetize" to an object, that collides with it
-    public Rectangle   cursor;
+    /** Rectangle of the current magnet target. */
+    public final Rectangle targetShape = new Rectangle(new Vector2f(), new Vector2f());
 
-    public VertexArray background;
-//    public VertexArray buttonBackground;
+    public final Vector4f color      = new Vector4f(0.55f, 0.85f, 1.0f, 0.35f);
+    public final Vector4f idleColor  = new Vector4f(0.55f, 0.85f, 1.0f, 0.35f);
+    public final Vector4f hoverColor = new Vector4f(0.70f, 0.95f, 1.0f, 0.28f);
 
-    public Rectangle previouslySelectedButtonShape;
+    /** Spring stiffness. Higher values make the cursor catch up faster. */
+    public float stiffness = 170f;
 
-    // Switching of this parameter is controlled by onCollision methods of VisualCursorSystem
-    public boolean   isIntersects = false;
+    /** Spring damping. Lower values add bounce and inertia. */
+    public float damping = 18f;
+
+    /** How fast the cursor morphs into a target rectangle. */
+    public float magnetizationSpeed = 14f;
+
+    /** How fast the cursor color changes between idle and hover states. */
+    public float colorSpeed = 12f;
+
+    /** Replaces the operating system cursor with this visual cursor when possible. */
+    public boolean hideSystemCursor = true;
+
+    /** Can be used to temporarily hide the visual cursor. */
+    public boolean visible = true;
+
+    /** The entity whose collider is currently under the pointer, if any. */
+    public Entity hoveredEntity;
+
+    /** The previously hovered entity. Useful for systems that need edge-triggered reactions. */
+    public Entity previousHoveredEntity;
+
+    public boolean isHovered() {
+        return hoveredEntity != null;
+    }
 
 }

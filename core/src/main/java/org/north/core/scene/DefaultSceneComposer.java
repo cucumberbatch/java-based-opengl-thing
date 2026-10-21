@@ -1,5 +1,6 @@
 package org.north.core.scene;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
@@ -8,6 +9,7 @@ import org.north.core.graphics.Material;
 import org.north.core.graphics.PredefinedMeshes;
 import org.north.core.graphics.Texture;
 import org.north.core.graphics.shader.Shader;
+import org.north.core.physics.shape.Rectangle;
 import org.north.core.scene.component.*;
 import org.north.core.scene.component.management.ComponentManager;
 import org.north.core.scene.tree.TreeNode;
@@ -29,7 +31,76 @@ public class DefaultSceneComposer implements SceneComposer {
         // initReferenceScene(sceneRoot, cm);
         // testScene(sceneRoot, cm);
         // initSpaceshipOnScreen(sceneRoot, cm);
+        initCursorDemoOverlay(sceneRoot, cm);
         testManyTransparentCubesGrid(sceneRoot, cm);
+    }
+
+    private void initCursorDemoOverlay(TreeNode<Entity> root, ComponentManager cm) {
+        createUiButton(root, cm, "ui_button_1", 256f, 112f, 180f, 46f,
+                new Vector4f(0.22f, 0.32f, 0.44f, 0.94f),
+                new Vector4f(0.32f, 0.72f, 1.00f, 1.00f));
+
+        createUiButton(root, cm, "ui_button_2", 256f, 180f, 180f, 46f,
+                new Vector4f(0.34f, 0.26f, 0.20f, 0.94f),
+                new Vector4f(1.00f, 0.66f, 0.30f, 1.00f));
+
+        createUiButton(root, cm, "ui_button_3", 256f, 248f, 180f, 46f,
+                new Vector4f(0.24f, 0.34f, 0.26f, 0.94f),
+                new Vector4f(0.42f, 0.92f, 0.52f, 1.00f));
+
+        Entity cursorEntity = new Entity("visual_cursor", cm);
+        Transform cursorTransform = cm.add(cursorEntity, Transform.class);
+        cursorTransform.moveTo(256f, 320f, 0f);
+
+        VisualCursor visualCursor = new VisualCursor();
+        visualCursor.center.set(256f, 320f);
+        visualCursor.previousCenter.set(256f, 320f);
+        visualCursor.targetCenter.set(256f, 320f);
+
+        MeshRenderer cursorRenderer = cm.add(cursorEntity, MeshRenderer.class);
+        cursorRenderer.mesh = PredefinedMeshes.QUAD;
+        cursorRenderer.screenSpace = true;
+        cursorRenderer.renderOrder = 100;
+        cursorRenderer.material = simpleColorMaterial(visualCursor.color);
+
+        cm.add(cursorEntity, visualCursor);
+        root.add(cursorEntity);
+    }
+
+    private void createUiButton(TreeNode<Entity> root,
+                                ComponentManager cm,
+                                String name,
+                                float x,
+                                float y,
+                                float width,
+                                float height,
+                                Vector4f idleColor,
+                                Vector4f hoverColor) {
+        Entity entity = new Entity(name, cm);
+
+        Transform transform = cm.add(entity, Transform.class);
+        transform.moveTo(x, y, 0f);
+        transform.rescaleTo(width, height, 1f);
+
+        Button button = new Button();
+        button.buttonDefaultColor.set(idleColor);
+        button.buttonOnHoverColor.set(hoverColor);
+        button.buttonColor.set(idleColor);
+
+        MeshRenderer renderer = cm.add(entity, MeshRenderer.class);
+        renderer.mesh = PredefinedMeshes.QUAD;
+        renderer.screenSpace = true;
+        renderer.renderOrder = 0;
+        renderer.material = simpleColorMaterial(button.buttonColor);
+
+        MeshCollider collider = cm.add(entity, MeshCollider.class);
+        collider.body = new Rectangle(
+                new Vector2f(-width / 2f, -height / 2f),
+                new Vector2f(width / 2f, height / 2f)
+        );
+
+        cm.add(entity, button);
+        root.add(entity);
     }
 
     private void testManyTransparentCubesGrid(TreeNode<Entity> root, ComponentManager cm) {

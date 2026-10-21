@@ -29,5 +29,12 @@ public interface Component {
     default Transform getTransform() {
         return getEntity().getTransform();
     }
+
+    /**
+     * Render layers are sorted in ascending order, so components with a larger layer are drawn later.
+     */
+    default int getRenderLayer() {
+        return 0;
+    }
 }
  

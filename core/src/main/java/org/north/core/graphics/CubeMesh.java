@@ -58,6 +58,5 @@ public class CubeMesh {
             1, 1
     };
 
-    public VertexArray background;
     public Texture texture;
 }

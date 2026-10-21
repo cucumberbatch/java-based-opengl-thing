@@ -6,8 +6,8 @@ public class Mesh {
 
     private VertexArrayHandle vao;
     private BufferHandle vertexBuffer;
-    private BufferHandle textureCoordinatesBuffer;
     private BufferHandle indexBuffer;
+    private BufferHandle textureCoordinatesBuffer;
 
     public final float[] vertices;
     public final byte[]  indices;

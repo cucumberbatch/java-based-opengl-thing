@@ -1,6 +1,7 @@
 package org.north.core.system;
 
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 import org.north.core.architecture.ApplicationContext;
 import org.north.core.architecture.ComponentHandler;
 import org.north.core.architecture.Inject;
@@ -32,8 +33,21 @@ public class MeshRendererSystem
         Transform transform = cm.get(meshRenderer.getEntity(), Transform.class);
 
         mesh.upload(graphics);
-        material.apply(graphics, transform.getGlobalModelMatrix(bufferedMatrix));
+        Matrix4f modelMatrix = transform.getGlobalModelMatrix(bufferedMatrix);
 
+        if (meshRenderer.screenSpace) {
+            graphics.updateScreenProjection();
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            try {
+                material.apply(graphics, modelMatrix, graphics.screenProjection, graphics.screenView);
+                graphics.drawIndexed(mesh.vao(), mesh.indexCount());
+            } finally {
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
+            }
+            return;
+        }
+
+        material.apply(graphics, modelMatrix);
         graphics.drawIndexed(mesh.vao(), mesh.indexCount());
     }
 }

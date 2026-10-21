@@ -1,10 +1,8 @@
 package org.north.core.physics.shape;
 
 import org.joml.Vector2f;
-import org.north.core.graphics.Window;
 
-
-public class Rectangle implements Shape2d {
+public class Rectangle {
 
     public Vector2f topLeft;
 
@@ -19,63 +17,78 @@ public class Rectangle implements Shape2d {
     }
 
     public void moveTo(Vector2f position) {
-        float width = Math.abs(this.bottomRight.x - this.topLeft.x);
-        float height = Math.abs(this.topLeft.y - this.bottomRight.y);
-        this.topLeft.x = position.x - width / 2;
-        this.bottomRight.x = position.x + width / 2;
-        this.bottomRight.y = position.y - height / 2;
-        this.topLeft.y = position.y + height / 2;
+        moveTo(position.x, position.y);
+    }
+
+    public void moveTo(float x, float y) {
+        float halfWidth  = width() / 2;
+        float halfHeight = height() / 2;
+
+        this.topLeft.set(x - halfWidth, y - halfHeight);
+        this.bottomRight.set(x + halfWidth, y + halfHeight);
+    }
+
+    public void setFromCenter(Vector2f center, Vector2f size) {
+        float halfWidth  = size.x / 2;
+        float halfHeight = size.y / 2;
+
+        this.topLeft.set(center.x - halfWidth, center.y - halfHeight);
+        this.bottomRight.set(center.x + halfWidth, center.y + halfHeight);
+    }
+
+    public Vector2f getCenter(Vector2f destination) {
+        return destination.set(topLeft).add(bottomRight).mul(0.5f);
+    }
+
+    public float width() {
+        return Math.abs(this.bottomRight.x - this.topLeft.x);
+    }
+
+    public float height() {
+        return Math.abs(this.bottomRight.y - this.topLeft.y);
+    }
+
+    public boolean isEmpty() {
+        return width() == 0 || height() == 0;
     }
 
     public boolean isInside(Vector2f point) {
-        return  (point.x >= this.topLeft.x && point.x <= this.bottomRight.x) &&
-                (point.y >= this.topLeft.y && point.y <= this.bottomRight.y);
+        float minX = Math.min(topLeft.x, bottomRight.x);
+        float maxX = Math.max(topLeft.x, bottomRight.x);
+        float minY = Math.min(topLeft.y, bottomRight.y);
+        float maxY = Math.max(topLeft.y, bottomRight.y);
+
+        return point.x >= minX && point.x <= maxX &&
+               point.y >= minY && point.y <= maxY;
     }
 
     public boolean isInside(Rectangle rectangle) {
-        return  isInside(rectangle.topLeft) &&
-                isInside(rectangle.bottomRight);
+        return isInside(rectangle.topLeft) &&
+               isInside(rectangle.bottomRight);
     }
 
     public boolean isIntersects(Rectangle rectangle) {
-        return !(rectangle.bottomRight.x < this.topLeft.x ||
-                 rectangle.bottomRight.y < this.topLeft.y ||
-                 rectangle.topLeft.x > this.bottomRight.x ||
-                 rectangle.topLeft.y > this.bottomRight.y);
+        float thisMinX = Math.min(topLeft.x, bottomRight.x);
+        float thisMaxX = Math.max(topLeft.x, bottomRight.x);
+        float thisMinY = Math.min(topLeft.y, bottomRight.y);
+        float thisMaxY = Math.max(topLeft.y, bottomRight.y);
+
+        float otherMinX = Math.min(rectangle.topLeft.x, rectangle.bottomRight.x);
+        float otherMaxX = Math.max(rectangle.topLeft.x, rectangle.bottomRight.x);
+        float otherMinY = Math.min(rectangle.topLeft.y, rectangle.bottomRight.y);
+        float otherMaxY = Math.max(rectangle.topLeft.y, rectangle.bottomRight.y);
+
+        return !(otherMaxX < thisMinX ||
+                 otherMaxY < thisMinY ||
+                 otherMinX > thisMaxX ||
+                 otherMinY > thisMaxY);
     }
 
     public boolean isIdentical(Rectangle rectangle) {
         float epsilon = 0.01f;
 
-        float thisWidth  = this.bottomRight.x - this.topLeft.x;
-        float thisHeight = this.bottomRight.y - this.topLeft.y;
-        float rectWidth  = rectangle.bottomRight.x - rectangle.topLeft.x;
-        float rectHeight = rectangle.bottomRight.y - rectangle.topLeft.y;
-
-        return Math.abs(rectWidth  - thisWidth)  < epsilon &&
-               Math.abs(rectHeight - thisHeight) < epsilon;
-    }
-
-    @Override
-    public float[] toVertices() {
-        float[] vertices = new float[12];
-
-        Vector2f screenSpaceTopLeft     = Window.translatePointToWindow(topLeft);
-        Vector2f screenSpaceBottomRight = Window.translatePointToWindow(bottomRight);
-
-        vertices[0]  = screenSpaceTopLeft.x;
-        vertices[1]  = screenSpaceTopLeft.y;
-
-        vertices[3]  = screenSpaceTopLeft.x;
-        vertices[4]  = screenSpaceBottomRight.y;
-
-        vertices[6]  = screenSpaceBottomRight.x;
-        vertices[7]  = screenSpaceBottomRight.y;
-
-        vertices[9]  = screenSpaceBottomRight.x;
-        vertices[10] = screenSpaceTopLeft.y;
-
-        return vertices;
+        return Math.abs(rectangle.width()  - width())  < epsilon &&
+               Math.abs(rectangle.height() - height()) < epsilon;
     }
 
 }

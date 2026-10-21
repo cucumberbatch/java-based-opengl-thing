@@ -70,6 +70,9 @@ public class CameraAwareService {
 
         @Override
         public int compare(Component o1, Component o2) {
+            int layerComparison = Integer.compare(o1.getRenderLayer(), o2.getRenderLayer());
+            if (layerComparison != 0) return layerComparison;
+
             Transform t1 = componentContainer.get(o1.getEntity(), Transform.class);
             Transform t2 = componentContainer.get(o2.getEntity(), Transform.class);
             float o1Distance = t1.getGlobalPosition(o1Position).distance(cameraPosition);
