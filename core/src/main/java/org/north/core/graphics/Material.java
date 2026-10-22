@@ -122,14 +122,19 @@ public class Material {
             Texture texture = entry.getValue();
             if (texture == null) continue;
 
+            int uniformLocation = shader.findUniformLocation(graphics, entry.getKey());
+            if (uniformLocation == -1) continue;
+
             graphics.bindTexture(texture.id(), textureSlot);
-            int uniformLocation = shader.getUniformLocation(graphics, entry.getKey());
             graphics.setUniformInt(uniformLocation, textureSlot);
             textureSlot++;
         }
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            int uniformLocation = shader.getUniformLocation(graphics, entry.getKey());
+            // Shader compilers remove unused uniforms. Materials may be shared between shader
+            // variants, so only apply the properties that are actually present in the program.
+            int uniformLocation = shader.findUniformLocation(graphics, entry.getKey());
+            if (uniformLocation == -1) continue;
             setUniform(graphics, uniformLocation, entry.getValue());
         }
     }

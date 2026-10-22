@@ -13,14 +13,12 @@ import java.util.*;
 public class CameraAwareService {
     private final ComponentContainer componentContainer;
     private final CameraDistanceComparator cameraDistanceComparator;
-    private final Map<RenderProcess<?>, List<? extends Component>> distanceSortedComponentsMap;
     private Camera camera;
 
     @Inject
     public CameraAwareService(ComponentContainer componentContainer) {
         this.componentContainer = componentContainer;
         cameraDistanceComparator = new CameraDistanceComparator(componentContainer);
-        distanceSortedComponentsMap = new IdentityHashMap<>();
     }
 
     public void setCameraComponent(Camera camera) {
@@ -34,15 +32,10 @@ public class CameraAwareService {
             cameraDistanceComparator.setCameraPosition(transform.getPosition());
         }
 
-        List<? extends Component> components;
-        if (distanceSortedComponentsMap.containsKey(process)) {
-            components = distanceSortedComponentsMap.get(process);
-        } else {
-            System<? extends Component> system = (System<? extends Component>) process;
-            components = system.getComponentList();
-            distanceSortedComponentsMap.put(process, components);
-        }
-
+        // Do not cache the list: components can be added or removed at runtime (for example the
+        // gas clouds emitted by the spaceship), and a cached snapshot would never render them.
+        System<? extends Component> system = (System<? extends Component>) process;
+        List<? extends Component> components = system.getComponentList();
         components.sort(cameraDistanceComparator);
         return components;
     }

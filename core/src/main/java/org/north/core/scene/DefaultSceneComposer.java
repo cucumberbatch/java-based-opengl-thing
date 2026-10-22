@@ -30,12 +30,12 @@ public class DefaultSceneComposer implements SceneComposer {
         // initCubeAndCamera(sceneRoot, cm);
         // initReferenceScene(sceneRoot, cm);
         // testScene(sceneRoot, cm);
-        // initSpaceshipOnScreen(sceneRoot, cm);
+        initSpaceshipOnScreen(sceneRoot, cm);
 
         // Create the camera and world objects first so their update systems run before the cursor
         // picking system. The cursor itself is created last and is still rendered on top because
         // its renderer uses the screen-space render layer.
-        testManyTransparentCubesGrid(sceneRoot, cm);
+//        testManyTransparentCubesGrid(sceneRoot, cm);
 //        initCursorDemoOverlay(sceneRoot, cm);
     }
 
